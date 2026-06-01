@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club 猫娘聊天室增强
 // @namespace    https://penyo.ru/
-// @version      2.10.0
+// @version      2.9.0
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -34,7 +34,7 @@
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.10.0";
+  const VERSION = "2.9.0";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const ACTION_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/actions/catgirl-actions.json";
@@ -47,75 +47,6 @@
     PICKER: "picker",
     SELF: "self",
   };
-  const THEME_PRESETS = {
-    sakura: {
-      label: "樱粉",
-      soft: "#fff1f6",
-      panel: "#ffffff",
-      accent: "#f65086",
-      border: "#ffd4e2",
-      text: "#8a3f5b",
-      muted: "#9d7a86",
-      icon: "#f65086",
-      glow: "rgba(246, 80, 134, 0.22)",
-    },
-    mint: {
-      label: "薄荷",
-      soft: "#effff9",
-      panel: "#ffffff",
-      accent: "#59cdb4",
-      border: "#c5eee4",
-      text: "#2f665c",
-      muted: "#668078",
-      icon: "#6fd8c4",
-      glow: "rgba(89, 205, 180, 0.20)",
-    },
-    sky: {
-      label: "天空",
-      soft: "#eef8ff",
-      panel: "#ffffff",
-      accent: "#64b8ee",
-      border: "#c8e5f8",
-      text: "#315f82",
-      muted: "#647b8c",
-      icon: "#8ed2f6",
-      glow: "rgba(100, 184, 238, 0.20)",
-    },
-    cream: {
-      label: "奶油",
-      soft: "#fff8df",
-      panel: "#ffffff",
-      accent: "#efbd75",
-      border: "#f1dfb3",
-      text: "#715b2f",
-      muted: "#85785d",
-      icon: "#efc49a",
-      glow: "rgba(239, 189, 117, 0.20)",
-    },
-    lavender: {
-      label: "薰衣草",
-      soft: "#f7f0ff",
-      panel: "#ffffff",
-      accent: "#b58add",
-      border: "#decaf0",
-      text: "#604a7c",
-      muted: "#7e708e",
-      icon: "#cda7dc",
-      glow: "rgba(181, 138, 221, 0.20)",
-    },
-    tea: {
-      label: "白茶",
-      soft: "#f3f8f4",
-      panel: "#ffffff",
-      accent: "#9bb9aa",
-      border: "#d4e2d9",
-      text: "#43564f",
-      muted: "#6d7a75",
-      icon: "#c7d7bf",
-      glow: "rgba(155, 185, 170, 0.18)",
-    },
-  };
-  const THEME_ORDER = ["sakura", "mint", "sky", "cream", "lavender", "tea"];
 
   const defaults = {
     enabled: true,
@@ -131,7 +62,6 @@
     wheelX: null,
     wheelY: null,
     actionTargetMode: ACTION_TARGET_MODE.AUTO,
-    theme: "sakura",
     actions: [
       {
         label: "抱抱",
@@ -215,9 +145,6 @@
     if (!Object.values(ACTION_TARGET_MODE).includes(next.actionTargetMode)) {
       next.actionTargetMode = ACTION_TARGET_MODE.AUTO;
     }
-    if (!THEME_PRESETS[next.theme]) {
-      next.theme = defaults.theme;
-    }
     next.menuCollapsed = next.menuCollapsed !== false;
     next.wheelCollapsed = next.wheelCollapsed !== false;
     next.wheelX = Number.isFinite(Number(next.wheelX)) ? Number(next.wheelX) : null;
@@ -236,46 +163,6 @@
   function saveConfig() {
     normalizeConfig(config);
     localStorage.setItem(STORE_KEY, JSON.stringify(config));
-  }
-
-  function currentTheme() {
-    return THEME_PRESETS[config.theme] || THEME_PRESETS.sakura;
-  }
-
-  function hexToRgb(hex) {
-    const value = String(hex || "").replace("#", "").trim();
-    if (!/^[0-9a-f]{6}$/i.test(value)) return { r: 255, g: 255, b: 255 };
-    return {
-      r: parseInt(value.slice(0, 2), 16),
-      g: parseInt(value.slice(2, 4), 16),
-      b: parseInt(value.slice(4, 6), 16),
-    };
-  }
-
-  function withAlpha(hex, alpha) {
-    const rgb = hexToRgb(hex);
-    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${clamp(Number(alpha), 0, 1)})`;
-  }
-
-  function lighten(hex, amount) {
-    const rgb = hexToRgb(hex);
-    const ratio = clamp(Number(amount), 0, 1);
-    const mix = (channel) => Math.round(channel + (255 - channel) * ratio);
-    return `rgb(${mix(rgb.r)}, ${mix(rgb.g)}, ${mix(rgb.b)})`;
-  }
-
-  function applyTheme() {
-    if (!document.body) return;
-    const theme = currentTheme();
-    document.body.dataset.bcnTheme = config.theme;
-    document.body.style.setProperty("--bcn-soft", theme.soft);
-    document.body.style.setProperty("--bcn-panel", theme.panel);
-    document.body.style.setProperty("--bcn-accent", theme.accent);
-    document.body.style.setProperty("--bcn-border", theme.border);
-    document.body.style.setProperty("--bcn-text", theme.text);
-    document.body.style.setProperty("--bcn-muted", theme.muted);
-    document.body.style.setProperty("--bcn-icon", theme.icon);
-    document.body.style.setProperty("--bcn-glow", theme.glow);
   }
 
   function normalizeActionLibrary(source) {
@@ -493,7 +380,6 @@
 
   function syncBodyState() {
     if (!document.body) return;
-    applyTheme();
     document.body.classList.toggle("bcn-enabled", config.enabled);
     document.body.classList.toggle("bcn-wheel-on", config.quickWheel);
     document.body.classList.toggle("bcn-menu-collapsed", config.menuCollapsed);
@@ -1247,31 +1133,18 @@
   }
 
   const NekoSettingsUI = (() => {
-    const exitButton = { x: 1830, y: 62, w: 72, h: 72 };
-    const slider = { x: 800, y: 356, w: 386, h: 14 };
-    const cards = {
-      left: { x: 62, y: 150, w: 610, h: 740 },
-      middle: { x: 695, y: 150, w: 640, h: 740 },
-      right: { x: 1360, y: 150, w: 580, h: 740 },
-    };
-    const featureRows = [
-      { key: "convertOutgoing", y: 250, title: "转换发送语气（convertOutgoing）", desc: "发送的消息自动转换为猫娘语气～" },
-      { key: "convertDisplayed", y: 348, title: "转换显示语气（convertDisplayed）", desc: "接收的消息也会变成猫娘语气哦～" },
-      { key: "decorateChat", y: 524, title: "聊天室美化（decorateChat）", desc: "美化聊天界面，添加猫娘风格装饰～" },
-      { key: "rainOnSend", y: 622, title: "猫爪表情雨（rainOnSend）", desc: "发送消息时，下起猫爪表情雨～" },
-      { key: "quickWheel", y: 720, title: "动作快捷轮盘（quickWheel）", desc: "右下角显示抱抱、摸头、喂食动作～" },
-      { key: "notifyIncoming", y: 842, title: "新消息通知（notifyIncoming）", desc: "有新消息时显示通知提醒～" },
+    const checkboxSize = 58;
+    const leftX = 155;
+    const labelX = 235;
+    const slider = { x: 1040, y: 405, w: 310, h: 18 };
+    const rows = [
+      ["convertOutgoing", 230, "转换发送语气（convertOutgoing）", "发送的消息自动转换为猫娘语气～"],
+      ["convertDisplayed", 335, "转换显示语气（convertDisplayed）", "接收的消息也会变成猫娘语气哦～"],
+      ["decorateChat", 505, "聊天室美化（decorateChat）", "美化聊天界面，添加猫娘风格装饰～"],
+      ["rainOnSend", 610, "猫爪表情雨（rainOnSend）", "发送消息时下起猫爪表情雨～"],
+      ["quickWheel", 715, "动作快捷轮盘（quickWheel）", "右下角显示抱抱、摸头、喂食动作～"],
+      ["notifyIncoming", 860, "新消息通知（notifyIncoming）", "有新消息时显示通知提醒～"],
     ];
-    const enabledRow = { key: "enabled", x: 750, y: 250 };
-    const targetButton = { x: 725, y: 660, w: 230, h: 78 };
-    const actionButton = { x: 725, y: 775, w: 230, h: 78 };
-    const themeRows = THEME_ORDER.map((id, index) => ({
-      id,
-      x: 1405,
-      y: 286 + index * 92,
-      w: 490,
-      h: 72,
-    }));
 
     function load() {
       hideTargetPicker();
@@ -1289,23 +1162,22 @@
       try {
         drawSettingsBackground();
         drawHeader();
-        drawFeatureCard();
-        drawBehaviorCard();
-        drawThemeCard();
+        drawLeftColumn();
+        drawRightColumn();
       } catch (err) {
         console.error("[BCNekoSettings] render failed:", err);
       }
     }
 
     function click() {
-      if (W.MouseIn?.(exitButton.x, exitButton.y, exitButton.w, exitButton.h)) {
+      if (W.MouseIn?.(1815, 75, 90, 90)) {
         W.PreferenceExit?.();
         return;
       }
 
-      for (const row of featureRows) {
-        if (W.MouseIn?.(104, row.y - 18, 42, 42)) {
-          toggleConfig(row.key);
+      for (const [key, y] of rows) {
+        if (W.MouseIn?.(leftX, y, checkboxSize, checkboxSize)) {
+          toggleConfig(key);
           return;
         }
       }
@@ -1317,246 +1189,110 @@
         return;
       }
 
-      if (W.MouseIn?.(enabledRow.x, enabledRow.y - 18, 42, 42)) {
+      if (W.MouseIn?.(960, 315, checkboxSize, checkboxSize)) {
         toggleConfig("enabled");
         return;
       }
 
-      if (W.MouseIn?.(targetButton.x, targetButton.y, targetButton.w, targetButton.h)) {
+      if (W.MouseIn?.(1040, 610, 220, 58)) {
         cycleActionTargetMode();
         return;
       }
 
-      if (W.MouseIn?.(actionButton.x, actionButton.y, actionButton.w, actionButton.h)) {
+      if (W.MouseIn?.(1040, 700, 220, 58)) {
         editActions();
-        return;
-      }
-
-      for (const row of themeRows) {
-        if (W.MouseIn?.(row.x, row.y, row.w, row.h)) {
-          config.theme = row.id;
-          saveConfig();
-          syncBodyState();
-          showToast(`已切换到${THEME_PRESETS[row.id].label}主题喵~`);
-          return;
-        }
       }
     }
 
     function drawSettingsBackground() {
       const canvas = getDrawCanvas();
       if (!canvas) return;
-      const theme = currentTheme();
       canvas.save();
       const gradient = canvas.createLinearGradient(0, 0, 2000, 1000);
-      gradient.addColorStop(0, lighten(theme.soft, 0.72));
-      gradient.addColorStop(0.54, "#ffffff");
-      gradient.addColorStop(1, theme.soft);
+      gradient.addColorStop(0, "#fff8fb");
+      gradient.addColorStop(0.52, "#fffdfd");
+      gradient.addColorStop(1, "#ffe7f0");
       canvas.fillStyle = gradient;
       canvas.fillRect(0, 0, 2000, 1000);
-      roundedRect(canvas, 10, 10, 1980, 950, 54, "rgba(255,255,255,0.56)", theme.border, 2);
-      write("🐾", 108, 92, 70, withAlpha(theme.icon, 0.14), 700, "center");
-      write("🐾", 620, 105, 30, withAlpha(theme.icon, 0.82), 700, "center");
-      write("🐾", 1280, 105, 30, withAlpha(theme.icon, 0.82), 700, "center");
+      canvas.strokeStyle = "rgba(255, 143, 189, 0.72)";
+      canvas.lineWidth = 9;
+      canvas.strokeRect(36, 32, 1928, 932);
+      canvas.strokeStyle = "rgba(255, 194, 215, 0.72)";
+      canvas.lineWidth = 3;
+      canvas.strokeRect(54, 50, 1892, 896);
       canvas.restore();
     }
 
     function drawHeader() {
-      const theme = currentTheme();
-      W.DrawButton?.(exitButton.x, exitButton.y, exitButton.w, exitButton.h, "", "White", "Icons/Exit.png", "返回");
-      write("🐾", 690, 92, 42, theme.icon, 700, "center");
-      write("猫 娘 聊 天 室 增 强", 1000, 91, 48, theme.text, 800, "center");
-      write("🐾", 1310, 92, 42, theme.icon, 700, "center");
-      write(`v${VERSION}`, 1210, 134, 22, theme.muted, 700, "left");
+      W.DrawButton?.(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "返回");
+      drawText("猫娘聊天室增强", 1000, 112, "#8d4d67", "#ffe0ed", 40);
+      drawText(`v${VERSION}`, 1222, 135, "#b98095", "", 24);
+      drawText("🐾", 665, 122, "#ff8fbd", "", 36);
+      drawText("🐾", 1335, 122, "#ff8fbd", "", 36);
     }
 
-    function drawFeatureCard() {
-      const theme = currentTheme();
-      drawCard(cards.left);
-      drawCardTitle(cards.left.x + 62, cards.left.y + 60, "💬", "猫娘语气转换");
-      drawFeatureRow(featureRows[0], theme);
-      drawFeatureRow(featureRows[1], theme);
-      drawDivider(cards.left.x + 32, 444, cards.left.w - 64);
-      drawCardTitle(cards.left.x + 62, 493, "🐾", "聊天相关");
-      drawFeatureRow(featureRows[2], theme);
-      drawFeatureRow(featureRows[3], theme);
-      drawFeatureRow(featureRows[4], theme);
-      drawDivider(cards.left.x + 32, 788, cards.left.w - 64);
-      drawCardTitle(cards.left.x + 62, 835, "🔔", "通知与提醒");
-      drawFeatureRow(featureRows[5], theme);
-    }
+    function drawLeftColumn() {
+      sectionTitle("猫娘语气转换", 395, 200);
+      sectionTitle("聊天相关", 350, 475);
+      sectionTitle("通知与提醒", 360, 830);
 
-    function drawBehaviorCard() {
-      const theme = currentTheme();
-      const percent = Math.round(config.nyanChance * 100);
-      drawCard(cards.middle);
-      drawCardTitle(cards.middle.x + 62, cards.middle.y + 60, "⚙", "行为设置");
-
-      drawCheckBox(enabledRow.x, enabledRow.y, !!config.enabled);
-      write("猫娘模式（enabled）", enabledRow.x + 70, enabledRow.y + 2, 24, theme.text, 700);
-      write(config.enabled ? "当前会转换语气并启用装饰～" : "当前暂停转换，只保留设置入口～", enabledRow.x + 70, enabledRow.y + 38, 18, theme.muted, 500);
-
-      drawSlider();
-      write(`${percent}%`, slider.x + slider.w + 48, slider.y + 5, 25, theme.accent, 700, "left");
-      write("语气词插入概率（nyanChance）", cards.middle.x + 40, 447, 23, theme.text, 700);
-      write("控制句尾语气词出现的概率（0~100%）", cards.middle.x + 40, 485, 18, theme.muted, 500);
-
-      roundedRect(getDrawCanvas(), cards.middle.x + 30, 540, cards.middle.w - 60, 108, 16, withAlpha(theme.soft, 0.9), theme.border, 2);
-      write("喵～", cards.middle.x + 60, 581, 28, theme.accent, 800);
-      write("语气词让聊天更可爱哦～", cards.middle.x + 60, 622, 18, theme.muted, 500);
-      write("ฅ^•ω•^ฅ", cards.middle.x + cards.middle.w - 52, 590, 44, theme.accent, 800, "right");
-
-      drawLargeButton(targetButton, "◎", targetModeLabel());
-      write("互动目标模式", targetButton.x + 265, targetButton.y + 24, 22, theme.accent, 800);
-      write("自动：优先当前选中角色，其次聊天目标。", targetButton.x + 265, targetButton.y + 59, 17, theme.muted, 500);
-
-      drawLargeButton(actionButton, "⚡", "动作库");
-      write("从 GitHub 动作库加载；", actionButton.x + 265, actionButton.y + 24, 18, theme.muted, 500);
-      write("失败时将使用缓存或内置动作。", actionButton.x + 265, actionButton.y + 56, 18, theme.muted, 500);
-    }
-
-    function drawThemeCard() {
-      const theme = currentTheme();
-      drawCard(cards.right);
-      drawCardTitle(cards.right.x + 62, cards.right.y + 60, "🎨", "主题设置");
-      write("选择你喜欢的主题颜色", cards.right.x + 105, cards.right.y + 103, 17, theme.muted, 500);
-
-      themeRows.forEach((row) => {
-        const option = THEME_PRESETS[row.id];
-        const selected = config.theme === row.id;
-        roundedRect(getDrawCanvas(), row.x, row.y, row.w, row.h, 16, selected ? withAlpha(option.soft, 0.86) : "rgba(255,255,255,0.82)", selected ? option.accent : "#e8e8e8", selected ? 3 : 1);
-        write("🐾", row.x + 48, row.y + row.h / 2 + 1, 31, option.icon, 700, "center");
-        write(option.label, row.x + 90, row.y + row.h / 2 + 1, 24, selected ? option.text : "#2f2f2f", selected ? 800 : 600);
-        if (selected) {
-          circle(getDrawCanvas(), row.x + row.w - 16, row.y + 2, 20, option.accent, option.accent, 0);
-          write("✓", row.x + row.w - 16, row.y + 3, 24, "#fff", 900, "center");
-        }
+      rows.forEach(([key, y, title, desc]) => {
+        W.DrawCheckbox?.(leftX, y, checkboxSize, checkboxSize, "", !!config[key]);
+        drawLabel(title, labelX, y + 28, 560, "#8d4d67", 27);
+        drawLabel(desc, labelX, y + 66, 620, "#a47d89", 21);
       });
-      write("主题设置将立即生效并保存", cards.right.x + 48, cards.right.y + cards.right.h - 62, 18, theme.muted, 500);
     }
 
-    function drawFeatureRow(row, theme) {
-      drawCheckBox(104, row.y, !!config[row.key]);
-      write(row.title, 172, row.y + 2, 23, theme.text, 700);
-      write(row.desc, 172, row.y + 39, 18, theme.muted, 500);
+    function drawRightColumn() {
+      sectionTitle("行为设置", 1245, 250);
+      W.DrawCheckbox?.(960, 315, checkboxSize, checkboxSize, "", config.enabled);
+      drawLabel(`猫娘模式（enabled）`, 1040, 345, 520, "#d84686", 27);
+      drawLabel(config.enabled ? "当前会转换语气并启用装饰～" : "当前暂停转换，只保留设置入口～", 1040, 382, 540, "#a47d89", 21);
+
+      drawLabel("语气词插入概率（nyanChance）", 1040, 470, 540, "#8d4d67", 27);
+      drawSlider();
+
+      drawButton(1040, 610, 220, 58, targetModeLabel(), "#fff7fb");
+      drawLabel("互动目标模式", 1280, 640, 440, "#8d4d67", 24);
+      drawLabel("自动：优先当前选中角色，其次聊天目标。右键动作按钮可手动选择。", 1040, 690, 690, "#a47d89", 19);
+
+      drawButton(1040, 700, 220, 58, "动作库", "#fff7fb");
+      drawLabel("从 GitHub 动作库加载；失败时使用缓存或内置动作。", 1280, 730, 560, "#a47d89", 19);
+
+      drawNekoPreview();
     }
 
     function drawSlider() {
       const canvas = getDrawCanvas();
       if (!canvas) return;
-      const theme = currentTheme();
+      const percent = Math.round(config.nyanChance * 100);
       canvas.save();
-      roundedRect(canvas, slider.x, slider.y, slider.w, slider.h, 999, withAlpha(theme.accent, 0.28), "transparent", 0);
-      roundedRect(canvas, slider.x, slider.y, slider.w * config.nyanChance, slider.h, 999, theme.accent, "transparent", 0);
-      circle(canvas, slider.x + slider.w * config.nyanChance, slider.y + slider.h / 2, 17, "#fff", theme.accent, 3);
-      canvas.restore();
-    }
-
-    function drawCard(rect) {
-      const theme = currentTheme();
-      roundedRect(getDrawCanvas(), rect.x, rect.y, rect.w, rect.h, 28, "rgba(255,255,255,0.78)", withAlpha(theme.border, 0.78), 1.5);
-      shadowHint(rect.x, rect.y, rect.w, rect.h, theme.glow);
-    }
-
-    function drawCardTitle(x, y, icon, title) {
-      const theme = currentTheme();
-      write(icon, x - 5, y, 34, theme.icon, 800, "center");
-      write(title, x + 40, y, 28, theme.accent, 800);
-    }
-
-    function drawLargeButton(rect, icon, label) {
-      const theme = currentTheme();
-      roundedRect(getDrawCanvas(), rect.x, rect.y, rect.w, rect.h, 14, withAlpha(theme.soft, 0.76), theme.border, 1.5);
-      write(icon, rect.x + 45, rect.y + rect.h / 2 + 1, 32, theme.icon, 800, "center");
-      write(label, rect.x + 85, rect.y + rect.h / 2 + 1, 24, theme.text, 800);
-    }
-
-    function drawCheckBox(x, y, checked) {
-      const theme = currentTheme();
-      roundedRect(getDrawCanvas(), x, y - 18, 40, 40, 8, checked ? theme.accent : "#fff", checked ? theme.accent : theme.border, 2);
-      if (checked) write("✓", x + 20, y + 2, 32, "#fff", 900, "center");
-    }
-
-    function drawDivider(x, y, w) {
-      const canvas = getDrawCanvas();
-      if (!canvas) return;
-      const theme = currentTheme();
-      canvas.save();
-      canvas.strokeStyle = withAlpha(theme.border, 0.7);
-      canvas.lineWidth = 2;
+      canvas.fillStyle = "#ffd6e6";
+      canvas.fillRect(slider.x, slider.y, slider.w, slider.h);
+      canvas.fillStyle = "#ff78ad";
+      canvas.fillRect(slider.x, slider.y, slider.w * config.nyanChance, slider.h);
+      canvas.strokeStyle = "#ff8fbd";
+      canvas.lineWidth = 3;
+      canvas.strokeRect(slider.x, slider.y, slider.w, slider.h);
       canvas.beginPath();
-      canvas.moveTo(x, y);
-      canvas.lineTo(x + w, y);
+      canvas.arc(slider.x + slider.w * config.nyanChance, slider.y + slider.h / 2, 30, 0, Math.PI * 2);
+      canvas.fillStyle = "#fff";
+      canvas.fill();
       canvas.stroke();
       canvas.restore();
+      drawText(`${percent}%`, 1425, 416, "#8d4d67", "", 26);
+      drawLabel("很少", slider.x, slider.y + 65, 90, "#bf8a9d", 17);
+      drawLabel("适中", slider.x + 138, slider.y + 65, 90, "#d84686", 17);
+      drawLabel("很多", slider.x + 282, slider.y + 65, 90, "#bf8a9d", 17);
     }
 
-    function shadowHint(x, y, w, h, color) {
-      const canvas = getDrawCanvas();
-      if (!canvas) return;
-      canvas.save();
-      canvas.shadowColor = color;
-      canvas.shadowBlur = 18;
-      canvas.shadowOffsetY = 8;
-      canvas.strokeStyle = "rgba(255,255,255,0.1)";
-      canvas.strokeRect(x + 2, y + 2, w - 4, h - 4);
-      canvas.restore();
-    }
-
-    function roundedRect(canvas, x, y, w, h, radius, fill, stroke, lineWidth = 1) {
-      if (!canvas) return;
-      const r = Math.min(radius, w / 2, h / 2);
-      canvas.save();
-      canvas.beginPath();
-      canvas.moveTo(x + r, y);
-      canvas.lineTo(x + w - r, y);
-      canvas.quadraticCurveTo(x + w, y, x + w, y + r);
-      canvas.lineTo(x + w, y + h - r);
-      canvas.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      canvas.lineTo(x + r, y + h);
-      canvas.quadraticCurveTo(x, y + h, x, y + h - r);
-      canvas.lineTo(x, y + r);
-      canvas.quadraticCurveTo(x, y, x + r, y);
-      canvas.closePath();
-      if (fill && fill !== "transparent") {
-        canvas.fillStyle = fill;
-        canvas.fill();
-      }
-      if (stroke && stroke !== "transparent" && lineWidth > 0) {
-        canvas.strokeStyle = stroke;
-        canvas.lineWidth = lineWidth;
-        canvas.stroke();
-      }
-      canvas.restore();
-    }
-
-    function circle(canvas, x, y, radius, fill, stroke, lineWidth = 1) {
-      if (!canvas) return;
-      canvas.save();
-      canvas.beginPath();
-      canvas.arc(x, y, radius, 0, Math.PI * 2);
-      if (fill) {
-        canvas.fillStyle = fill;
-        canvas.fill();
-      }
-      if (stroke && lineWidth > 0) {
-        canvas.strokeStyle = stroke;
-        canvas.lineWidth = lineWidth;
-        canvas.stroke();
-      }
-      canvas.restore();
-    }
-
-    function write(text, x, y, size, color, weight = 500, align = "left") {
-      const canvas = getDrawCanvas();
-      if (!canvas) return;
-      canvas.save();
-      canvas.font = `${weight} ${size}px Arial, "Microsoft YaHei", sans-serif`;
-      canvas.textAlign = align;
-      canvas.textBaseline = "middle";
-      canvas.fillStyle = color;
-      canvas.fillText(text, x, y);
-      canvas.restore();
+    function drawNekoPreview() {
+      drawText("ฅ^•ﻌ•^ฅ", 1530, 560, "#ff78ad", "#ffe4ef", 64);
+      drawText("喵～", 1125, 555, "#d84686", "", 32);
+      drawLabel("语气词让聊天更可爱哦～", 1040, 600, 420, "#8d4d67", 23);
+      drawText("🐾", 1515, 690, "#ffb0cb", "", 52);
+      drawText("💗", 1595, 745, "#ff8fbd", "", 45);
+      drawText("🐱", 1665, 690, "#ff78ad", "", 58);
     }
 
     return { load, run, click, unload, exit };
@@ -1642,15 +1378,11 @@
 
   function installStyles() {
     addStyle(`
-      body {
-        --bcn-soft: #fff1f6;
-        --bcn-panel: #ffffff;
-        --bcn-accent: #f65086;
-        --bcn-border: #ffd4e2;
-        --bcn-text: #8a3f5b;
-        --bcn-muted: #9d7a86;
-        --bcn-icon: #f65086;
-        --bcn-glow: rgba(246, 80, 134, 0.22);
+      body.bcn-enabled {
+        --bcn-pink: #ff8fbd;
+        --bcn-pink-soft: #ffe8f1;
+        --bcn-blue: #69aef7;
+        --bcn-ink: #5a4037;
       }
 
       body.bcn-enabled #MainCanvas {
@@ -1668,9 +1400,9 @@
       #bcn-soft-paws span {
         position: absolute;
         opacity: 0.14;
-        color: var(--bcn-icon);
+        color: #ff7aa9;
         font-size: 54px;
-        text-shadow: 0 8px 24px var(--bcn-glow);
+        text-shadow: 0 8px 24px rgba(255, 120, 170, 0.2);
       }
 
       #bcn-panel {
@@ -1685,10 +1417,10 @@
         width: fit-content;
         height: fit-content;
         padding: 6px 8px;
-        border: 2px solid var(--bcn-border);
+        border: 2px solid rgba(255, 143, 189, 0.75);
         border-radius: 16px;
-        background: var(--bcn-panel);
-        box-shadow: 0 10px 28px var(--bcn-glow);
+        background: rgba(255, 250, 252, 0.88);
+        box-shadow: 0 10px 28px rgba(255, 143, 189, 0.28);
         backdrop-filter: blur(8px);
         cursor: grab;
         transition: gap 0.22s ease;
@@ -1707,13 +1439,13 @@
       .bcn-wheel-btn {
         min-width: 42px;
         min-height: 42px;
-        border: 2px solid var(--bcn-border);
+        border: 2px solid #ff9fc5;
         border-radius: 14px;
-        background: linear-gradient(180deg, var(--bcn-panel) 0%, var(--bcn-soft) 100%);
-        color: var(--bcn-text);
+        background: linear-gradient(180deg, #fff 0%, #ffe8f1 100%);
+        color: #8d4d67;
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 0 3px 0 var(--bcn-glow);
+        box-shadow: 0 3px 0 #f6b7ce;
       }
 
       #bcn-submenu {
@@ -1749,7 +1481,7 @@
       .bcn-btn:hover,
       .bcn-wheel-btn:hover {
         transform: translateY(-1px);
-        background: var(--bcn-soft);
+        background: #fff5f9;
       }
 
       .bcn-wheel-wrap {
@@ -1759,10 +1491,10 @@
         overflow: hidden;
         max-width: 0;
         padding: 0;
-        border: 2px solid var(--bcn-border);
+        border: 2px solid rgba(255, 143, 189, 0.7);
         border-radius: 16px;
-        background: var(--bcn-panel);
-        box-shadow: 0 10px 28px var(--bcn-glow);
+        background: rgba(255, 250, 252, 0.92);
+        box-shadow: 0 10px 28px rgba(255, 143, 189, 0.24);
         backdrop-filter: blur(8px);
         transition: max-width 0.22s ease, opacity 0.22s ease, transform 0.22s ease, padding 0.22s ease;
         opacity: 0;
@@ -1813,8 +1545,8 @@
       }
 
       #bcn-face.is-active {
-        outline: 3px solid var(--bcn-glow);
-        background: linear-gradient(180deg, var(--bcn-panel) 0%, var(--bcn-soft) 100%);
+        outline: 3px solid rgba(178, 140, 255, 0.38);
+        background: linear-gradient(180deg, #fff7fb 0%, #ffdce9 100%);
       }
 
       .bcn-wheel-btn {
@@ -1826,10 +1558,10 @@
 
       .bcn-wheel-blank {
         min-height: 58px;
-        border: 2px solid var(--bcn-border);
+        border: 2px solid rgba(255, 159, 197, 0.64);
         border-radius: 14px;
-        background: linear-gradient(180deg, var(--bcn-panel) 0%, var(--bcn-soft) 100%);
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.52), 0 3px 0 var(--bcn-glow);
+        background: linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,232,241,0.54) 100%);
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.52), 0 3px 0 rgba(246, 183, 206, 0.55);
         pointer-events: none;
       }
 
@@ -1866,10 +1598,10 @@
         flex-direction: column;
         gap: 8px;
         padding: 10px;
-        border: 2px solid var(--bcn-border);
+        border: 2px solid rgba(255, 143, 189, 0.78);
         border-radius: 16px;
-        background: var(--bcn-panel);
-        box-shadow: 0 14px 32px var(--bcn-glow), 0 2px 10px rgba(80, 40, 60, 0.12);
+        background: rgba(255, 250, 252, 0.96);
+        box-shadow: 0 14px 32px rgba(255, 143, 189, 0.26), 0 2px 10px rgba(80, 40, 60, 0.12);
         backdrop-filter: blur(10px);
         opacity: 0;
         transform: translateY(8px) scale(0.96);
@@ -1895,12 +1627,12 @@
 
       .bcn-kaomoji-tab,
       .bcn-kaomoji-item {
-        border: 2px solid var(--bcn-border);
+        border: 2px solid rgba(255, 159, 197, 0.82);
         border-radius: 12px;
-        background: linear-gradient(180deg, var(--bcn-panel) 0%, var(--bcn-soft) 100%);
-        color: var(--bcn-text);
+        background: linear-gradient(180deg, #fff 0%, #fff1f7 100%);
+        color: #7d405c;
         cursor: pointer;
-        box-shadow: 0 2px 0 var(--bcn-glow);
+        box-shadow: 0 2px 0 rgba(246, 183, 206, 0.92);
       }
 
       .bcn-kaomoji-tab {
@@ -1913,9 +1645,9 @@
       }
 
       .bcn-kaomoji-tab.is-active {
-        border-color: var(--bcn-accent);
-        background: linear-gradient(180deg, var(--bcn-panel) 0%, var(--bcn-soft) 100%);
-        color: var(--bcn-accent);
+        border-color: #b28cff;
+        background: linear-gradient(180deg, #fff 0%, #f3e9ff 100%);
+        color: #6d4bad;
       }
 
       .bcn-kaomoji-grid {
@@ -1945,7 +1677,7 @@
       .bcn-kaomoji-tab:hover,
       .bcn-kaomoji-item:hover {
         transform: translateY(-1px);
-        background: var(--bcn-soft);
+        background: #fff5f9;
       }
 
       @media (max-width: 520px) {
@@ -1964,41 +1696,41 @@
       }
 
       #TextAreaChatLog {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), var(--bcn-soft)) !important;
-        border: 2px solid var(--bcn-border) !important;
+        background: linear-gradient(180deg, rgba(255, 251, 253, 0.96), rgba(255, 242, 248, 0.95)) !important;
+        border: 2px solid #ff9fc5 !important;
         border-radius: 14px !important;
         padding: 8px !important;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85), 0 8px 22px var(--bcn-glow);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85), 0 8px 22px rgba(255, 143, 189, 0.18);
       }
 
       #chat-room-bot,
       #chat-room-reply-indicator > * {
-        border: 2px solid var(--bcn-border) !important;
+        border: 2px solid #ff9fc5 !important;
         border-radius: 14px !important;
-        background: rgba(255, 255, 255, 0.96) !important;
-        color: var(--bcn-text) !important;
-        box-shadow: 0 6px 18px var(--bcn-glow);
+        background: rgba(255, 252, 254, 0.96) !important;
+        color: #5a4037 !important;
+        box-shadow: 0 6px 18px rgba(255, 143, 189, 0.14);
       }
 
       #chat-room-bot:has(#InputChat:focus) {
-        outline: 2px solid var(--bcn-accent) !important;
-        box-shadow: 0 0 0 4px var(--bcn-glow) !important;
+        outline: 2px solid #ff7daf !important;
+        box-shadow: 0 0 0 4px rgba(255, 180, 210, 0.35) !important;
       }
 
       #InputChat {
         padding: 12px 16px !important;
-        color: var(--bcn-text) !important;
+        color: #5a4037 !important;
       }
 
       #InputChat::placeholder {
-        color: var(--bcn-muted) !important;
+        color: #b995a5 !important;
       }
 
       #chat-room-send::before {
         background-image: none !important;
         mask-image: none !important;
         content: "🐾";
-        color: var(--bcn-icon);
+        color: #ff6fa9;
         font-size: 1.4em;
         display: grid;
         place-items: center;
@@ -2007,11 +1739,11 @@
       #TextAreaChatLog .ChatMessage {
         margin: 7px 6px !important;
         padding: 9px 54px 9px 14px !important;
-        border: 2px solid var(--bcn-border);
+        border: 2px solid rgba(255, 143, 189, 0.58);
         border-radius: 12px;
         background: rgba(255, 255, 255, 0.78) !important;
-        color: var(--bcn-text);
-        box-shadow: 0 4px 12px var(--bcn-glow);
+        color: #5a4037;
+        box-shadow: 0 4px 12px rgba(255, 143, 189, 0.12);
       }
 
       #TextAreaChatLog .ChatMessage::after {
@@ -2020,12 +1752,12 @@
         right: 12px;
         bottom: 5px;
         opacity: 0.55;
-        color: var(--bcn-icon);
+        color: #ff7aa9;
       }
 
       #TextAreaChatLog .bcn-own-message {
-        border-color: var(--bcn-accent) !important;
-        background: linear-gradient(90deg, var(--bcn-soft), rgba(255, 255, 255, 0.9)) !important;
+        border-color: #ff5fa2 !important;
+        background: linear-gradient(90deg, rgba(255, 241, 248, 0.96), rgba(255, 255, 255, 0.9)) !important;
       }
 
       #TextAreaChatLog .bcn-own-message::before {
@@ -2039,8 +1771,8 @@
         place-items: center;
         border-radius: 999px;
         background: #fff;
-        border: 2px solid var(--bcn-accent);
-        box-shadow: 0 4px 10px var(--bcn-glow);
+        border: 2px solid #ff8fbd;
+        box-shadow: 0 4px 10px rgba(255, 143, 189, 0.25);
       }
 
       #TextAreaChatLog .ChatMessageWhisper {
@@ -2052,13 +1784,13 @@
       #TextAreaChatLog .ChatMessageEmote,
       #TextAreaChatLog .ChatMessageAction,
       #TextAreaChatLog .ChatMessageActivity {
-        border-color: var(--bcn-border) !important;
-        color: var(--bcn-muted) !important;
+        border-color: #ffb3ce !important;
+        color: #8a6170 !important;
         font-style: normal !important;
       }
 
       #TextAreaChatLog .ChatMessageName {
-        color: var(--label-color, var(--bcn-text)) !important;
+        color: var(--label-color, #90526b) !important;
         text-shadow: 0 1px 0 #fff !important;
         font-weight: 800;
       }
@@ -2066,10 +1798,10 @@
       body.bcn-enabled input,
       body.bcn-enabled textarea,
       body.bcn-enabled select {
-        border: 2px solid var(--bcn-border) !important;
+        border: 2px solid #e5b88f !important;
         border-radius: 10px !important;
-        background-color: rgba(255, 255, 255, 0.96) !important;
-        color: var(--bcn-text) !important;
+        background-color: rgba(255, 252, 247, 0.95) !important;
+        color: #3e2f2a !important;
         box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
       }
 
@@ -2088,17 +1820,17 @@
         padding: 10px;
         display: grid;
         gap: 7px;
-        border: 2px solid var(--bcn-border);
+        border: 2px solid #ff8fbd;
         border-radius: 14px;
-        background: var(--bcn-panel);
-        box-shadow: 0 14px 32px var(--bcn-glow);
-        color: var(--bcn-text);
+        background: rgba(255, 252, 254, 0.97);
+        box-shadow: 0 14px 32px rgba(255, 112, 170, 0.28);
+        color: #8d4d67;
         font-weight: 700;
       }
 
       .bcn-target-title {
         padding: 2px 6px 5px;
-        color: var(--bcn-accent);
+        color: #d84686;
         text-align: center;
         font-size: 14px;
       }
@@ -2106,16 +1838,16 @@
       #bcn-target-picker button {
         min-height: 34px;
         padding: 5px 9px;
-        border: 1px solid var(--bcn-border);
+        border: 1px solid #ffbdd5;
         border-radius: 10px;
-        background: var(--bcn-panel);
-        color: var(--bcn-text);
+        background: #fff7fb;
+        color: #8d4d67;
         font-weight: 700;
         cursor: pointer;
       }
 
       #bcn-target-picker button:hover {
-        background: var(--bcn-soft);
+        background: #ffe8f1;
       }
 
       #bcn-toast {
@@ -2126,13 +1858,13 @@
         transform: translateX(-50%) translateY(16px);
         opacity: 0;
         padding: 10px 20px;
-        border: 2px solid var(--bcn-border);
+        border: 2px solid #ff8fbd;
         border-radius: 14px;
         background: rgba(255, 255, 255, 0.94);
-        color: var(--bcn-accent);
+        color: #ff4d91;
         font-size: 22px;
         font-weight: 800;
-        box-shadow: 0 12px 28px var(--bcn-glow);
+        box-shadow: 0 12px 28px rgba(255, 143, 189, 0.24);
         transition: opacity 0.22s ease, transform 0.22s ease;
         pointer-events: none;
       }
@@ -2147,8 +1879,8 @@
         top: -48px;
         z-index: 100002;
         pointer-events: none;
-        color: var(--bcn-icon);
-        text-shadow: 0 3px 10px var(--bcn-glow);
+        color: #ff70aa;
+        text-shadow: 0 3px 10px rgba(255, 100, 160, 0.45);
         animation-name: bcn-rain-fall;
         animation-timing-function: linear;
         animation-fill-mode: forwards;

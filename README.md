@@ -33,7 +33,16 @@
 
 ## 安装
 
-先安装油猴或其他 userscript 管理器，然后选择一个版本安装：
+### 推荐使用：FUSAM 插件管理器
+
+FUSAM Integration:
+https://sidiousious.gitlab.io/bc-addon-loader/
+
+在 FUSAM 插件管理器里搜索 `BCNeko` 或 `Bondage Club Neko Chat Enhancer`，即可启用/禁用猫娘插件。FUSAM 可以在同一个地方管理多个 Bondage Club 插件，更适合长期使用。
+
+### 油猴安装
+
+也可以先安装油猴或其他 userscript 管理器，然后选择一个版本安装：
 
 正式版：
 https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.user.js

@@ -643,6 +643,7 @@
       .map((action, index) => {
         const self = Array.isArray(action.self) ? action.self.map(cleanActionLine).filter(Boolean) : [];
         const target = Array.isArray(action.target) ? action.target.map(cleanActionLine).filter(Boolean) : [];
+        const variants = normalizeActionVariantMap(action.variants);
         if (!self.length && !target.length) return null;
         return {
           id: String(action.id || `action-${index}`).trim() || `action-${index}`,
@@ -650,6 +651,8 @@
           enabled: action.enabled !== false,
           self,
           target,
+          requirements: normalizeActionRequirements(action.requirements),
+          variants,
         };
       })
       .filter(Boolean);
@@ -662,6 +665,31 @@
 
   function cleanActionLine(line) {
     return String(line || "").replace(/\{user\}\s*/g, "").trim();
+  }
+
+  function normalizeActionVariantMap(variants) {
+    if (!variants || typeof variants !== "object") return undefined;
+    const result = {};
+    for (const [key, value] of Object.entries(variants)) {
+      const self = Array.isArray(value?.self) ? value.self.map(cleanActionLine).filter(Boolean) : [];
+      const target = Array.isArray(value?.target) ? value.target.map(cleanActionLine).filter(Boolean) : [];
+      if (!self.length && !target.length) continue;
+      result[key] = { self, target };
+    }
+    return Object.keys(result).length ? result : undefined;
+  }
+
+  function normalizeActionRequirements(requirements) {
+    if (!requirements || typeof requirements !== "object") return undefined;
+    return {
+      needHands: requirements.needHands === true,
+      needMouth: requirements.needMouth === true,
+      needReach: requirements.needReach === true,
+      needMobility: requirements.needMobility === true,
+      maxGagLevel: Number.isFinite(Number(requirements.maxGagLevel))
+        ? clamp(Number(requirements.maxGagLevel), 0, 3)
+        : undefined,
+    };
   }
 
   function loadCachedActionLibrary() {
@@ -1262,15 +1290,43 @@
     return text.startsWith("悄悄喵~") ? text : `悄悄喵~ ${text}`;
   }
 
-  function convertByType(type, text) {
+  function applyGagSpeech(text, gagLevel, type = "Chat") {
+    if (!text || !gagLevel || gagLevel <= 0) return text;
+    let value = String(text).trim();
+    if (!value) return text;
+    const splitIndex = value.search(/[，。！？,.!?]/);
+    if (gagLevel >= 3) {
+      const core = splitIndex >= 0 ? value.slice(0, splitIndex) : value;
+      return `${core.slice(0, 8) || "唔"}……唔喵`;
+    }
+    if (gagLevel === 2) {
+      if (splitIndex >= 0) value = value.slice(0, Math.max(6, splitIndex));
+      value = value.replace(/[啊呀啦哦呢嘛]/g, "唔").replace(/[，。！？,.!?]+/g, "…");
+      return /唔喵|嗯唔/.test(value) ? value : `${value}……唔喵`;
+    }
+    value = value.replace(/[啊呀啦哦]/g, "唔");
+    if (type === "Whisper") return `${value}…唔`;
+    return /唔|喵/.test(value) ? `${value}…` : `${value} 唔喵`;
+  }
+
+  function applyLocalStateSpeechEffects(type, text) {
+    if (!["Chat", "Whisper", "Emote"].includes(type)) return text;
+    const state = detectPlayerActionCapability();
+    if (!state.gagged) return text;
+    return applyGagSpeech(text, state.gagLevel, type);
+  }
+
+  function convertByType(type, text, options = {}) {
     if (!config.enabled || !text) return text;
     if (isBugCommandText(text)) return text;
-    if (bugRp.enabled) return rpNeko(text, type);
-    if (type === "Whisper") return whisperNeko(text);
-    if (type === "Emote") return emoteNeko(text);
-    if (type === "Action" || type === "Activity") return actionNeko(text);
-    if (type === "Chat") return standardNeko(text);
-    return text;
+    let value = text;
+    if (bugRp.enabled) value = rpNeko(text, type);
+    else if (type === "Whisper") value = whisperNeko(text);
+    else if (type === "Emote") value = emoteNeko(text);
+    else if (type === "Action" || type === "Activity") value = actionNeko(text);
+    else if (type === "Chat") value = standardNeko(text);
+    if (options.applyGag) value = applyLocalStateSpeechEffects(type, value);
+    return value;
   }
 
   function shouldConvertDisplay(data, msg) {
@@ -1441,7 +1497,7 @@
       const [type, msg, replyId] = args;
       const nextMsg = shouldSkipGeneratedEmoteConvert(type)
         ? msg
-        : config.convertOutgoing || bugRp.enabled ? convertByType(type, msg) : msg;
+        : config.convertOutgoing || bugRp.enabled ? convertByType(type, msg, { applyGag: true }) : msg;
       return next([type, nextMsg, replyId]);
     });
 
@@ -1449,7 +1505,9 @@
       const [data, msg, senderCharacter, metadata] = args;
       handleNekoPeerSignal(data);
       maybeSpawnAtmosphere(data, msg);
-      const nextMsg = shouldConvertDisplay(data, msg) ? convertByType(data?.Type, msg) : msg;
+      const nextMsg = shouldConvertDisplay(data, msg)
+        ? convertByType(data?.Type, msg, { applyGag: isOwnSender(data?.Sender) })
+        : msg;
       const div = next([data, nextMsg, senderCharacter, metadata]);
       decorateMessage(div, data);
       if (config.notifyIncoming && data?.Sender && !isOwnSender(data.Sender) && ["Chat", "Whisper"].includes(data.Type)) {
@@ -1845,8 +1903,152 @@
       }));
   }
 
+  function normalizeStateToken(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function getCharacterEffects(character) {
+    if (!character) return [];
+    if (Array.isArray(character.Effect)) return character.Effect.filter(Boolean);
+    try {
+      const effects = typeof W.CharacterGetEffects === "function" ? W.CharacterGetEffects(character) : [];
+      return Array.isArray(effects) ? effects.filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function getCharacterPoses(character) {
+    return Array.isArray(character?.Pose) ? character.Pose.filter(Boolean) : [];
+  }
+
+  function hasTokenMatch(source, names) {
+    const tokens = source.map(normalizeStateToken).filter(Boolean);
+    const patterns = (names || []).map(normalizeStateToken).filter(Boolean);
+    return patterns.some((pattern) => tokens.some((token) => token === pattern || token.includes(pattern) || pattern.includes(token)));
+  }
+
+  function hasAnyEffect(character, names) {
+    return hasTokenMatch(getCharacterEffects(character), names);
+  }
+
+  function hasAnyPose(character, names) {
+    return hasTokenMatch(getCharacterPoses(character), names);
+  }
+
+  function readCharacterMethod(character, methodName, fallback) {
+    try {
+      const value = character?.[methodName]?.();
+      return typeof value === "boolean" ? value : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function detectCharacterState(character) {
+    const gagLevel = hasAnyEffect(character, ["gagveryheavy", "gagheavy", "gagtotal", "gaggedheavy"])
+      ? 3
+      : hasAnyEffect(character, ["gagmedium", "gag", "gagged"])
+        ? 2
+        : hasAnyEffect(character, ["gaglight"])
+          ? 1
+          : 0;
+    const kneeling = readCharacterMethod(character, "IsKneeling", undefined);
+    const lying = hasAnyPose(character, ["lying", "prone", "supine"]) || hasAnyEffect(character, ["prone"]);
+    const suspended = hasAnyEffect(character, ["suspended"]);
+    const handsFree = readCharacterMethod(character, "CanInteract", !hasAnyEffect(character, ["block", "freeze", "restrain", "bound", "cuffed"]));
+    const canMove = readCharacterMethod(character, "CanWalk", !hasAnyEffect(character, ["freeze", "tethered", "mounted", "suspended", "prone"]));
+    const gagged = gagLevel > 0 || readCharacterMethod(character, "CanTalk", true) === false;
+    const restrained = !handsFree || !canMove || hasAnyEffect(character, ["block", "freeze", "restrain", "bound", "cuffed", "tethered"]);
+    const resolvedKneeling = typeof kneeling === "boolean" ? kneeling : hasAnyPose(character, ["kneel", "kneeling"]);
+    const helpless = restrained && (lying || suspended || !canMove);
+    return {
+      gagLevel,
+      gagged,
+      mouthFree: gagLevel <= 1,
+      handsFree,
+      canMove,
+      kneeling: resolvedKneeling,
+      lying,
+      suspended,
+      restrained,
+      helpless,
+      canReach: handsFree && !lying && !suspended && (canMove || resolvedKneeling),
+    };
+  }
+
+  function detectPlayerActionCapability() {
+    return detectCharacterState(W.Player || null);
+  }
+
+  function inferActionRequirements(action) {
+    const value = `${action?.id || ""} ${action?.label || ""}`.toLowerCase();
+    if (/kiss|亲亲/.test(value)) return { needMouth: true, needReach: true, maxGagLevel: 1 };
+    if (/cuddle|贴贴/.test(value)) return { needReach: true, needMobility: true };
+    if (/hug|抱抱|pat|摸头|feed|喂食/.test(value)) return { needHands: true, needReach: true };
+    return {};
+  }
+
+  function getActionRequirements(action) {
+    const inferred = inferActionRequirements(action);
+    const explicit = action?.requirements || {};
+    return {
+      needHands: "needHands" in explicit ? explicit.needHands === true : inferred.needHands === true,
+      needMouth: "needMouth" in explicit ? explicit.needMouth === true : inferred.needMouth === true,
+      needReach: "needReach" in explicit ? explicit.needReach === true : inferred.needReach === true,
+      needMobility: "needMobility" in explicit ? explicit.needMobility === true : inferred.needMobility === true,
+      maxGagLevel: Number.isFinite(Number(explicit.maxGagLevel)) ? Number(explicit.maxGagLevel) : inferred.maxGagLevel,
+    };
+  }
+
+  function actionMeetsRequirements(action, state) {
+    const requirements = getActionRequirements(action);
+    if (requirements.needHands && !state.handsFree) return false;
+    if (requirements.needMouth && !state.mouthFree) return false;
+    if (requirements.needReach && !state.canReach) return false;
+    if (requirements.needMobility && !state.canMove) return false;
+    if (Number.isFinite(requirements.maxGagLevel) && state.gagLevel > requirements.maxGagLevel) return false;
+    return true;
+  }
+
+  function chooseActionVariant(action, state, hasTarget) {
+    const variants = action?.variants;
+    if (!variants || !state) return null;
+    const priority = ["helpless", "lying", "kneeling", "restrained", "gagged"];
+    for (const key of priority) {
+      if (!state[key]) continue;
+      const variant = variants[key];
+      if (!variant) continue;
+      const lines = hasTarget ? variant.target : variant.self;
+      if (Array.isArray(lines) && lines.some(Boolean)) return { key, lines };
+    }
+    return null;
+  }
+
+  function selectActionLine(action, target) {
+    const hasTarget = !!target;
+    const state = hasTarget ? detectCharacterState(target) : detectPlayerActionCapability();
+    const variant = chooseActionVariant(action, state, hasTarget);
+    if (variant) {
+      return {
+        line: pickRandomLine(
+          variant.lines,
+          hasTarget ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~")) : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~")),
+        ),
+        variantKey: variant.key,
+      };
+    }
+    return {
+      line: hasTarget
+        ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~"))
+        : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~")),
+      variantKey: "",
+    };
+  }
+
   function getActiveActions() {
-    return (actionLibrary.actions || []).filter((action) => action.enabled !== false);
+    const state = detectPlayerActionCapability();
+    return (actionLibrary.actions || []).filter((action) => action.enabled !== false && actionMeetsRequirements(action, state));
   }
 
   function pickRandomLine(lines, fallback = "") {
@@ -1978,10 +2180,8 @@
   }
 
   function formatActionText(action, target) {
+    const { line } = selectActionLine(action, target);
     const hasTarget = !!target;
-    const line = hasTarget
-      ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~"))
-      : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~"));
     const fallbackLine = line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : "身边的猫猫");
     return formatRpActionText(action, target, fallbackLine);
   }

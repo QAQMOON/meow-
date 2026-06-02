@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club 猫娘聊天室增强
 // @namespace    https://penyo.ru/
-// @version      2.10.1
+// @version      2.10.2
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -34,7 +34,7 @@
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.10.1";
+  const VERSION = "2.10.2";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const ACTION_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/actions/catgirl-actions.json";
@@ -179,6 +179,7 @@
   let kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
   const processedMessages = new WeakSet();
   let patched = false;
+  let statusBadgePatched = false;
   let bcModApi = null;
   let sdkLoadingPromise = null;
   let settingsRegistered = false;
@@ -619,7 +620,8 @@
   }
 
   function patchBC() {
-    if (patched || !bcModApi || !W.ChatRoomGenerateChatRoomChatMessage || !W.ChatRoomMessageDisplay || !W.ServerSend) return false;
+    if (patched) return true;
+    if (!bcModApi || !W.ChatRoomGenerateChatRoomChatMessage || !W.ChatRoomMessageDisplay || !W.ServerSend) return false;
     patched = true;
 
     bcModApi.hookFunction("ChatRoomGenerateChatRoomChatMessage", 0, (args, next) => {
@@ -650,6 +652,55 @@
 
     console.log("[BC 猫娘增强] 已通过 BC Mod SDK 接入聊天函数喵~");
     return true;
+  }
+
+  function patchStatusBadge() {
+    if (statusBadgePatched) return true;
+    if (!bcModApi || typeof W.ChatRoomDrawCharacterStatusIcons !== "function") return false;
+    statusBadgePatched = true;
+
+    bcModApi.hookFunction("ChatRoomDrawCharacterStatusIcons", 10, (args, next) => {
+      const result = next(args);
+      drawOwnCharacterBadge(args);
+      return result;
+    });
+
+    console.log("[BC Neko Enhancer] character cat badge hooked");
+    return true;
+  }
+
+  function drawOwnCharacterBadge(drawArgs) {
+    const character = drawArgs?.[0];
+    if (!character || W.CurrentScreen !== "ChatRoom") return;
+    if (Number(character.MemberNumber) !== Number(W.Player?.MemberNumber)) return;
+
+    const charX = Number(drawArgs?.[1]);
+    const charY = Number(drawArgs?.[2]);
+    const zoom = Number(drawArgs?.[3]) || 1;
+    if (!Number.isFinite(charX) || !Number.isFinite(charY)) return;
+
+    const size = 35 * zoom;
+    const badgeX = charX + 477.5 * zoom;
+    const badgeY = charY + 22.5 * zoom;
+    drawCatBadge(badgeX, badgeY, size);
+  }
+
+  function drawCatBadge(x, y, size) {
+    if (typeof W.DrawTextFit === "function") {
+      W.DrawTextFit("\uD83D\uDC31", x, y, size, "#ffc928", "#7a5600");
+      return;
+    }
+
+    const canvas = W.MainCanvas;
+    if (!canvas || typeof canvas.save !== "function") return;
+    canvas.save();
+    canvas.font = `${Math.round(size)}px "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif`;
+    canvas.textAlign = "center";
+    canvas.textBaseline = "middle";
+    canvas.shadowColor = "rgba(255, 201, 40, 0.46)";
+    canvas.shadowBlur = Math.max(2, size * 0.16);
+    canvas.fillText("\uD83D\uDC31", x, y);
+    canvas.restore();
   }
 
   function decorateExistingChat() {
@@ -2181,13 +2232,16 @@
     syncScreenClass();
 
     const patchTimer = setInterval(() => {
-      if (patchBC()) clearInterval(patchTimer);
+      const chatReady = patchBC();
+      const badgeReady = patchStatusBadge();
+      if (chatReady && badgeReady) clearInterval(patchTimer);
       registerSettingsUI();
       decorateExistingChat();
       syncScreenClass();
     }, 800);
 
     setInterval(() => {
+      patchStatusBadge();
       registerSettingsUI();
       decorateExistingChat();
       syncScreenClass();

@@ -2506,9 +2506,27 @@
       #TextAreaChatLog .ChatMessageEmote,
       #TextAreaChatLog .ChatMessageAction,
       #TextAreaChatLog .ChatMessageActivity {
-        border-color: var(--bcn-border) !important;
+        margin: 4px 8px !important;
+        padding: 2px 42px 2px 10px !important;
+        border: none !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
         color: var(--bcn-muted) !important;
         font-style: normal !important;
+        font-size: 0.94em !important;
+      }
+
+      #TextAreaChatLog .ChatMessageEmote::after,
+      #TextAreaChatLog .ChatMessageAction::after,
+      #TextAreaChatLog .ChatMessageActivity::after {
+        content: none !important;
+      }
+
+      #TextAreaChatLog .ChatMessageEmote .ChatMessageName,
+      #TextAreaChatLog .ChatMessageAction .ChatMessageName,
+      #TextAreaChatLog .ChatMessageActivity .ChatMessageName {
+        color: var(--bcn-muted) !important;
       }
 
       #TextAreaChatLog .ChatMessageName {

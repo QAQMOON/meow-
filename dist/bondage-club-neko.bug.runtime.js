@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Bug猫娘聊天室增强
 // @namespace    https://penyo.ru/
-// @version      2.10.6-bug.1
+// @version      2.10.6-bug.2
 // @description  Bondage Club Bug猫娘 RP 语气包测试版
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -35,7 +35,7 @@
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const MOD_ID = "BCNekoEnhancer";
   const CHANNEL = "bug";
-  const VERSION = "2.10.6-bug.1";
+  const VERSION = "2.10.6-bug.2";
   const STORE_KEY = "bcNekoEnhancer.config.v2.bug";
   const BUG_RP_STORE_KEY = "bcNekoEnhancer.bug.rp.v1";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
@@ -240,6 +240,7 @@
   let bcModApi = null;
   let sdkLoadingPromise = null;
   let settingsRegistered = false;
+  let nekoCommandsRegistered = false;
   let toastTimer = 0;
   let suppressNextEmoteConvertAt = 0;
   let activeKaomojiGroup = "all";
@@ -297,6 +298,7 @@
       runtime: {
         sdkRegistered: !!bcModApi,
         chatHooks: patched,
+        commandRegistered: nekoCommandsRegistered,
         statusBadgeHook: statusBadgePatched,
         roomEffectsHook: roomEffectsPatched,
         settingsRegistered,
@@ -418,8 +420,8 @@
     return recent;
   }
 
-  function handleBugCommand(text) {
-    if (!isBugCommandText(text)) return false;
+  function handleNekoCommand(text) {
+    if (!isNekoCommandText(text)) return false;
     const parts = String(text || "").trim().split(/\s+/).filter(Boolean);
     const group = parts[1] || "";
     if (!/^rp$/i.test(group) && group !== "猫娘rp") return false;
@@ -460,8 +462,67 @@
       return true;
     }
 
-    showToast("可用命令：/bug rp 开、关、状态、软萌、古风、傲娇、礼貌、简洁");
+    showToast("可用命令：/neko rp 开、关、状态、软萌、古风、傲娇、礼貌、简洁");
     return true;
+  }
+
+  function handleBugCommand(text) {
+    return handleNekoCommand(text);
+  }
+
+  function clearNekoCommandInput(text) {
+    const input = getChatInput();
+    if (input && input.value && input.value.trim() === String(text || "").trim()) {
+      input.value = "";
+      input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    }
+  }
+
+  function runNekoCommand(text) {
+    if (!handleNekoCommand(text)) return false;
+    clearNekoCommandInput(text);
+    return true;
+  }
+
+  function registerNekoCommands() {
+    if (nekoCommandsRegistered) return true;
+    if (typeof W.CommandCombine !== "function") return false;
+    const action = (argumentsString = "", message = "", args = []) => {
+      const argv = Array.isArray(args) ? args : String(argumentsString || "").trim().split(/\s+/).filter(Boolean);
+      const text = `/neko ${argv.join(" ")}`.trim();
+      runNekoCommand(text);
+    };
+    try {
+      W.CommandCombine([
+        {
+          Tag: "neko",
+          Description: "Bondage Club Neko Chat Enhancer commands.",
+          Action: action,
+        },
+        {
+          Tag: "bug",
+          Description: "Alias for Bondage Club Neko Chat Enhancer bug commands.",
+          Action: (argumentsString = "", message = "", args = []) => {
+            const argv = Array.isArray(args) ? args : String(argumentsString || "").trim().split(/\s+/).filter(Boolean);
+            runNekoCommand(`/bug ${argv.join(" ")}`.trim());
+          },
+        },
+        {
+          Tag: "noke",
+          Description: "Typo alias for Bondage Club Neko Chat Enhancer commands.",
+          Action: (argumentsString = "", message = "", args = []) => {
+            const argv = Array.isArray(args) ? args : String(argumentsString || "").trim().split(/\s+/).filter(Boolean);
+            runNekoCommand(`/noke ${argv.join(" ")}`.trim());
+          },
+        },
+      ]);
+      nekoCommandsRegistered = true;
+      console.log("[BC 猫娘增强] /neko 命令已注册喵~");
+      return true;
+    } catch (error) {
+      console.warn("[BC 猫娘增强] /neko 命令注册失败，保留输入拦截兜底:", error);
+      return false;
+    }
   }
 
   function currentTheme() {
@@ -787,8 +848,12 @@
       .replace(/([的了辣])([\s,.!?;:，。！？；：）】」』]|$)/g, `$1喵${randomNyan()}$2`);
   }
 
+  function isNekoCommandText(text) {
+    return typeof text === "string" && /^\/(?:neko|bug|noke)(?:\s|$)/i.test(text.trim());
+  }
+
   function isBugCommandText(text) {
-    return typeof text === "string" && /^\/bug(?:\s|$)/i.test(text.trim());
+    return isNekoCommandText(text);
   }
 
   function maybeAddToneSuffix(text, suffix, chance = 1) {
@@ -1006,6 +1071,23 @@
     if (!bcModApi || !W.ChatRoomGenerateChatRoomChatMessage || !W.ChatRoomMessageDisplay || !W.ServerSend) return false;
     patched = true;
 
+    if (typeof W.ChatRoomSendChat === "function") {
+      bcModApi.hookFunction("ChatRoomSendChat", 10000, (args, next) => {
+        const input = getChatInput();
+        const text = input?.value || "";
+        if (runNekoCommand(text)) return undefined;
+        return next(args);
+      });
+    }
+
+    if (typeof W.CommandParse === "function") {
+      bcModApi.hookFunction("CommandParse", 10000, (args, next) => {
+        const text = String(args?.[0] || "");
+        if (runNekoCommand(text)) return true;
+        return next(args);
+      });
+    }
+
     bcModApi.hookFunction("ChatRoomGenerateChatRoomChatMessage", 0, (args, next) => {
       const [type, msg, replyId] = args;
       const nextMsg = shouldSkipGeneratedEmoteConvert(type)
@@ -1029,7 +1111,7 @@
 
     bcModApi.hookFunction("ServerSend", 0, (args, next) => {
       const [message, payload] = args;
-      if (message === "ChatRoomChat" && handleBugCommand(payload?.Content)) {
+      if (message === "ChatRoomChat" && handleNekoCommand(payload?.Content)) {
         return undefined;
       }
       if (message === "ChatRoomChat" && config.enabled && config.rainOnSend) {
@@ -2960,7 +3042,8 @@
       const chatReady = patchBC();
       const badgeReady = patchStatusBadge();
       const roomReady = patchRoomEffects();
-      if (chatReady && badgeReady && roomReady) clearInterval(patchTimer);
+      const commandReady = registerNekoCommands();
+      if (chatReady && badgeReady && roomReady && commandReady) clearInterval(patchTimer);
       registerSettingsUI();
       decorateExistingChat();
       syncScreenClass();
@@ -2969,6 +3052,7 @@
     setInterval(() => {
       patchStatusBadge();
       patchRoomEffects();
+      registerNekoCommands();
       registerSettingsUI();
       decorateExistingChat();
       syncScreenClass();

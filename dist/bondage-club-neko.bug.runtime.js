@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Bondage Club 猫娘聊天室增强
+// @name         Bondage Club Bug猫娘聊天室增强
 // @namespace    https://penyo.ru/
-// @version      2.10.6
-// @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
+// @version      2.10.6-bug.1
+// @description  Bondage Club Bug猫娘 RP 语气包测试版
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
 // @match        *://www.bondageprojects.elementfx.com/*
@@ -18,8 +18,8 @@
 // @match        *://www.bondage-asia.com/club/R*/*
 // @match        *://bondage-asia.com/club/R*/*
 // @include      /^https:\/\/(www\.)?bondage(projects\.elementfx|-(europe|asia))\.com\/.*/
-// @downloadURL  https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.user.js
-// @updateURL    https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.user.js
+// @downloadURL  https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-bug.user.js
+// @updateURL    https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-bug.user.js
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
@@ -34,8 +34,10 @@
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.10.6";
-  const STORE_KEY = "bcNekoEnhancer.config.v2";
+  const CHANNEL = "bug";
+  const VERSION = "2.10.6-bug.1";
+  const STORE_KEY = "bcNekoEnhancer.config.v2.bug";
+  const BUG_RP_STORE_KEY = "bcNekoEnhancer.bug.rp.v1";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const ACTION_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/actions/catgirl-actions.json";
   const ACTION_LIBRARY_CACHE_KEY = "bcNekoEnhancer.actionLibrary.v1";
@@ -45,6 +47,54 @@
   const PEER_SIGNAL_INTERVAL = 45000;
   const PEER_TTL = 300000;
   const ATMOSPHERE_KEYWORDS = /喵|蹭蹭|蹭|贴贴|抱抱|摸摸|摸头|亲亲|ฅ|🐾|💗|💕|💖/i;
+  const RP_TONE_PRESETS = {
+    soft: {
+      label: "软萌猫娘",
+      suffix: "喵~",
+      actionTarget: "{actor}轻轻靠过去，软乎乎地{verb}了{target}，尾巴开心地晃呀晃喵~",
+      actionSelf: "{actor}软软地{verb}了自己一下，像小猫晒太阳一样眯起眼睛喵~",
+    },
+    classic: {
+      label: "古风猫娘",
+      suffix: "喵乎",
+      actionTarget: "{actor}轻移莲步，{verb}{target}入怀，尾尖微晃，似是甚欢喵。",
+      actionSelf: "{actor}垂眸轻笑，悄悄{verb}了自己一下，甚是安然喵。",
+    },
+    tsundere: {
+      label: "傲娇猫娘",
+      suffix: "哼喵",
+      actionTarget: "{actor}别过脸去，装作漫不经心地{verb}了{target}，才、才不是特意的喵！",
+      actionSelf: "{actor}哼了一声，勉强{verb}了自己一下，才不是需要安慰呢喵。",
+    },
+    polite: {
+      label: "礼貌猫娘",
+      suffix: "喵。",
+      actionTarget: "{actor}温柔而克制地{verb}了{target}，希望能让对方安心一些喵。",
+      actionSelf: "{actor}安静地{verb}了自己一下，认真整理好心情喵。",
+    },
+    simple: {
+      label: "简洁猫娘",
+      suffix: "喵",
+      actionTarget: "{actor}{verb}了{target}喵。",
+      actionSelf: "{actor}{verb}了自己喵。",
+    },
+  };
+  const RP_TONE_ALIASES = {
+    开: "on",
+    关: "off",
+    状态: "status",
+    軟萌: "soft",
+    软萌: "soft",
+    软萌猫娘: "soft",
+    古风: "classic",
+    古风猫娘: "classic",
+    傲娇: "tsundere",
+    傲娇猫娘: "tsundere",
+    礼貌: "polite",
+    礼貌猫娘: "polite",
+    简洁: "simple",
+    简洁猫娘: "simple",
+  };
   const DEFAULT_KAOMOJI = ["(=^･ω･^=)", "ฅ(•ㅅ•❀)ฅ", "(=｀ω´=)", "(ฅ´ω`ฅ)", "(=^･ｪ･^=)"];
   const ACTION_TARGET_MODE = {
     AUTO: "auto",
@@ -179,6 +229,7 @@
   };
 
   const config = loadConfig();
+  let bugRp = loadBugRpConfig();
   let actionLibrary = loadCachedActionLibrary() || normalizeActionLibrary(DEFAULT_ACTION_LIBRARY);
   let kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
   const processedMessages = new WeakSet();
@@ -190,6 +241,7 @@
   let sdkLoadingPromise = null;
   let settingsRegistered = false;
   let toastTimer = 0;
+  let suppressNextEmoteConvertAt = 0;
   let activeKaomojiGroup = "all";
   let lastPeerSignalAt = 0;
   let lastPeerRoom = "";
@@ -212,8 +264,9 @@
     sendAction: sendQuickAction,
     reloadActions: loadRemoteActionLibrary,
     reloadKaomoji: loadRemoteKaomojiLibrary,
+    bugRp: () => ({ ...bugRp, label: currentTone().label }),
     diagnostic,
-    status: () => ({ patched, sdk: !!bcModApi, enabled: config.enabled, screen: W.CurrentScreen, url: location.href }),
+    status: () => ({ patched, sdk: !!bcModApi, enabled: config.enabled, channel: CHANNEL, rp: { ...bugRp, label: currentTone().label }, screen: W.CurrentScreen, url: location.href }),
   };
 
   function diagnostic() {
@@ -232,9 +285,15 @@
     return {
       mod: MOD_ID,
       version: VERSION,
+      channel: CHANNEL,
       url: String(location.href),
       screen: W.CurrentScreen || "",
       player: W.Player?.MemberNumber || null,
+      rp: {
+        enabled: !!bugRp.enabled,
+        tonePreset: bugRp.tonePreset,
+        toneLabel: currentTone().label,
+      },
       runtime: {
         sdkRegistered: !!bcModApi,
         chatHooks: patched,
@@ -276,6 +335,9 @@
         members: Array.from(nekoPeers, ([memberNumber, peer]) => ({
           memberNumber,
           version: peer.version || "unknown",
+          channel: peer.channel || "unknown",
+          tonePreset: peer.tonePreset || "",
+          toneLabel: peer.toneLabel || "",
           seenSecondsAgo: Math.round((Date.now() - peer.time) / 1000),
         })),
       },
@@ -317,6 +379,89 @@
   function saveConfig() {
     normalizeConfig(config);
     localStorage.setItem(STORE_KEY, JSON.stringify(config));
+  }
+
+  function loadBugRpConfig() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(BUG_RP_STORE_KEY) || "{}");
+      return normalizeBugRpConfig(saved);
+    } catch {
+      return normalizeBugRpConfig({});
+    }
+  }
+
+  function normalizeBugRpConfig(next) {
+    const tonePreset = RP_TONE_PRESETS[next?.tonePreset] ? next.tonePreset : "soft";
+    return {
+      enabled: next?.enabled === true,
+      tonePreset,
+    };
+  }
+
+  function saveBugRpConfig() {
+    bugRp = normalizeBugRpConfig(bugRp);
+    localStorage.setItem(BUG_RP_STORE_KEY, JSON.stringify(bugRp));
+  }
+
+  function currentTone() {
+    return RP_TONE_PRESETS[bugRp.tonePreset] || RP_TONE_PRESETS.soft;
+  }
+
+  function bugRpStatusText() {
+    return `Bug RP：${bugRp.enabled ? "开启" : "关闭"}，当前人设：${currentTone().label}`;
+  }
+
+  function shouldSkipGeneratedEmoteConvert(type) {
+    if (type !== "Emote" || !suppressNextEmoteConvertAt) return false;
+    const recent = Date.now() - suppressNextEmoteConvertAt < 1200;
+    suppressNextEmoteConvertAt = 0;
+    return recent;
+  }
+
+  function handleBugCommand(text) {
+    if (!isBugCommandText(text)) return false;
+    const parts = String(text || "").trim().split(/\s+/).filter(Boolean);
+    const group = parts[1] || "";
+    if (!/^rp$/i.test(group) && group !== "猫娘rp") return false;
+    const rawAction = parts[2] || "状态";
+    const action = RP_TONE_ALIASES[rawAction] || rawAction;
+
+    if (action === "on") {
+      bugRp.enabled = true;
+      config.enabled = true;
+      saveConfig();
+      saveBugRpConfig();
+      lastPeerSignalAt = 0;
+      sendNekoPeerSignal(true);
+      showToast(`${bugRpStatusText()}，之后聊天会按当前人设转换`);
+      return true;
+    }
+    if (action === "off") {
+      bugRp.enabled = false;
+      saveBugRpConfig();
+      lastPeerSignalAt = 0;
+      sendNekoPeerSignal(true);
+      showToast("Bug RP 已关闭，恢复普通猫娘转换");
+      return true;
+    }
+    if (action === "status") {
+      showToast(bugRpStatusText());
+      return true;
+    }
+    if (RP_TONE_PRESETS[action]) {
+      bugRp.enabled = true;
+      bugRp.tonePreset = action;
+      config.enabled = true;
+      saveConfig();
+      saveBugRpConfig();
+      lastPeerSignalAt = 0;
+      sendNekoPeerSignal(true);
+      showToast(`${bugRpStatusText()}，已切换`);
+      return true;
+    }
+
+    showToast("可用命令：/bug rp 开、关、状态、软萌、古风、傲娇、礼貌、简洁");
+    return true;
   }
 
   function currentTheme() {
@@ -642,6 +787,151 @@
       .replace(/([的了辣])([\s,.!?;:，。！？；：）】」』]|$)/g, `$1喵${randomNyan()}$2`);
   }
 
+  function isBugCommandText(text) {
+    return typeof text === "string" && /^\/bug(?:\s|$)/i.test(text.trim());
+  }
+
+  function maybeAddToneSuffix(text, suffix, chance = 1) {
+    const value = String(text || "").trim();
+    if (!value || Math.random() > chance) return value;
+    if (/[喵呢呀哼。！？~～]$/.test(value)) return value;
+    return `${value}${suffix}`;
+  }
+
+  function softNeko(text) {
+    return relationHonorific(text)
+      .replace(/我们/g, "咱喵们")
+      .replace(/大家/g, "大家猫猫")
+      .replace(/本人/g, "人家")
+      .replace(/你们/g, "你们猫猫")
+      .replace(/您/g, "你")
+      .replace(/我/g, "人家")
+      .replace(/不可以/g, "不可以喵")
+      .replace(/谢谢/g, "谢谢你喵")
+      .replace(/好的/g, "好呀")
+      .replace(/([啊呀呢吧嘛哦啦])([\s,.!?;:，。！？；：）】」』]|$)/g, "喵~$2");
+  }
+
+  function classicNeko(text) {
+    return relationHonorific(text)
+      .replace(/我们/g, "吾等猫猫")
+      .replace(/大家/g, "诸位猫猫")
+      .replace(/本人/g, "咱喵")
+      .replace(/你们/g, "汝等")
+      .replace(/您/g, "汝")
+      .replace(/你/g, "汝")
+      .replace(/我/g, "咱喵")
+      .replace(/好的/g, "甚好")
+      .replace(/可以/g, "可")
+      .replace(/很/g, "甚")
+      .replace(/真的/g, "当真")
+      .replace(/([啊呀呢吧嘛哦啦])([\s,.!?;:，。！？；：）】」』]|$)/g, "喵乎$2");
+  }
+
+  function tsundereNeko(text) {
+    let value = relationHonorific(text)
+      .replace(/我们/g, "咱喵们")
+      .replace(/大家/g, "大家")
+      .replace(/本人/g, "本猫")
+      .replace(/您/g, "汝")
+      .replace(/你/g, "汝")
+      .replace(/我/g, "本猫")
+      .replace(/喜欢/g, "才不是喜欢")
+      .replace(/想要/g, "勉强想要")
+      .replace(/可以/g, "勉强可以")
+      .replace(/好的/g, "哼，好吧");
+    if (!/^(哼|才不是|别误会)/.test(value) && Math.random() < 0.55) {
+      value = `哼，${value}`;
+    }
+    return value;
+  }
+
+  function politeNeko(text) {
+    return relationHonorific(text)
+      .replace(/我们/g, "我们猫猫")
+      .replace(/大家/g, "各位")
+      .replace(/本人/g, "我")
+      .replace(/你们/g, "各位")
+      .replace(/好的/g, "好的呢")
+      .replace(/谢谢/g, "谢谢您")
+      .replace(/麻烦/g, "麻烦您")
+      .replace(/可以/g, "可以的");
+  }
+
+  function simpleNeko(text) {
+    return relationHonorific(text)
+      .replace(/我们/g, "我们猫猫")
+      .replace(/我/g, "咱喵")
+      .replace(/你/g, "你");
+  }
+
+  function rpNeko(text, type = "Chat") {
+    if (!text || typeof text !== "string") return text;
+    if (isBugCommandText(text)) return text;
+    const preset = bugRp.tonePreset;
+    const tone = currentTone();
+    let value = text;
+    if (preset === "soft") value = softNeko(value);
+    else if (preset === "classic") value = classicNeko(value);
+    else if (preset === "tsundere") value = tsundereNeko(value);
+    else if (preset === "polite") value = politeNeko(value);
+    else if (preset === "simple") value = simpleNeko(value);
+    else value = standardNeko(value);
+
+    if (type === "Whisper") {
+      value = maybeAddToneSuffix(value, preset === "classic" ? "喵乎" : tone.suffix, preset === "simple" ? 0.35 : 0.85);
+      return value.startsWith("悄悄喵~") ? value : `悄悄喵~ ${value}`;
+    }
+    if (type === "Emote") {
+      value = maybeAddToneSuffix(value, tone.suffix, preset === "simple" ? 0.25 : 0.65);
+      return hasKnownKaomoji(value) || preset === "simple" ? value : `${value} ${pickRandomKaomoji()}`;
+    }
+    if (type === "Action" || type === "Activity") {
+      return rpActionLine(value);
+    }
+    const chance = preset === "simple" ? 0.28 : preset === "polite" ? 0.5 : 0.8;
+    return maybeAddToneSuffix(value, tone.suffix, chance);
+  }
+
+  function rpActionLine(text) {
+    if (!text || typeof text !== "string") return text;
+    const preset = bugRp.tonePreset;
+    if (preset === "classic") {
+      return relationHonorific(text)
+        .replace(/轻轻/g, "悄然")
+        .replace(/抱住/g, "轻拥")
+        .replace(/摸了摸/g, "轻抚")
+        .replace(/亲了亲/g, "轻吻")
+        .replace(/贴/g, "依偎")
+        .replace(/喂/g, "奉上")
+        .replace(/喵~?$/g, "喵乎");
+    }
+    if (preset === "tsundere") {
+      const value = relationHonorific(text)
+        .replace(/轻轻/g, "装作随意地")
+        .replace(/开心/g, "勉强开心")
+        .replace(/温柔/g, "别扭又认真")
+        .replace(/喵~?$/g, "哼喵");
+      return /才不是|哼/.test(value) ? value : `${value}，才不是特意的喵。`;
+    }
+    if (preset === "polite") {
+      return relationHonorific(text)
+        .replace(/一把/g, "轻柔地")
+        .replace(/偷偷/g, "安静地")
+        .replace(/开心/g, "安心")
+        .replace(/喵~?$/g, "喵。");
+    }
+    if (preset === "simple") {
+      return relationHonorific(text)
+        .replace(/喵~+/g, "喵")
+        .replace(/呀/g, "");
+    }
+    return relationHonorific(text)
+      .replace(/轻轻/g, "软乎乎地")
+      .replace(/开心/g, "甜甜地开心")
+      .replace(/喵。?$/g, "喵~");
+  }
+
   function actionNeko(text) {
     text = relationHonorific(text || "");
     if (/喵喵[）)]?$/.test(text)) return text;
@@ -661,6 +951,8 @@
 
   function convertByType(type, text) {
     if (!config.enabled || !text) return text;
+    if (isBugCommandText(text)) return text;
+    if (bugRp.enabled) return rpNeko(text, type);
     if (type === "Whisper") return whisperNeko(text);
     if (type === "Emote") return emoteNeko(text);
     if (type === "Action" || type === "Activity") return actionNeko(text);
@@ -671,6 +963,7 @@
   function shouldConvertDisplay(data, msg) {
     if (!config.enabled || !config.convertDisplayed || !msg) return false;
     if (isBugPeerSender(data?.Sender)) return false;
+    if (isOwnSender(data?.Sender) && bugRp.enabled) return false;
     const type = data?.Type;
     if (type === "Whisper" && String(msg).startsWith("悄悄喵~")) return false;
     if ((type === "Action" || type === "Activity") && /喵喵[）)]?$/.test(String(msg))) return false;
@@ -685,6 +978,7 @@
   function isBugPeerSender(sender) {
     const memberNumber = memberNumberOf(sender);
     if (!memberNumber) return false;
+    if (memberNumber === memberNumberOf(W.Player) && CHANNEL === "bug") return true;
     const peer = nekoPeers.get(memberNumber);
     return !!peer && peer.channel === "bug" && peer.noDisplayConvert === true;
   }
@@ -714,7 +1008,9 @@
 
     bcModApi.hookFunction("ChatRoomGenerateChatRoomChatMessage", 0, (args, next) => {
       const [type, msg, replyId] = args;
-      const nextMsg = config.convertOutgoing ? convertByType(type, msg) : msg;
+      const nextMsg = shouldSkipGeneratedEmoteConvert(type)
+        ? msg
+        : config.convertOutgoing || bugRp.enabled ? convertByType(type, msg) : msg;
       return next([type, nextMsg, replyId]);
     });
 
@@ -733,6 +1029,9 @@
 
     bcModApi.hookFunction("ServerSend", 0, (args, next) => {
       const [message, payload] = args;
+      if (message === "ChatRoomChat" && handleBugCommand(payload?.Content)) {
+        return undefined;
+      }
       if (message === "ChatRoomChat" && config.enabled && config.rainOnSend) {
         const type = payload?.Type;
         if (["Chat", "Whisper", "Emote", "Action"].includes(type)) pawRain(type);
@@ -903,7 +1202,15 @@
         Type: "Hidden",
         Content: PEER_SIGNAL_CONTENT,
         Sender: W.Player.MemberNumber,
-        Dictionary: [{ mod: MOD_ID, version: VERSION, channel: "stable", noDisplayConvert: false }],
+        Dictionary: [{
+          mod: MOD_ID,
+          version: VERSION,
+          channel: CHANNEL,
+          rpEnabled: !!bugRp.enabled,
+          tonePreset: bugRp.tonePreset,
+          toneLabel: currentTone().label,
+          noDisplayConvert: true,
+        }],
       });
     } catch (error) {
       console.warn("[BC Neko Enhancer] failed to send peer signal", error);
@@ -1117,12 +1424,128 @@
     return cleanLines[Math.floor(Math.random() * cleanLines.length)];
   }
 
+  function actionActor() {
+    const preset = bugRp.tonePreset;
+    if (preset === "classic") return "咱喵";
+    if (preset === "tsundere") return "本猫";
+    if (preset === "polite") return "我";
+    if (preset === "simple") return "咱喵";
+    return "人家";
+  }
+
+  function actionKind(action) {
+    const value = `${action?.id || ""} ${action?.label || ""}`.toLowerCase();
+    if (/hug|抱/.test(value)) return "hug";
+    if (/pat|摸|头/.test(value)) return "pat";
+    if (/feed|喂|食/.test(value)) return "feed";
+    if (/cuddle|贴|蹭/.test(value)) return "cuddle";
+    if (/kiss|亲|吻/.test(value)) return "kiss";
+    return "default";
+  }
+
+  function actionVerb(action) {
+    const kind = actionKind(action);
+    if (kind === "hug") {
+      if (bugRp.tonePreset === "classic") return "轻拥";
+      if (bugRp.tonePreset === "tsundere") return "勉强抱住";
+      if (bugRp.tonePreset === "polite") return "轻轻抱住";
+      return "抱抱";
+    }
+    if (kind === "pat") {
+      if (bugRp.tonePreset === "classic") return "轻抚";
+      if (bugRp.tonePreset === "tsundere") return "装作随手摸摸";
+      if (bugRp.tonePreset === "polite") return "温柔摸摸";
+      return "摸摸头";
+    }
+    if (kind === "feed") {
+      if (bugRp.tonePreset === "classic") return "奉上一口点心予";
+      if (bugRp.tonePreset === "tsundere") return "勉强投喂";
+      if (bugRp.tonePreset === "polite") return "递上一口点心给";
+      return "投喂";
+    }
+    if (kind === "cuddle") {
+      if (bugRp.tonePreset === "classic") return "依偎";
+      if (bugRp.tonePreset === "tsundere") return "假装路过蹭蹭";
+      if (bugRp.tonePreset === "polite") return "轻轻贴近";
+      return "贴贴";
+    }
+    if (kind === "kiss") {
+      if (bugRp.tonePreset === "classic") return "轻吻";
+      if (bugRp.tonePreset === "tsundere") return "别扭地亲亲";
+      if (bugRp.tonePreset === "polite") return "轻轻亲亲";
+      return "亲亲";
+    }
+    return String(action?.label || "靠近");
+  }
+
+  function rpActionTemplate(action, target) {
+    const preset = bugRp.tonePreset;
+    const kind = actionKind(action);
+    const targeted = !!target;
+    const templates = {
+      soft: {
+        hug: ["{actor}软乎乎地抱住{target}蹭了蹭，尾巴开心地晃呀晃喵~", "{actor}抱住自己缩成暖暖一团，小声呼噜呼噜喵~"],
+        pat: ["{actor}踮起脚摸摸{target}的头，声音甜甜地夸了一句好乖喵~", "{actor}摸摸自己的头，把小烦恼一点点揉散喵~"],
+        feed: ["{actor}把小点心递到{target}嘴边，眼睛亮晶晶地等回应喵~", "{actor}啊呜吃下一口点心，幸福得耳朵都抖了抖喵~"],
+        cuddle: ["{actor}软软贴到{target}身边，像找到最暖的小窝喵~", "{actor}抱住自己的尾巴贴贴，偷偷给自己一点温暖喵~"],
+        kiss: ["{actor}轻轻亲了亲{target}，害羞得耳朵都热起来喵~", "{actor}把一个小亲亲藏进掌心，悄悄送给自己喵~"],
+        default: ["{actor}软乎乎地{verb}了{target}喵~", "{actor}软软地{verb}了自己一下喵~"],
+      },
+      classic: {
+        hug: ["{actor}轻移莲步，将{target}轻拥入怀，尾尖微晃，似是甚欢喵。", "{actor}垂眸轻笑，敛袖轻拥自己，心下甚安喵乎。"],
+        pat: ["{actor}抬手轻抚{target}发顶，眉眼含笑，温声道甚乖喵。", "{actor}悄然顺了顺自己的发顶，神色安然喵乎。"],
+        feed: ["{actor}奉上一口点心予{target}，眸光微亮，盼君尝之喵。", "{actor}慢慢尝下一口点心，尾尖轻卷，甚是满足喵乎。"],
+        cuddle: ["{actor}悄然依偎在{target}身侧，衣袖轻触，心意已明喵。", "{actor}倚着自己静坐片刻，像把暖意藏进怀中喵乎。"],
+        kiss: ["{actor}俯身轻吻{target}，旋即别过眼去，耳尖微红喵。", "{actor}轻吻指尖，将好运悄悄留给自己喵乎。"],
+        default: ["{actor}{verb}{target}，尾尖微晃，甚好喵。", "{actor}悄悄{verb}了自己一下，甚是安然喵。"],
+      },
+      tsundere: {
+        hug: ["{actor}别过脸勉强抱住{target}，才、才不是特意想靠近喵！", "{actor}哼了一声抱住自己，才不是需要安慰呢喵。"],
+        pat: ["{actor}装作随手摸摸{target}的头，哼，这只是普通奖励喵。", "{actor}给自己摸摸头，才不是在偷偷求夸喵。"],
+        feed: ["{actor}把点心递给{target}，哼，吃完可要记得夸本猫喵。", "{actor}咬了一口点心，才不是因为嘴馋才开心喵。"],
+        cuddle: ["{actor}假装路过蹭了蹭{target}，别误会，只是这里比较舒服喵。", "{actor}抱着自己贴贴，哼，自己也能照顾自己喵。"],
+        kiss: ["{actor}别扭地亲亲{target}，立刻转头说不许笑喵！", "{actor}给自己一个小亲亲奖励，才不是害羞喵。"],
+        default: ["{actor}装作漫不经心地{verb}了{target}，才不是特意的喵！", "{actor}勉强{verb}了自己一下，哼喵。"],
+      },
+      polite: {
+        hug: ["{actor}轻轻抱住{target}，希望这份温度能让对方安心一些喵。", "{actor}轻轻抱住自己，认真把心情整理好喵。"],
+        pat: ["{actor}温柔摸摸{target}的头，轻声说今天也辛苦了喵。", "{actor}给自己顺了顺毛，安静地放松下来喵。"],
+        feed: ["{actor}递上一口点心给{target}，语气温和地请对方尝尝喵。", "{actor}小口吃下点心，认真补充一点猫娘能量喵。"],
+        cuddle: ["{actor}轻轻贴近{target}，保持着温柔又舒服的距离喵。", "{actor}安静地靠着自己，给心情一点休息时间喵。"],
+        kiss: ["{actor}轻轻亲亲{target}，把祝福温柔地送过去喵。", "{actor}亲亲自己的指尖，愿今天也顺利喵。"],
+        default: ["{actor}温柔而克制地{verb}了{target}喵。", "{actor}安静地{verb}了自己一下喵。"],
+      },
+      simple: {
+        hug: ["{actor}抱了抱{target}喵。", "{actor}抱了抱自己喵。"],
+        pat: ["{actor}摸了摸{target}的头喵。", "{actor}摸了摸自己的头喵。"],
+        feed: ["{actor}给{target}递了点心喵。", "{actor}吃了一口点心喵。"],
+        cuddle: ["{actor}和{target}贴贴喵。", "{actor}和自己贴贴喵。"],
+        kiss: ["{actor}亲亲{target}喵。", "{actor}给自己一个亲亲喵。"],
+        default: ["{actor}{verb}了{target}喵。", "{actor}{verb}了自己喵。"],
+      },
+    };
+    const pack = templates[preset] || templates.soft;
+    const pair = pack[kind] || pack.default;
+    return targeted ? pair[0] : pair[1];
+  }
+
+  function formatRpActionText(action, target, fallbackLine) {
+    if (!bugRp.enabled) return fallbackLine;
+    const template = rpActionTemplate(action, target) || (target ? currentTone().actionTarget : currentTone().actionSelf);
+    if (!template) return rpActionLine(fallbackLine);
+    return template
+      .replace(/\{actor\}/g, actionActor())
+      .replace(/\{verb\}/g, actionVerb(action))
+      .replace(/\{target\}/g, target ? getCharacterName(target) : "自己");
+  }
+
   function formatActionText(action, target) {
     const hasTarget = !!target;
     const line = hasTarget
       ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~"))
       : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~"));
-    return line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : "身边的猫猫");
+    const fallbackLine = line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : "身边的猫猫");
+    return formatRpActionText(action, target, fallbackLine);
   }
 
   function sendEmote(text) {
@@ -1130,6 +1553,7 @@
     if (input && typeof W.ChatRoomSendChat === "function") {
       input.value = `*${text}*`;
       input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+      suppressNextEmoteConvertAt = Date.now();
       W.ChatRoomSendChat();
       input.focus();
       return true;

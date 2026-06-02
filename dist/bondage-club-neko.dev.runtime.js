@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club 猫娘聊天室增强
 // @namespace    https://penyo.ru/
-// @version      2.10.5
+// @version      2.10.6
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -34,7 +34,7 @@
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.10.5";
+  const VERSION = "2.10.6";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const ACTION_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/actions/catgirl-actions.json";
@@ -670,6 +670,7 @@
 
   function shouldConvertDisplay(data, msg) {
     if (!config.enabled || !config.convertDisplayed || !msg) return false;
+    if (isBugPeerSender(data?.Sender)) return false;
     const type = data?.Type;
     if (type === "Whisper" && String(msg).startsWith("悄悄喵~")) return false;
     if ((type === "Action" || type === "Activity") && /喵喵[）)]?$/.test(String(msg))) return false;
@@ -679,6 +680,13 @@
 
   function isOwnSender(sender) {
     return Number(sender) === Number(W.Player?.MemberNumber);
+  }
+
+  function isBugPeerSender(sender) {
+    const memberNumber = memberNumberOf(sender);
+    if (!memberNumber) return false;
+    const peer = nekoPeers.get(memberNumber);
+    return !!peer && peer.channel === "bug" && peer.noDisplayConvert === true;
   }
 
   function decorateMessage(div, data) {
@@ -869,6 +877,10 @@
     const info = Array.isArray(data.Dictionary) ? data.Dictionary[0] || {} : {};
     nekoPeers.set(memberNumber, {
       version: String(info.version || "unknown"),
+      channel: String(info.channel || "dev"),
+      tonePreset: String(info.tonePreset || ""),
+      toneLabel: String(info.toneLabel || ""),
+      noDisplayConvert: info.noDisplayConvert === true,
       time: Date.now(),
     });
     sendNekoPeerSignal(false);
@@ -891,7 +903,7 @@
         Type: "Hidden",
         Content: PEER_SIGNAL_CONTENT,
         Sender: W.Player.MemberNumber,
-        Dictionary: [{ mod: MOD_ID, version: VERSION }],
+        Dictionary: [{ mod: MOD_ID, version: VERSION, channel: "dev", noDisplayConvert: false }],
       });
     } catch (error) {
       console.warn("[BC Neko Enhancer] failed to send peer signal", error);

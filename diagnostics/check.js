@@ -14,6 +14,12 @@ const resources = [
     kind: "script",
   },
   {
+    id: "bug-loader",
+    name: "油猴 Bug 版入口",
+    url: `${RAW_BASE}bondage-club-neko-bug.user.js`,
+    kind: "script",
+  },
+  {
     id: "stable-runtime",
     name: "正式版 runtime",
     url: `${RAW_BASE}dist/bondage-club-neko.runtime.js`,
@@ -23,6 +29,12 @@ const resources = [
     id: "dev-runtime",
     name: "测试版 runtime",
     url: `${RAW_BASE}dist/bondage-club-neko.dev.runtime.js`,
+    kind: "runtime",
+  },
+  {
+    id: "bug-runtime",
+    name: "Bug 版 runtime",
+    url: `${RAW_BASE}dist/bondage-club-neko.bug.runtime.js`,
     kind: "runtime",
   },
   {
@@ -151,10 +163,12 @@ function renderDiagnosticSummary(data) {
   const summary = `
     <div class="summary">
       <div><span>插件版本</span><strong>${escapeHtml(data.version || "unknown")}</strong></div>
+      <div><span>通道</span><strong>${escapeHtml(data.channel || "stable")}</strong></div>
       <div><span>当前界面</span><strong>${escapeHtml(data.screen || "unknown")}</strong></div>
       <div><span>动作库</span><strong>${escapeHtml(libraries.actions?.version || "unknown")}</strong></div>
       <div><span>颜文字</span><strong>${escapeHtml(libraries.kaomoji?.items ?? "unknown")}</strong></div>
       <div><span>猫娘同好</span><strong>${escapeHtml(peers.count ?? 0)}</strong></div>
+      <div><span>Bug RP</span><strong>${escapeHtml(data.rp ? `${data.rp.enabled ? "开" : "关"} ${data.rp.toneLabel || data.rp.tonePreset || ""}` : "无")}</strong></div>
     </div>
   `;
   const status = failed.length ? "warn" : "ok";

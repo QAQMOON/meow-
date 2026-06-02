@@ -44,12 +44,18 @@ https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.user.js
 测试版：
 https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-dev.user.js
 
+Bug 版：
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-bug.user.js
+
+Bug 版只建议用油猴安装，用来测试 RP 语气包等实验功能；不加入 FUSAM。
+
 ## 更新
 
-插件现在使用动态加载。安装正式版或测试版入口后，每次刷新游戏、重新进入游戏时，都会自动从 GitHub 拉取对应版本的最新插件主体。
+插件现在使用动态加载。安装正式版、测试版或 Bug 版入口后，每次刷新游戏、重新进入游戏时，都会自动从 GitHub 拉取对应版本的最新插件主体。
 
 - 正式版会加载 `dist/bondage-club-neko.runtime.js`
 - 测试版会加载 `dist/bondage-club-neko.dev.runtime.js`
+- Bug 版会加载 `dist/bondage-club-neko.bug.runtime.js`
 
 如果 GitHub 暂时无法访问，插件会尝试使用上一次成功加载的缓存版本。loader 入口本身很少变化；只有入口脚本更新时，才需要在油猴里检查更新。
 

@@ -1,4 +1,4 @@
-const RAW_BASE = "https://raw.githubusercontent.com/QAQMOON/meow-/main/";
+const RAW_BASE = "https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/";
 
 const resources = [
   {

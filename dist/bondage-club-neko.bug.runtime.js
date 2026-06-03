@@ -442,14 +442,141 @@
     return recent;
   }
 
+
+  function sendNekoCommandNotice(lines, duration = 22000) {
+    const text = Array.isArray(lines) ? lines.join("\n") : String(lines || "");
+    if (!text) return false;
+    try {
+      if (typeof W.ChatRoomSendLocal === "function" && W.CurrentScreen === "ChatRoom") {
+        W.ChatRoomSendLocal(text, duration);
+        return true;
+      }
+    } catch {}
+    showToast(text.split(/\n+/)[0]);
+    return false;
+  }
+
+  function normalizeNekoHelpSection(section) {
+    const raw = String(section || "").trim();
+    const key = raw.toLowerCase();
+    const aliases = {
+      "": "main",
+      help: "main",
+      "\u5e2e\u52a9": "main",
+      rp: "rp",
+      "\u732b\u5a18rp": "rp",
+      action: "action",
+      "\u52a8\u4f5c": "action",
+      emoji: "emoji",
+      kaomoji: "emoji",
+      "\u989c\u6587\u5b57": "emoji",
+      mode: "mode",
+      "\u6a21\u5f0f": "mode",
+      theme: "theme",
+      "\u4e3b\u9898": "theme",
+      status: "status",
+      "\u72b6\u6001": "status",
+    };
+    return aliases[key] || aliases[raw] || "main";
+  }
+
+  function getActionTargetModeLabel() {
+    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return "\u624b\u52a8\u9009\u76ee\u6807";
+    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return "\u53ea\u5bf9\u81ea\u5df1";
+    return "\u81ea\u52a8\u76ee\u6807";
+  }
+
+  function getBugNekoStatusLines() {
+    const speechState = detectPlayerActionCapability();
+    const gagSuffix = speechState.gagged ? " (Lv." + speechState.gagLevel + ")" : "";
+    return [
+      "[\u732b\u5a18\u72b6\u6001] Bondage Club Neko Chat Enhancer v" + VERSION + " (Bug\u7248)",
+      "\u732b\u5a18\u6a21\u5f0f\uff1a" + (config.enabled ? "\u5f00\u542f" : "\u5173\u95ed"),
+      "Bug RP\uff1a" + (bugRp.enabled ? "\u5f00\u542f" : "\u5173\u95ed") + " | \u5f53\u524d\u4eba\u8bbe\uff1a" + currentTone().label,
+      "\u53d1\u9001\u8f6c\u6362\uff1a" + (config.convertOutgoing ? "\u5f00" : "\u5173") + " | \u663e\u793a\u8f6c\u6362\uff1a" + (config.convertDisplayed ? "\u5f00" : "\u5173"),
+      "\u5835\u5634\u8bf4\u8bdd\uff1a" + getSpeechModeLabel(speechState) + gagSuffix,
+      "\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme) + " | \u52a8\u4f5c\u76ee\u6807\uff1a" + getActionTargetModeLabel(),
+      "\u547d\u4ee4\u6ce8\u518c\uff1a" + (nekoCommandsRegistered ? "\u5df2\u6ce8\u518c (" + (nekoCommandRegistrationSource || "unknown") + ")" : "\u8f93\u5165\u62e6\u622a\u5149\u5e95"),
+    ];
+  }
+
+  function getBugNekoHelpLines(section = "main") {
+    switch (normalizeNekoHelpSection(section)) {
+      case "rp":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / rp]",
+          "\u53ef\u7528\u547d\u4ee4\uff1a/neko rp \u5f00 | \u5173 | \u72b6\u6001",
+          "\u5207\u6362\u4eba\u8bbe\uff1a/neko rp \u8f6f\u840c | \u53e4\u98ce | \u50b2\u5a07 | \u793c\u8c8c | \u7b80\u6d01",
+          "\u5148\u505a RP \u8f6c\u6362\uff0c\u518d\u53e0\u52a0\u5835\u5634\u8bf4\u8bdd\u538b\u5236\u3002",
+        ];
+      case "action":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / action]",
+          "\u53f3\u4e0b\u89d2\u52a8\u4f5c\u732b\u732b\u53ef\u5feb\u901f\u53d1\u9001\u62b1\u62b1\u3001\u6478\u5934\u3001\u5582\u98df\u3001\u8d34\u8d34\u3001\u4eb2\u4eb2\u3002",
+          "\u5f53\u524d\u76ee\u6807\u6a21\u5f0f\uff1a" + getActionTargetModeLabel(),
+          "\u52a8\u4f5c\u4f1a\u6839\u636e RP \u4eba\u8bbe\u81ea\u52a8\u4fee\u9970\u6587\u6848\u3002",
+        ];
+      case "emoji":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / emoji]",
+          "\u989c\u6587\u5b57\u732b\u732b\u70b9\u51fb\u53ef\u63d2\u5165\uff0c\u957f\u6309\u53ef\u6253\u5f00\u9009\u62e9\u5668\u3002",
+          "\u989c\u6587\u5b57\u5e93\u4f1a\u8fdc\u7a0b\u540c\u6b65\u3002",
+        ];
+      case "mode":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / mode]",
+          "\u4e3b\u732b\u732b\u957f\u6309 10 \u79d2\u5207\u6362\u732b\u5a18\u6a21\u5f0f\u3002",
+          "\u5835\u5634\u8bf4\u8bdd\u73b0\u5728\u5206\u6210\uff1a\u8f7b\u5835\u5634 / \u91cd\u5835\u5634 / \u53ea\u80fd\u77ed\u53e5 / \u53ea\u80fd\u545c\u54bd\u3002",
+          "\u83dc\u5355\u9762\u677f\u4efb\u610f\u4f4d\u7f6e\u53ef\u62d6\u52a8\u3002",
+        ];
+      case "theme":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / theme]",
+          "\u5f53\u524d\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme),
+          "\u53ef\u7528\u4e3b\u9898\uff1a\u6a31\u7c89 / \u8584\u8377 / \u5929\u7a7a / \u5976\u6cb9 / \u858b\u8863\u8349 / \u767d\u8336\u3002",
+        ];
+      case "status":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / status]",
+          "\u4f7f\u7528 /neko status \u53ef\u67e5\u770b\u5f53\u524d Bug RP\u3001\u5835\u5634\u8bf4\u8bdd\u6863\u4f4d\u3001\u4e3b\u9898\u548c\u547d\u4ee4\u6ce8\u518c\u72b6\u6001\u3002",
+        ];
+      default:
+        return [
+          "[\u732b\u5a18\u547d\u4ee4\u5e2e\u52a9] /neko help <\u5206\u7c7b>",
+          "\u53ef\u7528\u5206\u7c7b\uff1arp / action / emoji / mode / theme / status",
+          "\u5feb\u6377\u4f8b\u5b50\uff1a/neko help rp | /neko help mode | /neko status",
+        ];
+    }
+  }
+
   function handleNekoCommand(text) {
     if (!isNekoCommandText(text)) return false;
     const parts = String(text || "").trim().split(/\s+/).filter(Boolean);
-    const group = parts[1] || "";
-    if (!/^rp$/i.test(group) && group !== "猫娘rp") return false;
-    const rawAction = parts[2] || "状态";
-    const action = RP_TONE_ALIASES[rawAction] || rawAction;
+    const group = normalizeNekoHelpSection(parts[1] || "help");
 
+    if (group === "main") {
+      sendNekoCommandNotice(getBugNekoHelpLines(parts[2] || "main"));
+      return true;
+    }
+    if (group === "status") {
+      sendNekoCommandNotice(getBugNekoStatusLines());
+      return true;
+    }
+    if (group === "action" || group === "emoji" || group === "mode" || group === "theme") {
+      sendNekoCommandNotice(getBugNekoHelpLines(group));
+      return true;
+    }
+    if (group !== "rp") {
+      sendNekoCommandNotice(getBugNekoHelpLines("main"));
+      return true;
+    }
+
+    const rawAction = parts[2] || "status";
+    const action = RP_TONE_ALIASES[rawAction] || rawAction;
+    if (action === "help" || action === "\u5e2e\u52a9") {
+      sendNekoCommandNotice(getBugNekoHelpLines("rp"));
+      return true;
+    }
     if (action === "on") {
       bugRp.enabled = true;
       config.enabled = true;
@@ -457,7 +584,7 @@
       saveBugRpConfig();
       lastPeerSignalAt = 0;
       sendNekoPeerSignal(true);
-      showToast(`${bugRpStatusText()}，之后聊天会按当前人设转换`);
+      showToast(bugRpStatusText() + "\uff0c\u4e4b\u540e\u804a\u5929\u4f1a\u6309\u5f53\u524d\u4eba\u8bbe\u8f6c\u6362");
       return true;
     }
     if (action === "off") {
@@ -465,11 +592,11 @@
       saveBugRpConfig();
       lastPeerSignalAt = 0;
       sendNekoPeerSignal(true);
-      showToast("Bug RP 已关闭，恢复普通猫娘转换");
+      showToast("Bug RP \u5df2\u5173\u95ed\uff0c\u6062\u590d\u666e\u901a\u732b\u5a18\u8f6c\u6362");
       return true;
     }
     if (action === "status") {
-      showToast(bugRpStatusText());
+      sendNekoCommandNotice(getBugNekoStatusLines());
       return true;
     }
     if ((rpLibrary?.tonePresets || RP_TONE_PRESETS)[action]) {
@@ -480,11 +607,11 @@
       saveBugRpConfig();
       lastPeerSignalAt = 0;
       sendNekoPeerSignal(true);
-      showToast(`${bugRpStatusText()}，已切换`);
+      showToast(bugRpStatusText() + "\uff0c\u5df2\u5207\u6362");
       return true;
     }
 
-    showToast("可用命令：/neko rp 开、关、状态、软萌、古风、傲娇、礼貌、简洁");
+    sendNekoCommandNotice(getBugNekoHelpLines("rp"));
     return true;
   }
 
@@ -1290,30 +1417,50 @@
     return text.startsWith("悄悄喵~") ? text : `悄悄喵~ ${text}`;
   }
 
-  function applyGagSpeech(text, gagLevel, type = "Chat") {
+  function getSpeechModeLabel(speechState) {
+    const mode = typeof speechState === "object" ? speechState?.speechMode : speechState;
+    if (mode === "moan") return "\u53ea\u80fd\u545c\u54bd";
+    if (mode === "short") return "\u53ea\u80fd\u77ed\u53e5";
+    if (mode === "heavy") return "\u91cd\u5835\u5634";
+    if (mode === "light") return "\u8f7b\u5835\u5634";
+    return "\u6b63\u5e38";
+  }
+
+  function applyGagSpeech(text, speechState, type = "Chat") {
+    const gagLevel = typeof speechState === "object" ? Number(speechState?.gagLevel || 0) : Number(speechState || 0);
+    const speechMode = typeof speechState === "object"
+      ? (speechState?.speechMode || "clear")
+      : (gagLevel >= 4 ? "moan" : gagLevel === 3 ? "short" : gagLevel === 2 ? "heavy" : gagLevel === 1 ? "light" : "clear");
     if (!text || !gagLevel || gagLevel <= 0) return text;
     let value = String(text).trim();
     if (!value) return text;
-    const splitIndex = value.search(/[，。！？,.!?]/);
-    if (gagLevel >= 3) {
+    const splitIndex = value.search(/[,.!?;:\u3002\uff01\uff1f\uff0c\uff1b\uff1a]/);
+    if (speechMode === "moan") {
+      if (type === "Emote") return "\u545c\u2026\u2026\u55b5\u2026\u2026";
+      if (type === "Whisper") return "\u545c\u5514\u2026\u2026\u55b5\u2026";
+      return "\u5514\u2026\u2026\u55b5\u545c\u2026\u2026";
+    }
+    if (speechMode === "short") {
       const core = splitIndex >= 0 ? value.slice(0, splitIndex) : value;
-      return `${core.slice(0, 8) || "唔"}……唔喵`;
+      const compact = core.replace(/\s+/g, "").slice(0, 6);
+      return (compact || "\u5514") + "\u2026\u2026\u55b5";
     }
-    if (gagLevel === 2) {
-      if (splitIndex >= 0) value = value.slice(0, Math.max(6, splitIndex));
-      value = value.replace(/[啊呀啦哦呢嘛]/g, "唔").replace(/[，。！？,.!?]+/g, "…");
-      return /唔喵|嗯唔/.test(value) ? value : `${value}……唔喵`;
+    if (speechMode === "heavy") {
+      if (splitIndex >= 0) value = value.slice(0, Math.max(4, splitIndex));
+      value = value.replace(/[\u554a\u5440\u5566\u5462\u561b\u54e6\u54c7]/g, "\u5514").replace(/[,.!?;:\u3002\uff01\uff1f\uff0c\uff1b\uff1a]+/g, "\u2026");
+      return /[\u5514\u545c]/.test(value) ? value + "\u2026\u55b5" : value + "\u2026\u2026\u55b5";
     }
-    value = value.replace(/[啊呀啦哦]/g, "唔");
-    if (type === "Whisper") return `${value}…唔`;
-    return /唔|喵/.test(value) ? `${value}…` : `${value} 唔喵`;
+    value = value.replace(/[\u554a\u5440\u5566\u5462\u561b\u54e6\u54c7]/g, "\u5514");
+    if (type === "Whisper") return value + "\u2026\u55b5";
+    return /[\u5514\u55b5]/.test(value) ? value + "\u2026" : value + " \u55b5\u5514";
   }
 
   function applyLocalStateSpeechEffects(type, text) {
     if (!["Chat", "Whisper", "Emote"].includes(type)) return text;
+    if (isUltraBcLoaded()) return text;
     const state = detectPlayerActionCapability();
     if (!state.gagged) return text;
-    return applyGagSpeech(text, state.gagLevel, type);
+    return applyGagSpeech(text, state, type);
   }
 
   function convertByType(type, text, options = {}) {
@@ -1932,6 +2079,22 @@
     return hasTokenMatch(getCharacterEffects(character), names);
   }
 
+  function isUltraBcLoaded() {
+    try {
+      if (W.Player?.UBC) return true;
+      if (typeof W.UBCver === "string" && W.UBCver) return true;
+      const mods = W.bcModSdk?.getModsInfo?.();
+      if (!mods || typeof mods[Symbol.iterator] !== "function") return false;
+      for (const mod of mods) {
+        const name = String(mod?.name || "");
+        const fullName = String(mod?.fullName || "");
+        const repository = String(mod?.repository || "");
+        if (/ULTRAbc/i.test(name) || /Ultra Bondage Club/i.test(fullName) || /tetris245\/ULTRAbc/i.test(repository)) return true;
+      }
+    } catch {}
+    return false;
+  }
+
   function hasAnyPose(character, names) {
     return hasTokenMatch(getCharacterPoses(character), names);
   }
@@ -1946,26 +2109,40 @@
   }
 
   function detectCharacterState(character) {
-    const gagLevel = hasAnyEffect(character, ["gagveryheavy", "gagheavy", "gagtotal", "gaggedheavy"])
-      ? 3
-      : hasAnyEffect(character, ["gagmedium", "gag", "gagged"])
-        ? 2
-        : hasAnyEffect(character, ["gaglight"])
-          ? 1
-          : 0;
+    const cannotTalk = readCharacterMethod(character, "CanTalk", true) === false;
+    const gagLevel = hasAnyEffect(character, ["gagtotal"])
+      ? 4
+      : hasAnyEffect(character, ["gagveryheavy", "gagheavy", "gaggedheavy"])
+        ? 3
+        : hasAnyEffect(character, ["gagmedium", "gag", "gagged"])
+          ? 2
+          : hasAnyEffect(character, ["gaglight"])
+            ? 1
+            : 0;
+    const resolvedGagLevel = cannotTalk && gagLevel < 4 ? 4 : gagLevel;
+    const speechMode = resolvedGagLevel >= 4
+      ? "moan"
+      : resolvedGagLevel === 3
+        ? "short"
+        : resolvedGagLevel === 2
+          ? "heavy"
+          : resolvedGagLevel === 1
+            ? "light"
+            : "clear";
     const kneeling = readCharacterMethod(character, "IsKneeling", undefined);
     const lying = hasAnyPose(character, ["lying", "prone", "supine"]) || hasAnyEffect(character, ["prone"]);
     const suspended = hasAnyEffect(character, ["suspended"]);
     const handsFree = readCharacterMethod(character, "CanInteract", !hasAnyEffect(character, ["block", "freeze", "restrain", "bound", "cuffed"]));
     const canMove = readCharacterMethod(character, "CanWalk", !hasAnyEffect(character, ["freeze", "tethered", "mounted", "suspended", "prone"]));
-    const gagged = gagLevel > 0 || readCharacterMethod(character, "CanTalk", true) === false;
+    const gagged = resolvedGagLevel > 0 || cannotTalk;
     const restrained = !handsFree || !canMove || hasAnyEffect(character, ["block", "freeze", "restrain", "bound", "cuffed", "tethered"]);
     const resolvedKneeling = typeof kneeling === "boolean" ? kneeling : hasAnyPose(character, ["kneel", "kneeling"]);
     const helpless = restrained && (lying || suspended || !canMove);
     return {
-      gagLevel,
+      gagLevel: resolvedGagLevel,
       gagged,
-      mouthFree: gagLevel <= 1,
+      speechMode,
+      mouthFree: resolvedGagLevel <= 1,
       handsFree,
       canMove,
       kneeling: resolvedKneeling,

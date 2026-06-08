@@ -3896,10 +3896,6 @@
         overflow: hidden;
       }
 
-      body:not(.bcn-enabled) #bcn-soft-paws {
-        display: none !important;
-      }
-
       #bcn-soft-paws span {
         position: absolute;
         opacity: 0.14;

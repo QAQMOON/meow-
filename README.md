@@ -1,115 +1,117 @@
 # Bondage Club Neko Chat Enhancer
 
-一个给 Bondage Club 用的猫娘主题。
+[中文版](README.zh-CN.md) | English
 
-## 功能
+A catgirl-themed chat enhancer for Bondage Club.
 
-- 聊天消息可自动转换成猫娘语气，发送方本地记录和接收方显示都可生效
-- 聊天室美化、猫爪表情雨和新消息提醒，让界面更有猫娘主题感
-- 右下角猫猫菜单支持拖动、展开/收起、动作轮盘和颜文字选择器
-- 抱抱、摸头、喂食、贴贴、亲亲等动作支持自动目标、手动目标或只对自己
-- GitHub 远程动作库与颜文字库，方便后续继续扩展内容
-- 扩展组件设置页支持功能开关、概率调节和主题颜色切换
+## Features
 
-## 预览
+- Auto-converts chat messages to catgirl speech style for both sender and receiver
+- Chatroom beautification with paw decorations, emoji rain, and new message notifications
+- Draggable cat menu in bottom-right corner with action wheel and kaomoji picker
+- Quick actions (hug, pat, feed, cuddle, kiss) with auto-target, manual target, or self-only modes
+- Remote action library and kaomoji library hosted on GitHub for easy expansion
+- Extension settings panel with toggle switches, probability sliders, and theme color customization
 
-### 猫娘可爱主题聊天室
+## Preview
 
-粉色猫娘主题聊天室，自动将发送消息转换成猫娘语气，并同步美化本地聊天显示。搭配猫爪装饰、表情雨和便捷颜文字面板，让聊天更可爱、更顺手，喵~
+### Cute Catgirl-Themed Chatroom
 
-<!-- ![猫娘可爱主题聊天室](assets/preview-chat-kaomoji.png) -->
+Pink catgirl-themed chatroom that auto-converts sent messages to catgirl speech and beautifies local chat display. Paired with paw decorations, emoji rain, and handy kaomoji panel for cuter, smoother chatting, meow~
 
-### 便捷动作轮盘
+<!-- ![Cute Catgirl-Themed Chatroom](assets/preview-chat-kaomoji.png) -->
 
-内置抱抱、摸头、喂食等快捷动作，适合日常互动和 RP 使用。动作文案支持通过 GitHub 远程动作库持续扩展，之后想增加亲亲、贴贴等动作也更方便。
+### Quick Action Wheel
 
-<!-- ![便捷动作轮盘](assets/preview-actions.png) -->
+Built-in quick actions like hug, pat, feed for daily interactions and RP use. Action templates support continuous expansion via remote GitHub action library, making it easier to add kiss, cuddle, and other actions later.
 
-## 安装
+<!-- ![Quick Action Wheel](assets/preview-actions.png) -->
 
-### 推荐使用：FUSAM 插件管理器
+## Installation
+
+### Recommended: FUSAM Add-on Manager
 
 FUSAM Integration:
 https://sidiousious.gitlab.io/bc-addon-loader/
 
-在 FUSAM 插件管理器里搜索 `BCNeko` 或 `Bondage Club Neko Chat Enhancer`，即可启用/禁用猫娘插件。FUSAM 可以在同一个地方管理多个 Bondage Club 插件，更适合长期使用。
+Search for `BCNeko` or `Bondage Club Neko Chat Enhancer` in FUSAM add-on manager to enable/disable the catgirl plugin. FUSAM lets you manage multiple Bondage Club plugins in one place, ideal for long-term use.
 
-### 油猴安装
+### Userscript Installation
 
-也可以先安装油猴或其他 userscript 管理器，然后选择一个版本安装：
+Alternatively, install Tampermonkey or another userscript manager, then choose a version to install:
 
-正式版：
+Production version:
 https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.user.js
 
-测试版：
+Dev version:
 https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko-dev.user.js
 
-Bug 版：
+Bug version:
 https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko-bug.user.js
 
-Bug 版只建议用油猴安装，用来测试 RP 语气包等实验功能；不加入 FUSAM。
+The Bug version is recommended for userscript installation only, for testing experimental features like RP speech packs; it's not included in FUSAM.
 
-## 更新
+## Updates
 
-插件现在使用动态加载。安装正式版、测试版或 Bug 版入口后，每次刷新游戏、重新进入游戏时，都会自动从 GitHub 拉取对应版本的最新插件主体。
+The plugin now uses dynamic loading. After installing the production, dev, or bug version entry script, every time you refresh the game or re-enter, it will automatically pull the latest plugin core from GitHub for that version.
 
-- 正式版会加载 `dist/bondage-club-neko.runtime.js`
-- 测试版会加载 `dist/bondage-club-neko.dev.runtime.js`
-- Bug 版会加载 `dist/bondage-club-neko.bug.runtime.js`
+- Production version loads `dist/bondage-club-neko.runtime.js`
+- Dev version loads `dist/bondage-club-neko.dev.runtime.js`
+- Bug version loads `dist/bondage-club-neko.bug.runtime.js`
 
-如果 GitHub 暂时无法访问，插件会尝试使用上一次成功加载的缓存版本。loader 入口本身很少变化；只有入口脚本更新时，才需要在油猴里检查更新。
+If GitHub is temporarily unreachable, the plugin will try to use the last successfully loaded cached version. The loader entry script rarely changes; you only need to check for updates in your userscript manager when the entry script itself updates.
 
-## 动作库
+## Action Library
 
-动作文案放在：
+Action templates are stored at:
 
 https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/blob/main/actions/catgirl-actions.json
 
-插件启动时会尝试从 GitHub 加载动作库；如果加载失败，会使用上次缓存，缓存也没有时会使用内置默认动作。
+The plugin tries to load the action library from GitHub on startup; if loading fails, it uses the last cache, or built-in default actions if there's no cache.
 
-新增动作主题时，在 `actions` 数组里追加一项即可：
+To add a new action theme, append an item to the `actions` array:
 
 ```json
 {
-  "id": "kiss",
-  "label": "亲亲",
-  "enabled": true,
-  "self": [
-    "轻轻碰了碰自己的指尖，假装这是一个小小亲亲喵~"
+  “id”: “kiss”,
+  “label”: “亲亲”,
+  “enabled”: true,
+  “self”: [
+    “轻轻碰了碰自己的指尖，假装这是一个小小亲亲喵~”
   ],
-  "target": [
-    "轻轻亲了亲 {target}，然后害羞地别过脸喵~"
+  “target”: [
+    “轻轻亲了亲 {target}，然后害羞地别过脸喵~”
   ]
 }
 ```
 
-`label` 会显示在动作轮盘按钮上；`self` 用于没有目标或只对自己时；`target` 用于对其他角色释放时。
+`label` displays on the action wheel button; `self` is used when there's no target or acting on self; `target` is used when acting on another character.
 
-## 颜文字库
+## Kaomoji Library
 
-颜文字库放在：
+Kaomoji library is stored at:
 
 https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/blob/main/kaomoji/cute-kaomoji.json
 
-插件启动时会尝试从 GitHub 加载颜文字库；如果加载失败，会使用上次缓存，缓存也没有时会使用内置默认猫猫颜文字。
+The plugin tries to load the kaomoji library from GitHub on startup; if loading fails, it uses the last cache, or built-in default cat kaomoji if there's no cache.
 
-新增颜文字时，在对应分类的 `items` 数组里追加字符串即可。新增分类时，在 `groups` 数组里追加一项：
+To add new kaomoji, append a string to the corresponding category's `items` array. To add a new category, append an item to the `groups` array:
 
 ```json
 {
-  "id": "kiss",
-  "label": "亲亲",
-  "enabled": true,
-  "items": [
-    "( ˘ ³˘)♥",
-    "(๑˘ ³˘๑)"
+  “id”: “kiss”,
+  “label”: “亲亲”,
+  “enabled”: true,
+  “items”: [
+    “( ˘ ³˘)♥”,
+    “(๑˘ ³˘๑)”
   ]
 }
 ```
 
-`enabled` 设为 `false` 可以暂时禁用某个分类；插件会从所有启用分类里随机抽取颜文字。
+Setting `enabled` to `false` temporarily disables a category; the plugin randomly picks kaomoji from all enabled categories.
 
-## 说明
+## Notes
 
-这是面向 Bondage Club 的界面增强脚本，不是独立网页应用。
-如果你在游戏里看到设置页，请优先在“设置 -> 扩展组件”里找“猫娘设置”。
+This is a UI enhancement script for Bondage Club, not a standalone web app.
+If you see the settings page in-game, look for “Catgirl Settings” under “Settings -> Extension Components” first.

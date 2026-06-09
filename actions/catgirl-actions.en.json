@@ -1,0 +1,383 @@
+{
+  "version": "1.1.0",
+  "updatedAt": "2026-06-02",
+  "description": "Bondage Club catgirl plugin action text library. To add a new action, append a new theme object to the actions array.",
+  "actions": [
+    {
+      "id": "hug",
+      "label": "Hug",
+      "enabled": true,
+      "requirements": {
+        "needHands": true,
+        "needReach": true
+      },
+      "self": [
+        "gently hugs herself, like holding a warm little puff of cotton, meow~",
+        "wraps herself in her own arms, her tail swaying comfortably for a moment, meow.",
+        "gives herself a soft little hug, and her mood warms right up, meow~",
+        "hugs herself and nuzzles quietly, as if recharging herself, meow.",
+        "buries her face against herself and sneaks in a sweet little hug, meow~",
+        "lightly wraps her arms around herself, her ears twitching happily, meow.",
+        "hugs herself tight and whispers that she will be a good kitty today too, meow.",
+        "curls into a tiny ball and hugs herself, like a kitten caught by a cloud, meow~",
+        "gently circles her arms around herself, pretending it was just a casual gesture and not clinginess, meow.",
+        "holds herself a little tighter, n-not because she feels like crying, meow.",
+        "gives herself a hug, hmph, this is called self-care, meow.",
+        "wraps her arms around her own tail, pretending she does not need anyone else's hug at all, meow.",
+        "hugs herself and turns her face away; blushing? Not at all, meow.",
+        "lightly holds herself and whispers that she is definitely not waiting to be comforted, meow.",
+        "shrinks into her own embrace, trying very hard to look calm, meow.",
+        "hugs herself and sways gently, while her heart secretly goes soft, meow.",
+        "curls her little tail close, saying she is fine, though her body is much too honest, meow.",
+        "gives herself a hug, hmph, this is just a normal reward, meow.",
+        "hugs herself and purrs in secret, not because she is lonely at all, meow.",
+        "gently hugs herself; she did her best today too, meow~"
+      ],
+      "variants": {
+        "restrained": {
+          "target": [
+            "carefully leans close to the restrained {target}, only daring to brush her cheek over softly, as if quietly soothing them, meow~",
+            "looks at the bound {target} and makes the hug even softer and gentler, meow."
+          ]
+        },
+        "kneeling": {
+          "target": [
+            "bends down and gently hugs the kneeling {target}, the tip of her tail secretly tracing a tiny circle, meow~",
+            "leans down to gather the kneeling {target} into her arms, moving so lightly it is like she fears breaking something, meow."
+          ]
+        },
+        "lying": {
+          "target": [
+            "bends over and gently hugs the lying {target}, as if slowly draping warmth over them, meow~",
+            "leans close to the lying {target} and gives them a quiet hug, even her ear tips turning soft, meow."
+          ]
+        },
+        "helpless": {
+          "target": [
+            "seeing {target} barely able to move, she only wraps them in a gentle embrace, as if saying not to be afraid, meow.",
+            "warmly hugs the weakly struggling {target}, her tail slowly settling down too, meow."
+          ]
+        }
+      },
+      "target": [
+        "gently hugs {target}, her tail swishing happily in tiny waves, meow~",
+        "softly nestles into {target}'s arms, the warmth of the hug just right, meow.",
+        "gives {target} a cozy warm hug, her ears perking right up, meow~",
+        "hugs {target} and nuzzles them, as if tucking her fondness quietly inside, meow.",
+        "hugs {target} with careful little movements, light enough not to wake a dream, meow~",
+        "scoops {target} into a hug, clearly blushing while pretending to be perfectly calm, meow.",
+        "gently wraps her arms around {target}; hmph, it was just a casual hug, meow.",
+        "pulls {target} into her arms, calling it a normal greeting while her tail tells the truth, meow.",
+        "presses close to {target} and purrs softly, warm and squishy like a little dumpling, meow~",
+        "hugs {target} and refuses to let go, pretending she is only a little cold, meow.",
+        "secretly hugs {target}, though her cheeks are already heating up, meow.",
+        "lightly holds {target} and whispers that this time they can have one hug first, meow.",
+        "wraps {target} into her arms with motions as gentle as hiding a star, meow~",
+        "hugs {target} and sways softly, hmph, this is only basic etiquette, meow.",
+        "leans close and gives {target} a hug; i-it is not because she especially wanted to be near them, meow.",
+        "hugs {target} all soft and warm, the whole kitty turning sweet, meow~",
+        "holds {target} for a little while, then lets go with a very practiced calm face, meow.",
+        "leans gently into {target}'s arms and nuzzles like a little kitten bun, meow.",
+        "her ears quietly heat up while she hugs {target}, meow.",
+        "gives {target} a warm hug; hmph, this is special treatment, meow."
+      ]
+    },
+    {
+      "id": "pat",
+      "label": "Pat",
+      "enabled": true,
+      "requirements": {
+        "needHands": true,
+        "needReach": true
+      },
+      "self": [
+        "pats her own head, like sprinkling herself with a little sweet frosting, meow~",
+        "gently rubs her own head, feeling so comfy her eyes narrow happily, meow.",
+        "smooths her own fur, and her messy mood slowly calms down too, meow~",
+        "pats her own head, seriously rewarding one well-behaved kitty, meow.",
+        "pets her own head and purrs quietly; she worked hard today too, meow~",
+        "lightly pats the top of her head, her ears going all soft and floppy, meow.",
+        "rubs her own head, as if kneading all the little worries away, meow~",
+        "gently smooths her own fur, and her mood turns round and cozy at once, meow.",
+        "pats her own head, pretending she is only checking her fur, meow.",
+        "rubs her own head; hmph, comforting herself is a skill too, meow.",
+        "gives herself a few head pats, definitely not secretly asking for comfort, meow.",
+        "smooths her own fur and pretends she does not need praise at all, meow.",
+        "gently rubs her own head, though her tail has already perked up happily, meow.",
+        "pats the top of her head, coaxing each messy little feeling back into place, meow~",
+        "gives herself a head-pat reward and softly says she did great today, meow.",
+        "pets her own hair, as if touching a soft little cloud, meow.",
+        "lightly pats her own head, solemnly declaring this is routine encouragement, meow.",
+        "pats her own head, calm on the outside but secretly delighted inside, meow.",
+        "smooths her own fur, her ears twitching comfortably along with it, meow~",
+        "gives herself a head pat, refilling today's courage meter just a little, meow."
+      ],
+      "variants": {
+        "restrained": {
+          "target": [
+            "gently pats the restrained {target}'s head, moving extra softly as if quietly coaxing them, meow~",
+            "smooths the bound {target}'s hair and whispers that they are still being very good, meow."
+          ]
+        },
+        "kneeling": {
+          "target": [
+            "bends down to pat the kneeling {target}'s head, her voice softening along with the touch, meow~",
+            "leans at the waist and gently rubs the kneeling {target}'s hair, like giving a careful reward, meow."
+          ]
+        },
+        "lying": {
+          "target": [
+            "bends over and gently pats the lying {target}, like soothing an obedient little kitty, meow~",
+            "lets her hand rest softly on the lying {target}'s head and slowly smooths their hair, meow."
+          ]
+        },
+        "helpless": {
+          "target": [
+            "looking at the helpless {target}, she only pats their head tenderly, smoothing the panic down bit by bit, meow.",
+            "gently strokes the almost motionless {target}'s hair and softly comforts them not to be afraid, meow."
+          ]
+        }
+      },
+      "target": [
+        "gently pats {target}'s head, her touch as tender as a cloud drifting down, meow~",
+        "smooths {target}'s fur, her eyes curving into a smile, meow.",
+        "rubs {target}'s head, like rewarding a very good little one, meow~",
+        "lightly pats {target}'s head, her tail swaying happily, meow.",
+        "pets {target}'s head and softly says they worked hard today too, meow~",
+        "gently smooths {target}'s fur with a touch light enough not to ruffle a dream, meow.",
+        "gives {target} a gentle head pat, like kneading starlight into their hair, meow~",
+        "pats {target}'s head; hmph, she will reluctantly praise them this once, meow.",
+        "gently rubs {target}, awkward in words but very honest with her hand, meow.",
+        "pats {target}'s head, like rewarding a sweet little candy, meow~",
+        "smooths {target}'s fur with soft motions, like she is trying to soothe them, meow.",
+        "pats {target}, pretending it was just casual while taking it very seriously, meow.",
+        "gently pats {target}'s head, fondness shining in her eyes, meow~",
+        "rubs {target}'s head; hmph, do not get too smug, meow.",
+        "lightly pats {target} twice, counting it as a reward for today's little performance, meow~",
+        "pets {target}'s head, her ear tips quietly warming up, meow.",
+        "gently smooths {target}'s fur, like soothing a little kitten, meow~",
+        "pats the top of {target}'s head and quietly says they did pretty well, meow.",
+        "gives {target} a soft head pat and ends up happy herself too, meow~",
+        "gently rubs {target}'s head; hmph, this is special care, meow."
+      ]
+    },
+    {
+      "id": "feed",
+      "label": "Feed",
+      "enabled": true,
+      "requirements": {
+        "needHands": true,
+        "needReach": true
+      },
+      "self": [
+        "takes a little nom, so happy her ears give a tiny twitch, meow~",
+        "holds a snack and nibbles it slowly, the whole kitty turning sweet, meow.",
+        "feeds herself a bite, her puffed cheeks like a tiny mochi ball, meow~",
+        "eats the tasty treat in tiny bites, her tail curling with satisfaction, meow.",
+        "secretly rewards herself with a snack, her eyes shining with happiness, meow~",
+        "takes one bite of a little treat, the sweetness softening her heart, meow.",
+        "nibbles the snack gently, like a quiet and peaceful little cat, meow~",
+        "successfully feeds herself, and today's mood instantly feels complete, meow.",
+        "holds a snack and eats slowly, pretending she is not greedy at all, meow.",
+        "finishes the little treat in one bite, though her tail has already perked up happily, meow~",
+        "eats a small piece; hmph, this is just energy replenishment, meow.",
+        "sneaks a bite, definitely not getting happy because she likes it so much, meow.",
+        "feeds herself and seriously calls it catgirl energy management, meow.",
+        "turns her face away while eating the snack; the taste is only... not bad, meow.",
+        "holds the food and nibbles in tiny bites, pretending she was not craving it, meow.",
+        "takes a gentle bite, while her heart is already secretly satisfied, meow.",
+        "pops a bite into her mouth; hmph, this is only necessary supplies, meow.",
+        "nibbles the treat, her ears going soft with comfort, meow~",
+        "eats the snack in tiny bites, swallowing sweet happiness bit by bit, meow.",
+        "secretly feeds herself one bite, and the whole kitty ends up happy, meow~"
+      ],
+      "variants": {
+        "restrained": {
+          "target": [
+            "carefully brings the snack to the restrained {target}'s lips, slowing every motion down, meow~",
+            "looks at the bound {target} and gently offers the small treat, like taking careful care of them, meow."
+          ]
+        },
+        "kneeling": {
+          "target": [
+            "bends down to offer the snack in front of the kneeling {target}, her tail swaying with anticipation, meow~",
+            "leans down and gives the little treat to the kneeling {target}, her voice softening by a few degrees, meow."
+          ]
+        },
+        "lying": {
+          "target": [
+            "bends over and gently brings the snack to the lying {target}'s mouth, as if afraid to disturb them, meow~",
+            "patiently offers the tasty treat to the lying {target}, waiting with bright sparkling eyes for a response, meow."
+          ]
+        },
+        "helpless": {
+          "target": [
+            "seeing {target} too weak to move on their own, she carefully feeds them the snack with almost unbelievable gentleness, meow.",
+            "watching the motionless {target}, she brings the little snack to their lips bit by bit, caring for them seriously, meow."
+          ]
+        }
+      },
+      "target": [
+        "offers a little snack to {target}, eyes sparkling as she waits for a response, meow~",
+        "gently feeds {target} a bite, happy as if she got to eat it too, meow.",
+        "shares her favorite little snack with {target}, her tail swaying sweetly, meow~",
+        "carefully feeds {target}, moving as gently as if holding a treasure, meow.",
+        "feeds {target} a bite of something tasty, smiling until her ears curve too, meow~",
+        "gives {target} a bite of snack, calling it casual while clearly putting care into it, meow.",
+        "softly brings the food in front of {target}, like presenting the most precious gift, meow~",
+        "successfully feeds {target}; hmph, this was specially prepared, meow.",
+        "hands the little snack to {target}, smiling obviously while trying to look calm, meow.",
+        "gently feeds {target} a bite, her tail so happy it might tie itself in a knot, meow~",
+        "offers the snack to {target}, not because she deliberately picked the tastiest piece, meow.",
+        "feeds {target} a bite, saying not to waste it while her voice stays very soft, meow.",
+        "carefully brings the food to {target}, serious as if afraid it might be too hot, meow~",
+        "offers {target} a sweet bite of snack; hmph, hurry and praise me, meow.",
+        "feeds {target} a small treat and feels satisfied along with them, meow~",
+        "gently feeds {target}, acting obedient and earnest like a serious little kitty, meow.",
+        "shares the tasty food with {target}, not because she wants to see them happy, meow.",
+        "feeds {target} a bite, blushing as she says not to misunderstand, it is only sharing, meow.",
+        "hands the snack to {target}; hmph, remember to praise me after eating it, meow.",
+        "gently feeds {target}, awkwardly sending her tenderness over one bite at a time, meow~"
+      ]
+    },
+    {
+      "id": "cuddle",
+      "label": "Cuddle",
+      "enabled": true,
+      "requirements": {
+        "needReach": true,
+        "needMobility": true
+      },
+      "self": [
+        "gently cuddles her own tail, pretending this counts as being held, meow~",
+        "curls herself into a soft little bundle and secretly gives herself some warmth, meow.",
+        "rubs her cheek against her sleeve and softly says it is just normal catgirl grooming, meow~",
+        "leans quietly against herself for a while, the tip of her tail slowly curling into a ring, meow.",
+        "keeps a tiny bit of closeness for herself, like hiding a cuddle in her heart, meow~",
+        "gently hugs her own arm; hmph, cuddling herself is impressive too, meow.",
+        "buries her face in a soft fold of cloth, pretending she does not want to be clingy at all, meow~",
+        "loops her tail lightly around herself, like tucking a warm blanket over her mood, meow.",
+        "quietly leans against herself and whispers that she deserves gentleness today too, meow~",
+        "gives herself a special cuddle, her ears twitching softly with comfort, meow."
+      ],
+      "variants": {
+        "restrained": {
+          "target": [
+            "gently cuddles beside the restrained {target}, brushing them with only the smallest cheek nuzzle, meow~",
+            "looking at the bound {target}, she quietly leans in for a cuddle, as if sending them a little peace, meow."
+          ]
+        },
+        "kneeling": {
+          "target": [
+            "bends down to cuddle close to the kneeling {target}, the tip of her tail secretly curling, meow~",
+            "softly cuddles beside the kneeling {target}, as if stealing away just a tiny bit of distance, meow."
+          ]
+        },
+        "lying": {
+          "target": [
+            "bends over and gently cuddles close to the lying {target}, even her breathing slowing down, meow~",
+            "leans near the lying {target} and nuzzles them, like wrapping them in a layer of fluffy warmth, meow."
+          ]
+        },
+        "helpless": {
+          "target": [
+            "quietly cuddles close to the almost motionless {target}, leaving only the lightest bit of leaning warmth, meow.",
+            "shrinks the distance between herself and {target} to just right, as if silently staying by their side, meow."
+          ]
+        }
+      },
+      "target": [
+        "gently cuddles up beside {target}, her tail secretly starting to sway, meow~",
+        "softly nuzzles {target}, like a kitten finding the warmest place, meow.",
+        "sneaks close to {target} for one tiny cuddle; hmph, she was just passing by, meow.",
+        "rubs her cheek gently against {target}, her ears twitching shyly, meow~",
+        "leans closer to {target}, saying it is definitely not because she wants to be spoiled, meow.",
+        "carefully nuzzles {target}, like hiding her fondness in her tail, meow~",
+        "gently leans against {target}, the whole kitty turning warm and cozy, meow.",
+        "settles beside {target} without speaking, letting only her tail quietly show her happiness, meow~",
+        "softly brushes against {target}, pretending this is ordinary catgirl etiquette, meow.",
+        "slowly scoots beside {target}; hmph, this spot is just more comfortable, meow.",
+        "lightly bumps {target}'s shoulder, then acts as if nothing happened, meow~",
+        "stays cuddled against {target} for a short while, blushing too much to hide it, meow.",
+        "gently nuzzles {target} with her tail, like secretly saying hello, meow~",
+        "leans close to {target} for a cuddle, saying it is only allowed for a little while, meow.",
+        "softly cuddles up beside {target}, like a little kitten bun that knows how to be spoiled, meow~",
+        "nuzzles beside {target}'s hand and whispers that she is not asking for attention, meow.",
+        "gently cuddles closer to {target}, though her ears have already perked up happily, meow~",
+        "moves just a tiny bit closer to {target}; hmph, only a tiny bit, meow.",
+        "cuddles against {target} with a little nuzzle, the tip of her tail curling happily, meow~",
+        "quietly leans against {target} and softly says this is a special cuddle, meow."
+      ]
+    },
+    {
+      "id": "kiss",
+      "label": "Kiss",
+      "enabled": true,
+      "requirements": {
+        "needMouth": true,
+        "needReach": true,
+        "maxGagLevel": 1
+      },
+      "self": [
+        "lightly touches her own fingertips, pretending she received a tiny kiss, meow~",
+        "blows a little mwah into the air, then shyly turns her face away, meow.",
+        "kisses the back of her own hand and seriously declares it a good-luck blessing, meow~",
+        "gives herself a tiny kiss reward, her ears twitching with happiness, meow.",
+        "secretly gives herself a little mwah; hmph, it is only self-encouragement, meow~",
+        "hides a kiss in her palm and quietly saves it for today's self, meow.",
+        "lightly touches her own forehead, like stamping on a sweet cat-paw mark, meow~",
+        "sends herself a soft little mwah, her cheeks heating up all at once, meow.",
+        "kisses her own fingertips and quietly says today should have good luck too, meow~",
+        "gives herself a limited-edition kiss and pretends she is not shy at all, meow."
+      ],
+      "variants": {
+        "restrained": {
+          "target": [
+            "gently leans close to the restrained {target} and leaves a tiny kiss, every motion carrying a soothing warmth, meow~",
+            "looking at the bound {target}, she only brushes their cheek softly, like secretly coaxing them, meow."
+          ]
+        },
+        "kneeling": {
+          "target": [
+            "bends down and gently kisses the kneeling {target}, her ear tips heating up at once, meow~",
+            "leans at the waist to give the kneeling {target} a tiny kiss, her tail unable to resist swaying, meow."
+          ]
+        },
+        "lying": {
+          "target": [
+            "bends over and gently kisses the lying {target}, as if placing tenderness down softly, meow~",
+            "leans close to the lying {target} and leaves a soft kiss, even her gaze turning sweet, meow."
+          ]
+        },
+        "helpless": {
+          "target": [
+            "looking at the almost motionless {target}, she leaves only a gentle kiss, as if saying they can relax, meow.",
+            "gives a quiet little kiss to the weakly struggling {target}, her movement light as a feather, meow."
+          ]
+        }
+      },
+      "target": [
+        "gently kisses {target}, then shyly turns her face away, meow~",
+        "sneaks close to {target} and gives a little mwah, immediately pretending to be calm, meow.",
+        "gives {target} a soft kiss, her tail wagging happily, meow~",
+        "lightly kisses {target}'s forehead, like stamping on a sweet cat-paw mark, meow.",
+        "gives {target} a little mwah; hmph, it is only a normal reward, meow.",
+        "carefully kisses {target}, light enough not to wake a dream, meow~",
+        "leans in to secretly kiss {target}, blushing as she says not to laugh, meow.",
+        "lightly touches {target}'s cheek with a kiss, the whole kitty turning sweet, meow~",
+        "gives {target} a tiny mwah, though her shy ears cannot hide it, meow.",
+        "kisses {target}, saying it was definitely not on purpose, meow.",
+        "gives {target} a gentle little mwah, her tail already giving away all her happiness, meow~",
+        "gives {target} a tender kiss and softly says it is a good-luck blessing, meow.",
+        "secretly kisses {target}, then immediately pretends nothing happened, meow~",
+        "gently kisses the back of {target}'s hand and seriously calls it catgirl etiquette, meow.",
+        "steps in front of {target} and gives them a kiss; hmph, just this once, meow.",
+        "turns her face away after kissing {target}, though her honest ear tips are bright red, meow~",
+        "lightly kisses {target}'s forehead, sending sweet good luck over, meow.",
+        "gives {target} a little mwah and whispers not to tell anyone else, meow~",
+        "gives {target} a soft and fluffy kiss, like sending out a tiny star, meow.",
+        "kisses {target}; hmph, this is a limited-edition catgirl kiss, meow."
+      ]
+    }
+  ]
+}

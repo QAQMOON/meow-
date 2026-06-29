@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer
 // @namespace    https://penyo.ru/
-// @version      2.10.9
+// @version      2.10.10
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -34,7 +34,7 @@
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.10.9";
+  const VERSION = "2.10.10";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const ACTION_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/actions/catgirl-actions.json";
@@ -243,9 +243,11 @@
 
   function diagnostic() {
     cleanupNekoPeers();
-    const activeActions = (actionLibrary.actions || []).filter((action) => action.enabled !== false);
+    const enabledActions = (actionLibrary.actions || []).filter((action) => action.enabled !== false);
+    const availableActions = getActiveActions();
     const activeKaomojiGroups = getVisibleKaomojiGroups();
     const activeKaomojiItems = getActiveKaomojiItems();
+    const playerActionState = detectPlayerActionCapability();
     let actionCache = false;
     let kaomojiCache = false;
     try {
@@ -285,7 +287,9 @@
         actions: {
           version: actionLibrary.version || "unknown",
           total: (actionLibrary.actions || []).length,
-          enabled: activeActions.length,
+          enabled: enabledActions.length,
+          available: availableActions.length,
+          filtered: Math.max(0, enabledActions.length - availableActions.length),
           cached: actionCache,
           url: ACTION_LIBRARY_URL,
         },
@@ -306,6 +310,7 @@
           seenSecondsAgo: Math.round((Date.now() - peer.time) / 1000),
         })),
       },
+      actionState: playerActionState,
       generatedAt: new Date().toISOString(),
     };
   }
@@ -392,6 +397,7 @@
       .map((action, index) => {
         const self = Array.isArray(action.self) ? action.self.map(cleanActionLine).filter(Boolean) : [];
         const target = Array.isArray(action.target) ? action.target.map(cleanActionLine).filter(Boolean) : [];
+        const variants = normalizeActionVariantMap(action.variants);
         if (!self.length && !target.length) return null;
         return {
           id: String(action.id || `action-${index}`).trim() || `action-${index}`,
@@ -399,6 +405,8 @@
           enabled: action.enabled !== false,
           self,
           target,
+          requirements: normalizeActionRequirements(action.requirements),
+          variants,
         };
       })
       .filter(Boolean);
@@ -411,6 +419,31 @@
 
   function cleanActionLine(line) {
     return String(line || "").replace(/\{user\}\s*/g, "").trim();
+  }
+
+  function normalizeActionVariantMap(variants) {
+    if (!variants || typeof variants !== "object") return undefined;
+    const result = {};
+    for (const [key, value] of Object.entries(variants)) {
+      const self = Array.isArray(value?.self) ? value.self.map(cleanActionLine).filter(Boolean) : [];
+      const target = Array.isArray(value?.target) ? value.target.map(cleanActionLine).filter(Boolean) : [];
+      if (!self.length && !target.length) continue;
+      result[key] = { self, target };
+    }
+    return Object.keys(result).length ? result : undefined;
+  }
+
+  function normalizeActionRequirements(requirements) {
+    if (!requirements || typeof requirements !== "object") return undefined;
+    return {
+      needHands: requirements.needHands === true,
+      needMouth: requirements.needMouth === true,
+      needReach: requirements.needReach === true,
+      needMobility: requirements.needMobility === true,
+      maxGagLevel: Number.isFinite(Number(requirements.maxGagLevel))
+        ? clamp(Number(requirements.maxGagLevel), 0, 3)
+        : undefined,
+    };
   }
 
   function loadCachedActionLibrary() {
@@ -686,6 +719,10 @@
     return text.startsWith("悄悄喵~") ? text : `悄悄喵~ ${text}`;
   }
 
+  function normalizeStateToken(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
   function getCharacterEffects(character) {
     if (!character) return [];
     if (Array.isArray(character.Effect)) return character.Effect.filter(Boolean);
@@ -697,10 +734,31 @@
     }
   }
 
+  function getCharacterPoses(character) {
+    return Array.isArray(character?.Pose) ? character.Pose.filter(Boolean) : [];
+  }
+
+  function hasTokenMatch(source, names) {
+    const tokens = source.map(normalizeStateToken).filter(Boolean);
+    const patterns = (names || []).map(normalizeStateToken).filter(Boolean);
+    return patterns.some((pattern) => tokens.some((token) => token === pattern || token.includes(pattern) || pattern.includes(token)));
+  }
+
   function hasAnyEffect(character, names) {
-    const effects = getCharacterEffects(character).map((effect) => String(effect || "").trim().toLowerCase());
-    const patterns = (names || []).map((name) => String(name || "").trim().toLowerCase()).filter(Boolean);
-    return patterns.some((pattern) => effects.some((effect) => effect === pattern || effect.includes(pattern) || pattern.includes(effect)));
+    return hasTokenMatch(getCharacterEffects(character), names);
+  }
+
+  function hasAnyPose(character, names) {
+    return hasTokenMatch(getCharacterPoses(character), names);
+  }
+
+  function readCharacterMethod(character, methodName, fallback) {
+    try {
+      const value = character?.[methodName]?.();
+      return typeof value === "boolean" ? value : fallback;
+    } catch {
+      return fallback;
+    }
   }
 
   function isUltraBcLoaded() {
@@ -737,6 +795,43 @@
             : 0;
     const gagged = gagLevel > 0 || cannotTalk;
     return { gagged, gagLevel };
+  }
+
+  function detectCharacterState(character) {
+    const cannotTalk = readCharacterMethod(character, "CanTalk", true) === false;
+    const gagLevel = hasAnyEffect(character, ["gagveryheavy", "gagheavy", "gagtotal", "gaggedheavy"])
+        ? 3
+        : hasAnyEffect(character, ["gagmedium", "gag", "gagged"])
+          ? 2
+          : hasAnyEffect(character, ["gaglight"])
+            ? 1
+            : 0;
+    const kneeling = readCharacterMethod(character, "IsKneeling", undefined);
+    const lying = hasAnyPose(character, ["lying", "prone", "supine"]) || hasAnyEffect(character, ["prone"]);
+    const suspended = hasAnyEffect(character, ["suspended"]);
+    const handsFree = readCharacterMethod(character, "CanInteract", !hasAnyEffect(character, ["block", "freeze", "restrain", "bound", "cuffed"]));
+    const canMove = readCharacterMethod(character, "CanWalk", !hasAnyEffect(character, ["freeze", "tethered", "mounted", "suspended", "prone"]));
+    const gagged = gagLevel > 0 || cannotTalk;
+    const restrained = !handsFree || !canMove || hasAnyEffect(character, ["block", "freeze", "restrain", "bound", "cuffed", "tethered"]);
+    const resolvedKneeling = typeof kneeling === "boolean" ? kneeling : hasAnyPose(character, ["kneel", "kneeling"]);
+    const helpless = restrained && (lying || suspended || !canMove);
+    return {
+      gagLevel,
+      gagged,
+      mouthFree: gagLevel <= 1,
+      handsFree,
+      canMove,
+      kneeling: resolvedKneeling,
+      lying,
+      suspended,
+      restrained,
+      helpless,
+      canReach: handsFree && !lying && !suspended && (canMove || resolvedKneeling),
+    };
+  }
+
+  function detectPlayerActionCapability() {
+    return detectCharacterState(W.Player || null);
   }
 
   function getSpeechModeLabel(speechState) {
@@ -1382,11 +1477,13 @@
 
   function getNekoLibraryStatusLines() {
     cleanupNekoPeers();
+    const enabledActions = (actionLibrary.actions || []).filter((action) => action.enabled !== false);
     const activeActions = getActiveActions();
     const visibleKaomojiGroups = getVisibleKaomojiGroups();
     const activeKaomojiItems = getActiveKaomojiItems();
     const selectedTarget = getSelectedTarget();
     const actionTargets = getActionTargets();
+    const playerActionState = detectPlayerActionCapability();
     const cached = { actions: false, kaomoji: false };
     try {
       cached.actions = !!localStorage.getItem(ACTION_LIBRARY_CACHE_KEY);
@@ -1395,11 +1492,13 @@
       // Ignore storage read failures; status should still be usable.
     }
     return {
+      enabledActions,
       activeActions,
       visibleKaomojiGroups,
       activeKaomojiItems,
       selectedTarget,
       actionTargets,
+      playerActionState,
       cached,
     };
   }
@@ -1408,6 +1507,22 @@
     if (!target) return "\u65e0";
     const number = target.MemberNumber ? "#" + target.MemberNumber : "";
     return getCharacterName(target) + (number ? " " + number : "");
+  }
+
+  function formatActionCapabilityStatus(state) {
+    const flags = [
+      "手:" + (state?.handsFree ? "可用" : "受限"),
+      "嘴:" + (state?.mouthFree ? "可用" : "受限"),
+      "移动:" + (state?.canMove ? "可" : "受限"),
+      "够到:" + (state?.canReach ? "可" : "受限"),
+    ];
+    const posture = [];
+    if (state?.kneeling) posture.push("跪姿");
+    if (state?.lying) posture.push("躺下");
+    if (state?.suspended) posture.push("悬吊");
+    if (state?.restrained) posture.push("束缚");
+    if (state?.helpless) posture.push("无助");
+    return flags.join(" | ") + " | 姿态:" + (posture.length ? posture.join("/") : "正常");
   }
 
   function getActionTargetModeLabel() {
@@ -1649,7 +1764,8 @@
       "\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme),
       "\u52a8\u4f5c\u76ee\u6807\uff1a" + getActionTargetModeLabel(),
       "\u5f53\u524d\u9009\u4e2d\uff1a" + formatSelectedTargetStatus(status.selectedTarget) + " | \u53ef\u4e92\u52a8\u76ee\u6807\uff1a" + status.actionTargets.length,
-      "\u52a8\u4f5c\u5e93\uff1a" + status.activeActions.length + "/" + ((actionLibrary.actions || []).length) + " \u53ef\u7528 | \u7f13\u5b58\uff1a" + (status.cached.actions ? "\u6709" : "\u65e0") + " | v" + (actionLibrary.version || "unknown"),
+      "\u52a8\u4f5c\u5e93\uff1a" + status.activeActions.length + "/" + status.enabledActions.length + " \u5f53\u524d\u53ef\u7528 | \u8fc7\u6ee4\uff1a" + Math.max(0, status.enabledActions.length - status.activeActions.length) + " | \u7f13\u5b58\uff1a" + (status.cached.actions ? "\u6709" : "\u65e0") + " | v" + (actionLibrary.version || "unknown"),
+      "\u52a8\u4f5c\u80fd\u529b\uff1a" + formatActionCapabilityStatus(status.playerActionState),
       "\u989c\u6587\u5b57\uff1a" + status.activeKaomojiItems.length + " \u4e2a | \u5206\u7ec4\uff1a" + status.visibleKaomojiGroups.length + "/" + ((kaomojiLibrary.groups || []).length) + " | \u7f13\u5b58\uff1a" + (status.cached.kaomoji ? "\u6709" : "\u65e0"),
       "\u540c\u63d2\u4ef6\u73a9\u5bb6\uff1a" + nekoPeers.size + " | SDK\uff1a" + (bcModApi ? "\u5df2\u6ce8\u518c" : "\u672a\u6ce8\u518c") + " | hooks\uff1a" + (patched ? "\u5df2\u63a5\u5165" : "\u672a\u63a5\u5165"),
       "\u547d\u4ee4\u6ce8\u518c\uff1a" + (nekoCommandsRegistered ? "\u5df2\u6ce8\u518c (" + (nekoCommandRegistrationSource || "unknown") + ")" : "\u8f93\u5165\u62e6\u622a\u515c\u5e95"),
@@ -1935,8 +2051,74 @@
       }));
   }
 
+  function inferActionRequirements(action) {
+    const value = `${action?.id || ""} ${action?.label || ""}`.toLowerCase();
+    if (/kiss|亲亲/.test(value)) return { needMouth: true, needReach: true, maxGagLevel: 1 };
+    if (/cuddle|贴贴/.test(value)) return { needReach: true, needMobility: true };
+    if (/hug|抱抱|pat|摸头|feed|喂食/.test(value)) return { needHands: true, needReach: true };
+    return {};
+  }
+
+  function getActionRequirements(action) {
+    const inferred = inferActionRequirements(action);
+    const explicit = action?.requirements || {};
+    return {
+      needHands: "needHands" in explicit ? explicit.needHands === true : inferred.needHands === true,
+      needMouth: "needMouth" in explicit ? explicit.needMouth === true : inferred.needMouth === true,
+      needReach: "needReach" in explicit ? explicit.needReach === true : inferred.needReach === true,
+      needMobility: "needMobility" in explicit ? explicit.needMobility === true : inferred.needMobility === true,
+      maxGagLevel: Number.isFinite(Number(explicit.maxGagLevel)) ? Number(explicit.maxGagLevel) : inferred.maxGagLevel,
+    };
+  }
+
+  function actionMeetsRequirements(action, state) {
+    const requirements = getActionRequirements(action);
+    if (requirements.needHands && !state.handsFree) return false;
+    if (requirements.needMouth && !state.mouthFree) return false;
+    if (requirements.needReach && !state.canReach) return false;
+    if (requirements.needMobility && !state.canMove) return false;
+    if (Number.isFinite(requirements.maxGagLevel) && state.gagLevel > requirements.maxGagLevel) return false;
+    return true;
+  }
+
+  function chooseActionVariant(action, state, hasTarget) {
+    const variants = action?.variants;
+    if (!variants || !state) return null;
+    const priority = ["helpless", "lying", "kneeling", "restrained", "gagged"];
+    for (const key of priority) {
+      if (!state[key]) continue;
+      const variant = variants[key];
+      if (!variant) continue;
+      const lines = hasTarget ? variant.target : variant.self;
+      if (Array.isArray(lines) && lines.some(Boolean)) return { key, lines };
+    }
+    return null;
+  }
+
+  function selectActionLine(action, target) {
+    const hasTarget = !!target;
+    const state = hasTarget ? detectCharacterState(target) : detectPlayerActionCapability();
+    const variant = chooseActionVariant(action, state, hasTarget);
+    if (variant) {
+      return {
+        line: pickRandomLine(
+          variant.lines,
+          hasTarget ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~")) : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~")),
+        ),
+        variantKey: variant.key,
+      };
+    }
+    return {
+      line: hasTarget
+        ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~"))
+        : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~")),
+      variantKey: "",
+    };
+  }
+
   function getActiveActions() {
-    return (actionLibrary.actions || []).filter((action) => action.enabled !== false);
+    const state = detectPlayerActionCapability();
+    return (actionLibrary.actions || []).filter((action) => action.enabled !== false && actionMeetsRequirements(action, state));
   }
 
   function pickRandomLine(lines, fallback = "") {
@@ -1947,9 +2129,7 @@
 
   function formatActionText(action, target) {
     const hasTarget = !!target;
-    const line = hasTarget
-      ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~"))
-      : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~"));
+    const { line } = selectActionLine(action, target);
     return line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : "身边的猫猫");
   }
 
@@ -1969,6 +2149,11 @@
 
   function sendQuickAction(action, target = undefined) {
     if (!action) return;
+    if (!actionMeetsRequirements(action, detectPlayerActionCapability())) {
+      showToast("当前姿势暂时做不了这个动作喵~");
+      renderWheel();
+      return;
+    }
     const selected = target === undefined ? getSelectedTarget() : target;
     if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER && target === undefined) {
       showTargetPicker(action);
@@ -2475,6 +2660,7 @@
     patchRoomEffects();
     registerSettingsUI();
     syncScreenClass();
+    renderWheel();
     scheduleDecorateChat(0);
   }
 

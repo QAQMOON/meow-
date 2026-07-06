@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer (English)
 // @namespace    https://penyo.ru/
-// @version      3.0.0-en
+// @version      3.0.1-en
 // @description  Bondage Club catgirl enhancer English version - dynamically loads the latest plugin core from GitHub on game refresh
 // @author       Penyo (Modified)
+// @icon         https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/assets/neko-icon.png
+// @icon64       https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/assets/neko-icon-64.png
 // @match        *://www.bondageprojects.com/club_game*
 // @match        *://www.bondageprojects.elementfx.com/*
 // @match        *://bondageprojects.elementfx.com/*

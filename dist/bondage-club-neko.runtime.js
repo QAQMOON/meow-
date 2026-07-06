@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer
 // @namespace    https://penyo.ru/
-// @version      2.10.10
+// @version      2.10.11
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -34,13 +34,14 @@
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.10.10";
+  const VERSION = "2.10.11";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const ACTION_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/actions/catgirl-actions.json";
   const ACTION_LIBRARY_CACHE_KEY = "bcNekoEnhancer.actionLibrary.v1";
   const KAOMOJI_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/kaomoji/cute-kaomoji.json";
   const KAOMOJI_LIBRARY_CACHE_KEY = "bcNekoEnhancer.kaomojiLibrary.v1";
+  const KAOMOJI_USAGE_KEY = "bcNekoEnhancer.kaomojiUsage.v1";
   const PEER_SIGNAL_CONTENT = "BCNekoEnhancer.Hello";
   const PEER_SIGNAL_INTERVAL = 45000;
   const PEER_TTL = 300000;
@@ -184,6 +185,7 @@
   const config = loadConfig();
   let actionLibrary = loadCachedActionLibrary() || normalizeActionLibrary(DEFAULT_ACTION_LIBRARY);
   let kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
+  let kaomojiUsage = loadKaomojiUsage();
   const processedMessages = new WeakSet();
   const atmosphereMessages = new WeakSet();
   let patched = false;
@@ -221,6 +223,8 @@
     version: VERSION,
     insertFace,
     insertKaomoji,
+    kaomojiUsage: () => ({ ...kaomojiUsage }),
+    resetKaomojiUsage,
     toggleKaomojiPicker,
     toggle: toggleNekoMode,
     rain: pawRain,
@@ -515,14 +519,66 @@
   }
 
   function getKaomojiItemsForGroup(groupId) {
-    if (groupId === "all") return getActiveKaomojiItems();
+    if (groupId === "all") return sortKaomojiByUsage(getActiveKaomojiItems());
     const group = getVisibleKaomojiGroups().find((item) => item.id === groupId);
-    return group?.items?.length ? group.items : getActiveKaomojiItems();
+    return sortKaomojiByUsage(group?.items?.length ? group.items : getActiveKaomojiItems());
   }
 
   function pickRandomKaomoji() {
     const items = getActiveKaomojiItems();
     return items[Math.floor(Math.random() * items.length)] || DEFAULT_KAOMOJI[0];
+  }
+
+  function loadKaomojiUsage() {
+    try {
+      const raw = localStorage.getItem(KAOMOJI_USAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+      return Object.fromEntries(
+        Object.entries(parsed)
+          .map(([face, count]) => [String(face), Math.max(0, Number(count) || 0)])
+          .filter(([face, count]) => face && count > 0)
+      );
+    } catch {
+      return {};
+    }
+  }
+
+  function saveKaomojiUsage() {
+    try {
+      localStorage.setItem(KAOMOJI_USAGE_KEY, JSON.stringify(kaomojiUsage));
+    } catch {
+      // Ignore storage failures; kaomoji insertion still works without ranking.
+    }
+  }
+
+  function getKaomojiUsage(face) {
+    return Math.max(0, Number(kaomojiUsage[String(face)] || 0));
+  }
+
+  function sortKaomojiByUsage(items) {
+    return items
+      .map((face, index) => ({ face, index, count: getKaomojiUsage(face) }))
+      .sort((a, b) => b.count - a.count || a.index - b.index)
+      .map((item) => item.face);
+  }
+
+  function recordKaomojiUsage(face) {
+    const key = String(face || "").trim();
+    if (!key) return;
+    kaomojiUsage[key] = getKaomojiUsage(key) + 1;
+    saveKaomojiUsage();
+  }
+
+  function resetKaomojiUsage() {
+    kaomojiUsage = {};
+    try {
+      localStorage.removeItem(KAOMOJI_USAGE_KEY);
+    } catch {
+      // Ignore storage failures; the in-memory ranking has already been reset.
+    }
+    renderKaomojiPicker();
+    showToast("猫猫颜文字记忆已清空喵~");
   }
 
   function hasKnownKaomoji(text) {
@@ -2011,6 +2067,7 @@
       const pos = start + insert.length;
       input.setSelectionRange(pos, pos);
     }
+    recordKaomojiUsage(face);
     showToast("猫猫颜文字已插入喵~");
   }
 
@@ -2287,11 +2344,12 @@
 
     const grid = picker.querySelector(".bcn-kaomoji-grid");
     items.forEach((face, index) => {
+      const usageCount = getKaomojiUsage(face);
       const button = document.createElement("button");
-      button.className = "bcn-kaomoji-item";
+      button.className = `bcn-kaomoji-item${usageCount ? " is-used" : ""}`;
       button.type = "button";
       button.textContent = face;
-      button.title = face;
+      button.title = usageCount ? `${face} · 已使用 ${usageCount} 次` : face;
       button.style.setProperty("--i", String(index % 18));
       button.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -3394,6 +3452,11 @@
         text-overflow: ellipsis;
         animation: bcn-pop 0.2s ease both;
         animation-delay: calc(var(--i, 0) * 0.012s);
+      }
+
+      .bcn-kaomoji-item.is-used {
+        border-color: var(--bcn-accent);
+        box-shadow: 0 2px 0 var(--bcn-glow), inset 0 0 0 1px rgba(255, 255, 255, 0.72);
       }
 
       .bcn-kaomoji-tab:hover,

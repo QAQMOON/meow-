@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer (Dev)
 // @namespace    https://penyo.ru/
-// @version      3.0.3
+// @version      3.0.4
 // @description  Bondage Club 猫娘增强动态加载测试版；刷新游戏时自动拉取 GitHub 最新测试主体
 // @author       Penyo (Modified)
-// @icon         https://raw.githubusercontent.com/QAQMOON/meow-/main/assets/neko-icon.png
-// @icon64       https://raw.githubusercontent.com/QAQMOON/meow-/main/assets/neko-icon-64.png
+// @icon         https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/assets/neko-icon.png
+// @icon64       https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/assets/neko-icon-64.png
 // @match        *://www.bondageprojects.com/club_game*
 // @match        *://www.bondageprojects.elementfx.com/*
 // @match        *://bondageprojects.elementfx.com/*
@@ -35,7 +35,7 @@
   "use strict";
 
   const CHANNEL = "dev";
-  const RUNTIME_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/dist/bondage-club-neko.dev.runtime.js";
+  const RUNTIME_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.dev.runtime.js";
   const CACHE_KEY = "bcNekoEnhancer.runtimeCache.dev";
 
   function log(message, detail) {

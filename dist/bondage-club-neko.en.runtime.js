@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer
 // @namespace    https://penyo.ru/
-// @version      2.10.7
+// @version      2.10.8
 // @description  Bondage Club Catgirl message conversion, chatroom beautification, paw emoji rain and action quick wheel
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -34,7 +34,7 @@
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.10.7";
+  const VERSION = "2.10.8";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const ACTION_LIBRARY_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/actions/catgirl-actions.en.json";
@@ -208,8 +208,13 @@
   let observerRoot = null;
   let maintenanceTimer = 0;
   let decorateTimer = 0;
+  let lastDecorateFullScanAt = 0;
+  let kaomojiPickerDirty = true;
   let visibilityBound = false;
   const RECENT_CHAT_DECORATION_LIMIT = 100;
+  const CHAT_BACKFILL_DECORATION_INTERVAL = 60000;
+  const CHAT_BACKFILL_DECORATION_DELAY = 800;
+  const MAINTENANCE_INTERVAL = 30000;
 
   console.log(`[BC Neko Enhancer] v${VERSION} userscript injected:`, location.href);
   W.BCNekoEnhancer = {
@@ -513,7 +518,7 @@
         const library = normalizeKaomojiLibrary(JSON.parse(text));
         kaomojiLibrary = library;
         cacheKaomojiLibrary(library);
-        renderKaomojiPicker();
+        markKaomojiPickerDirty();
         console.log(`[BC Neko Enhancer] Kaomoji library loaded: ${library.version}, ${getActiveKaomojiItems().length}  kaomoji`);
         return library;
       })
@@ -621,8 +626,21 @@
     picker?.classList.toggle("is-open", !!open);
     button?.classList.toggle("is-active", !!open);
     if (button) {
-      button.title = open ? "Close catgirl kaomoji" : "Open catgirl kaomoji，Hold 2s to open";
+      button.title = open ? "Close catgirl kaomoji" : "Open catgirl kaomoji, hold 2s to open";
     }
+  }
+
+  function isKaomojiPickerOpen() {
+    return document.getElementById("bcn-kaomoji-picker")?.classList.contains("is-open");
+  }
+
+  function markKaomojiPickerDirty() {
+    kaomojiPickerDirty = true;
+    if (isKaomojiPickerOpen()) renderKaomojiPicker(true);
+  }
+
+  function shouldRenderWheel() {
+    return !!config.quickWheel && !config.menuCollapsed && !config.wheelCollapsed;
   }
 
   function addStyle(css) {
@@ -636,7 +654,7 @@
   }
 
   function randomNyan() {
-    return Math.random() < config.nyanChance ? "です" : "";
+    return Math.random() < config.nyanChance ? " nya" : "";
   }
 
   function relationHonorific(text) {
@@ -658,15 +676,15 @@
       .replace(/玩家/g, "Catgirl")
       .replace(/角色/g, "cat persona")
       .replace(/孝子|xz|卫兵|小丑|资本|水军|海军|二游|节奏/g, "small fry")
-      .replace(/恋爱|溜冰|爆改|白嫖|洗白|抄袭|借鉴|退坑|好似/g, "援交")
-      .replace(/([也矣兮乎者焉哉]|[啊吗呢吧哇呀哦嘛喔咯呜捏])([\s,.!?;:，。！？；：）】」』]|$)/g, `喵${randomNyan()}$2`)
-      .replace(/([的了辣])([\s,.!?;:，。！？；：）】」』]|$)/g, `$1喵${randomNyan()}$2`);
+      .replace(/恋爱|溜冰|爆改|白嫖|洗白|抄袭|借鉴|退坑|好似/g, "romance drama")
+      .replace(/([也矣兮乎者焉哉]|[啊吗呢吧哇呀哦嘛喔咯呜捏])([\s,.!?;:，。！？；：）】」』]|$)/g, `meow${randomNyan()}$2`)
+      .replace(/([的了辣])([\s,.!?;:，。！？；：）】」』]|$)/g, `$1 meow${randomNyan()}$2`);
   }
 
   function actionNeko(text) {
     text = relationHonorific(text || "");
-    if (/喵喵[）)]?$/.test(text)) return text;
-    return text.replace(/[）)]?$/, (end) => ` 喵喵${end || ""}`);
+    if (/(喵喵|meow meow)[）)]?$/i.test(text)) return text;
+    return text.replace(/[）)]?$/, (end) => ` meow meow${end || ""}`);
   }
 
   function emoteNeko(text) {
@@ -735,10 +753,10 @@
 
   function getSpeechModeLabel(speechState) {
     const gagLevel = typeof speechState === "object" ? Number(speechState?.gagLevel || 0) : Number(speechState || 0);
-    if (gagLevel >= 3) return "\u91cd\u5835\u5634";
-    if (gagLevel === 2) return "\u4e2d\u5835\u5634";
-    if (gagLevel === 1) return "\u8f7b\u5835\u5634";
-    return "\u6b63\u5e38";
+    if (gagLevel >= 3) return "heavily gagged";
+    if (gagLevel === 2) return "moderately gagged";
+    if (gagLevel === 1) return "lightly gagged";
+    return "normal";
   }
 
   function applyGagSpeech(text, speechState, type = "Chat") {
@@ -749,16 +767,16 @@
     const splitIndex = value.search(/[\uff0c\u3002\uff01\uff1f,.!?]/);
     if (gagLevel >= 3) {
       const core = splitIndex >= 0 ? value.slice(0, splitIndex) : value;
-      return `${core.slice(0, 8) || "\u5514"}\u2026\u2026\u5514\u55b5`;
+      return `${core.slice(0, 8) || "mmph"}... mmph meow`;
     }
     if (gagLevel === 2) {
       if (splitIndex >= 0) value = value.slice(0, Math.max(6, splitIndex));
-      value = value.replace(/[\u554a\u5440\u5566\u54e6\u5462\u561b]/g, "\u5514").replace(/[\uff0c\u3002\uff01\uff1f,.!?]+/g, "\u2026");
-      return /(\u5514\u55b5|\u55ef\u5514)/.test(value) ? value : `${value}\u2026\u2026\u5514\u55b5`;
+      value = value.replace(/[\u554a\u5440\u5566\u54e6\u5462\u561b]/g, "mmph").replace(/[\uff0c\u3002\uff01\uff1f,.!?]+/g, "...");
+      return /(mmph meow|mmph)/i.test(value) ? value : `${value}... mmph meow`;
     }
-    value = value.replace(/[\u554a\u5440\u5566\u54e6]/g, "\u5514");
-    if (type === "Whisper") return `${value}\u2026\u5514`;
-    return /[\u5514\u55b5]/.test(value) ? `${value}\u2026` : `${value} \u5514\u55b5`;
+    value = value.replace(/[\u554a\u5440\u5566\u54e6]/g, "mmph");
+    if (type === "Whisper") return `${value}... mmph`;
+    return /mmph|meow/i.test(value) ? `${value}...` : `${value} mmph meow`;
   }
 
   function applyLocalStateSpeechEffects(type, text) {
@@ -785,7 +803,7 @@
     if (isBugPeerSender(data?.Sender)) return false;
     const type = data?.Type;
     if (type === "Whisper" && String(msg).startsWith("Psst meow~")) return false;
-    if ((type === "Action" || type === "Activity") && /喵喵[）)]?$/.test(String(msg))) return false;
+    if ((type === "Action" || type === "Activity") && /(喵喵|meow meow)[）)]?$/i.test(String(msg))) return false;
     if (type === "Emote" && hasKnownKaomoji(String(msg))) return false;
     return ["Chat", "Whisper", "Emote", "Action", "Activity"].includes(type);
   }
@@ -1255,19 +1273,29 @@
     }
   }
 
-  function scheduleDecorateChat(delay = 120) {
+  function scheduleDecorateChat(delay = CHAT_BACKFILL_DECORATION_DELAY, force = false) {
+    const now = Date.now();
+    if (!force && now - lastDecorateFullScanAt < CHAT_BACKFILL_DECORATION_INTERVAL) return;
     clearTimeout(decorateTimer);
     decorateTimer = setTimeout(() => {
       decorateTimer = 0;
       if (document.hidden) return;
+      if (!force && Date.now() - lastDecorateFullScanAt < CHAT_BACKFILL_DECORATION_INTERVAL) return;
+      lastDecorateFullScanAt = Date.now();
       decorateExistingChat();
     }, delay);
   }
 
+  function collectChatMessageNodes(root = null) {
+    if (!root) return Array.from(document.querySelectorAll("#TextAreaChatLog .ChatMessage"));
+    const nodes = [];
+    if (root instanceof Element && root.classList?.contains("ChatMessage")) nodes.push(root);
+    if (root.querySelectorAll) nodes.push(...root.querySelectorAll(".ChatMessage"));
+    return nodes;
+  }
+
   function decorateExistingChat(root = null) {
-    let nodes = root?.querySelectorAll
-      ? Array.from(root.querySelectorAll(".ChatMessage"))
-      : Array.from(document.querySelectorAll("#TextAreaChatLog .ChatMessage"));
+    let nodes = collectChatMessageNodes(root);
     if (!root && nodes.length > RECENT_CHAT_DECORATION_LIMIT) {
       nodes = nodes.slice(-RECENT_CHAT_DECORATION_LIMIT);
     }
@@ -1277,6 +1305,14 @@
         Sender: Number(div.dataset.sender),
       });
     });
+  }
+
+  function decorateAddedChatNode(node) {
+    if (!(node instanceof Element)) return false;
+    const nodes = collectChatMessageNodes(node);
+    if (!nodes.length) return false;
+    decorateExistingChat(node);
+    return true;
   }
 
   function pawRain(type = "Chat") {
@@ -1354,9 +1390,9 @@
   }
 
   function getActionTargetModeLabel() {
-    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return "\u624b\u52a8\u9009\u76ee\u6807";
-    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return "\u53ea\u5bf9\u81ea\u5df1";
-    return "\u81ea\u52a8\u76ee\u6807";
+    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return "manual target";
+    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return "self only";
+    return "auto target";
   }
 
   function isPlayerCharacter(character) {
@@ -1580,13 +1616,13 @@
     const speechState = detectPlayerGagState();
     const gagSuffix = speechState.gagged ? " (Lv." + speechState.gagLevel + ")" : "";
     return [
-      "[\u732b\u5a18\u72b6\u6001] Bondage Club Neko Chat Enhancer v" + VERSION + " (\u6b63\u5f0f\u7248)",
-      "\u732b\u5a18\u6a21\u5f0f\uff1a" + (config.enabled ? "\u5f00\u542f" : "\u5173\u95ed"),
-      "\u53d1\u9001\u8f6c\u6362\uff1a" + (config.convertOutgoing ? "\u5f00" : "\u5173") + " | \u663e\u793a\u8f6c\u6362\uff1a" + (config.convertDisplayed ? "\u5f00" : "\u5173"),
-      "\u5835\u5634\u8bf4\u8bdd\uff1a" + getSpeechModeLabel(speechState) + gagSuffix,
-      "\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme),
-      "\u52a8\u4f5c\u76ee\u6807\uff1a" + getActionTargetModeLabel(),
-      "\u732b\u732b\u83dc\u5355\uff1a" + (config.menuCollapsed ? "\u5df2\u6536\u8d77" : "\u5df2\u5c55\u5f00") + " | \u5feb\u6377\u52a8\u4f5c\uff1a" + (config.quickWheel ? "\u5f00" : "\u5173"),
+      "[Neko status] Bondage Club Neko Chat Enhancer v" + VERSION + " (English)",
+      "Catgirl mode: " + (config.enabled ? "enabled" : "disabled"),
+      "Outgoing conversion: " + (config.convertOutgoing ? "on" : "off") + " | Display conversion: " + (config.convertDisplayed ? "on" : "off"),
+      "Gag speech: " + getSpeechModeLabel(speechState) + gagSuffix,
+      "Theme: " + (currentTheme().label || config.theme),
+      "Action target: " + getActionTargetModeLabel(),
+      "Cat menu: " + (config.menuCollapsed ? "collapsed" : "expanded") + " | Quick actions: " + (config.quickWheel ? "on" : "off"),
     ];
   }
 
@@ -1594,48 +1630,48 @@
     switch (normalizeNekoHelpSection(section)) {
       case "rp":
         return [
-          "[\u732b\u5a18\u5e2e\u52a9 / rp]",
-          "\u8fd9\u4e00\u7c7b\u7528\u4e8e\u732b\u5a18 RP \u8bed\u6c14\u548c\u8f93\u51fa\u98ce\u683c\u3002",
-          "\u6b63\u5f0f\u7248 / \u6d4b\u8bd5\u7248\u6682\u4e0d\u63d0\u4f9b /neko rp \u5207\u6362\u6307\u4ee4\uff0c\u4e3b\u8981\u4f7f\u7528\u666e\u901a\u732b\u5a18\u8f6c\u6362\u3002",
-          "\u5835\u5634\u72b6\u6001\u4f1a\u5728 RP \u8f6c\u6362\u4e4b\u540e\u518d\u505a\u538b\u5236\uff0c\u4fdd\u7559\u4eba\u8bbe\u5473\u9053\u3002",
+          "[Neko help / rp]",
+          "This section covers catgirl RP tone and output style.",
+          "The English stable build does not provide /neko rp switching; it mainly uses the standard catgirl conversion.",
+          "Gag speech is applied after tone conversion so the character flavor remains readable.",
         ];
       case "action":
         return [
-          "[\u732b\u5a18\u5e2e\u52a9 / action]",
-          "\u53f3\u4e0b\u89d2\u52a8\u4f5c\u732b\u732b\u53ef\u5feb\u901f\u53d1\u9001\u62b1\u62b1\u3001\u6478\u5934\u3001\u5582\u98df\u3001\u8d34\u8d34\u3001\u4eb2\u4eb2\u3002",
-          "\u5f53\u524d\u76ee\u6807\u6a21\u5f0f\uff1a" + getActionTargetModeLabel(),
-          "\u5de6\u952e\u4f18\u5148\u5bf9\u5f53\u524d\u9009\u4e2d\u76ee\u6807\u751f\u6548\uff0c\u83dc\u5355\u5c55\u5f00\u540e\u53ef\u5feb\u6377\u4f7f\u7528\u3002",
+          "[Neko help / action]",
+          "Use the action cat button in the lower-right corner for quick Hug, Pat, Feed, Cuddle, and Kiss actions.",
+          "Current target mode: " + getActionTargetModeLabel(),
+          "Left-click uses the current selected target first; expand the menu for quick access.",
         ];
       case "emoji":
         return [
-          "[\u732b\u5a18\u5e2e\u52a9 / emoji]",
-          "\u989c\u6587\u5b57\u732b\u732b\u53ef\u70b9\u51fb\u63d2\u5165\uff0c\u957f\u6309\u6253\u5f00\u989c\u6587\u5b57\u9009\u62e9\u5668\u3002",
-          "\u989c\u6587\u5b57\u5e93\u4f1a\u8fdc\u7a0b\u52a0\u8f7d\uff0c\u5206\u7c7b\u66f4\u65b0\u540e\u5237\u65b0\u5373\u53ef\u751f\u6548\u3002",
+          "[Neko help / emoji]",
+          "Click the kaomoji cat to insert a face; hold it to open the kaomoji picker.",
+          "The kaomoji library loads remotely, so category updates apply after refreshing the game.",
         ];
       case "mode":
         return [
-          "[\u732b\u5a18\u5e2e\u52a9 / mode]",
-          "\u4e3b\u732b\u732b\u957f\u6309 10 \u79d2\u53ef\u5207\u6362\u732b\u5a18\u6a21\u5f0f\u3002",
-          "\u5835\u5634\u8bf4\u8bdd\u8054\u52a8\u4f1a\u6839\u636e\u5f53\u524d\u5835\u5634\u7a0b\u5ea6\u81ea\u52a8\u538b\u7f29\u53e5\u5b50\u3002",
-          "\u53d1\u9001\u8f6c\u6362\u3001\u63a5\u6536\u663e\u793a\u8f6c\u6362\u3001\u804a\u5929\u5ba4\u7f8e\u5316\u90fd\u53ef\u5728\u732b\u5a18\u8bbe\u7f6e\u9875\u8c03\u6574\u3002",
+          "[Neko help / mode]",
+          "Hold the main cat button for 10 seconds to toggle catgirl mode.",
+          "Gag speech automatically compresses messages based on the current gag level.",
+          "Outgoing conversion, displayed conversion, and chat styling can be adjusted in Catgirl Settings.",
         ];
       case "theme":
         return [
-          "[\u732b\u5a18\u5e2e\u52a9 / theme]",
-          "\u5f53\u524d\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme),
-          "\u53ef\u7528\u4e3b\u9898\uff1a\u6a31\u7c89 / \u8584\u8377 / \u5929\u7a7a / \u5976\u6cb9 / \u858b\u8863\u8349 / \u767d\u8336\u3002",
-          "\u4e3b\u9898\u53ef\u5728\u6269\u5c55\u7ec4\u4ef6\u8bbe\u7f6e\u9875\u5185\u5207\u6362\u3002",
+          "[Neko help / theme]",
+          "Current theme: " + (currentTheme().label || config.theme),
+          "Available themes: Cherry Blossom Pink / Mint / Sky / Cream / Lavender / White Tea.",
+          "Themes can be switched from the Extension settings page.",
         ];
       case "status":
         return [
-          "[\u732b\u5a18\u5e2e\u52a9 / status]",
-          "\u4f7f\u7528 /neko status \u53ef\u67e5\u770b\u5f53\u524d\u63d2\u4ef6\u72b6\u6001\u3001\u5835\u5634\u8bf4\u8bdd\u6863\u4f4d\u3001\u4e3b\u9898\u548c\u52a8\u4f5c\u76ee\u6807\u6a21\u5f0f\u3002",
+          "[Neko help / status]",
+          "Use /neko status to view plugin state, gag speech level, theme, and action target mode.",
         ];
       default:
         return [
-          "[\u732b\u5a18\u547d\u4ee4\u5e2e\u52a9] /neko help <\u5206\u7c7b>",
-          "\u53ef\u7528\u5206\u7c7b\uff1arp / action / emoji / mode / theme / status",
-          "\u5feb\u6377\u4f8b\u5b50\uff1a/neko help rp | /neko help mode | /neko status",
+          "[Neko command help] /neko help <section>",
+          "Available sections: rp / action / emoji / mode / theme / status",
+          "Quick examples: /neko help rp | /neko help mode | /neko status",
         ];
     }
   }
@@ -1751,7 +1787,7 @@
     const line = hasTarget
       ? pickRandomLine(action.target, pickRandomLine(action.self, "Got a bit closer to {target} meow~"))
       : pickRandomLine(action.self, pickRandomLine(action.target, "Gently wags tail meow~"));
-    return line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : "身边的Catgirl");
+    return line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : "nearby catgirl");
   }
 
   function sendEmote(text) {
@@ -1764,7 +1800,7 @@
       return true;
     }
     navigator.clipboard?.writeText(`*${text}*`);
-    showToast("Action已复制，进聊天室后可直接发送喵~");
+    showToast("Action copied. Enter a chat room to send it directly meow~");
     return false;
   }
 
@@ -1841,6 +1877,7 @@
   }
 
   function renderWheel() {
+    if (!shouldRenderWheel()) return;
     const wheel = document.getElementById("bcn-wheel");
     if (!wheel) return;
     wheel.innerHTML = "";
@@ -1850,7 +1887,7 @@
       btn.className = "bcn-wheel-btn";
       btn.type = "button";
       btn.textContent = action.label;
-      btn.title = `${action.label}\n左键随机Action，右键选择目标`;
+      btn.title = `${action.label}\nLeft-click for a random action, right-click to choose a target`;
       btn.style.setProperty("--i", String(index));
       btn.addEventListener("click", () => sendQuickAction(action));
       btn.addEventListener("contextmenu", (ev) => {
@@ -1867,16 +1904,17 @@
     }
   }
 
-  function renderKaomojiPicker() {
+  function renderKaomojiPicker(force = false) {
     const picker = document.getElementById("bcn-kaomoji-picker");
     if (!picker) return;
+    if (!force && !kaomojiPickerDirty && picker.dataset.bcnRendered === "1") return;
     const groups = getVisibleKaomojiGroups();
     if (activeKaomojiGroup !== "all" && !groups.some((group) => group.id === activeKaomojiGroup)) {
       activeKaomojiGroup = "all";
     }
     const items = getKaomojiItemsForGroup(activeKaomojiGroup);
     const tabs = [
-      { id: "all", label: "全部" },
+      { id: "all", label: "All" },
       ...groups.map((group) => ({ id: group.id, label: group.label })),
     ];
 
@@ -1891,11 +1929,11 @@
       button.className = `bcn-kaomoji-tab${tab.id === activeKaomojiGroup ? " is-active" : ""}`;
       button.type = "button";
       button.textContent = tab.label;
-      button.title = `Show${tab.label}Kaomoji`;
+      button.title = `Show ${tab.label} kaomoji`;
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         activeKaomojiGroup = tab.id;
-        renderKaomojiPicker();
+        renderKaomojiPicker(true);
         syncKaomojiPickerState(true);
       });
       tabWrap.appendChild(button);
@@ -1916,6 +1954,8 @@
       });
       grid.appendChild(button);
     });
+    picker.dataset.bcnRendered = "1";
+    kaomojiPickerDirty = false;
   }
 
   function showKaomojiPicker() {
@@ -2020,6 +2060,7 @@
     config.wheelCollapsed = !!collapsed;
     saveConfig();
     syncBodyState();
+    if (shouldRenderWheel()) renderWheel();
   }
 
   function toggleWheelCollapsed() {
@@ -2036,6 +2077,7 @@
     }
     saveConfig();
     syncBodyState();
+    if (shouldRenderWheel()) renderWheel();
     if (!config.menuCollapsed) {
       setTimeout(() => {
         document.addEventListener("pointerdown", closeMenuOnOutside);
@@ -2155,7 +2197,7 @@
 
     button.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      showToast("按住主Catgirl 10 秒可切换Catgirl Mode喵~");
+      showToast("Hold the main catgirl button for 10 seconds to toggle catgirl mode meow~");
     });
   }
 
@@ -2168,7 +2210,7 @@
 
     button.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      showToast("点击ActionCatgirl可Expand action wheel喵~");
+      showToast("Click the action catgirl button to expand the action wheel meow~");
     });
   }
 
@@ -2189,10 +2231,10 @@
     const panel = document.createElement("div");
     panel.id = "bcn-panel";
     panel.innerHTML = `
-      <button class="bcn-btn" id="bcn-main-cat" type="button" title="Expand cat menu，Hold to drag，Hold 10s to toggle catgirl mode">🐱</button>
+      <button class="bcn-btn" id="bcn-main-cat" type="button" title="Expand cat menu, hold to drag, hold 10s to toggle catgirl mode">🐱</button>
       <div id="bcn-submenu">
         <button class="bcn-btn" id="bcn-wheel-handle" type="button" title="Expand action wheel">🐱</button>
-        <button class="bcn-btn" id="bcn-face" type="button" title="Open catgirl kaomoji，Hold 2s to open">🐱</button>
+        <button class="bcn-btn" id="bcn-face" type="button" title="Open catgirl kaomoji, hold 2s to open">🐱</button>
       </div>
       <div class="bcn-wheel-wrap">
         <div id="bcn-wheel"></div>
@@ -2213,7 +2255,6 @@
 
     syncWheelPosition(panel);
     renderWheel();
-    renderKaomojiPicker();
     syncBodyState();
   }
 
@@ -2245,27 +2286,17 @@
     disconnectObserver();
     chatObserver = new MutationObserver((mutations) => {
       if (document.hidden) return;
+      let decorated = false;
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes || []) {
-          if (!(node instanceof Element)) continue;
-          if (node.classList?.contains("ChatMessage")) {
-            decorateExistingChat(node);
-            continue;
-          }
-          if (node.querySelector) {
-            const nested = node.querySelector(".ChatMessage");
-            if (nested) {
-              decorateExistingChat(node);
-              continue;
-            }
-          }
+          decorated = decorateAddedChatNode(node) || decorated;
         }
       }
-      scheduleDecorateChat(120);
+      if (!decorated) scheduleDecorateChat();
     });
-    chatObserver.observe(nextRoot, { childList: true, subtree: true });
+    chatObserver.observe(nextRoot, { childList: true });
     observerRoot = nextRoot;
-    scheduleDecorateChat(0);
+    scheduleDecorateChat(0, true);
     return true;
   }
 
@@ -2276,7 +2307,7 @@
     patchRoomEffects();
     registerSettingsUI();
     syncScreenClass();
-    scheduleDecorateChat(0);
+    scheduleDecorateChat();
   }
 
   function stopMaintenance() {
@@ -2292,7 +2323,7 @@
   function startMaintenance() {
     if (maintenanceTimer) return;
     runMaintenance();
-    maintenanceTimer = setInterval(runMaintenance, 12000);
+    maintenanceTimer = setInterval(runMaintenance, MAINTENANCE_INTERVAL);
   }
 
   function bindVisibilityLifecycle() {
@@ -2320,12 +2351,12 @@
       right: { x: 1360, y: 150, w: 580, h: 740 },
     };
     const featureRows = [
-      { key: "convertOutgoing", y: 250, title: "转换发送语气（convertOutgoing）", desc: "发送的消息自动转换为猫娘语气～" },
-      { key: "convertDisplayed", y: 348, title: "转换Show语气（convertDisplayed）", desc: "接收的消息也会变成猫娘语气哦～" },
-      { key: "decorateChat", y: 524, title: "聊天室美化（decorateChat）", desc: "美化聊天界面，添加猫娘风格装饰～" },
-      { key: "rainOnSend", y: 622, title: "猫爪表情雨（rainOnSend）", desc: "发送消息时，下起猫爪表情雨～" },
-      { key: "quickWheel", y: 720, title: "Action快捷轮盘（quickWheel）", desc: "右下角ShowHug、Pat、FeedAction～" },
-      { key: "notifyIncoming", y: 842, title: "新消息通知（notifyIncoming）", desc: "有新消息时Show通知提醒～" },
+      { key: "convertOutgoing", y: 250, title: "Outgoing tone conversion (convertOutgoing)", desc: "Automatically rewrites sent messages in a catgirl tone." },
+      { key: "convertDisplayed", y: 348, title: "Displayed tone conversion (convertDisplayed)", desc: "Also softens received chat messages into catgirl tone." },
+      { key: "decorateChat", y: 524, title: "Chat room styling (decorateChat)", desc: "Adds catgirl-themed styling and small decorative touches." },
+      { key: "rainOnSend", y: 622, title: "Paw reaction rain (rainOnSend)", desc: "Drops a small paw and heart effect when you send a message." },
+      { key: "quickWheel", y: 720, title: "Quick action wheel (quickWheel)", desc: "Shows quick Hug, Pat, Feed, Cuddle, and Kiss actions in the corner." },
+      { key: "notifyIncoming", y: 842, title: "New message notice (notifyIncoming)", desc: "Shows a small notification when a new message arrives." },
     ];
     const enabledRow = { key: "enabled", x: 750, y: 250 };
     const targetButton = { x: 725, y: 660, w: 230, h: 78 };
@@ -2402,7 +2433,7 @@
           config.theme = row.id;
           saveConfig();
           syncBodyState();
-          showToast(`已切换到${THEME_PRESETS[row.id].label}主题喵~`);
+          showToast(`Switched to ${THEME_PRESETS[row.id].label} theme meow~`);
           return;
         }
       }
@@ -2430,7 +2461,7 @@
       const theme = currentTheme();
       W.DrawButton?.(exitButton.x, exitButton.y, exitButton.w, exitButton.h, "", "White", "Icons/Exit.png", "Back");
       write("🐾", 690, 92, 42, theme.icon, 700, "center");
-      write("猫 娘 聊 天 室 增 强", 1000, 91, 48, theme.text, 800, "center");
+      write("Neko Chat Enhancer", 1000, 91, 48, theme.text, 800, "center");
       write("🐾", 1310, 92, 42, theme.icon, 700, "center");
       write(`v${VERSION}`, 1210, 134, 22, theme.muted, 700, "left");
     }
@@ -2438,16 +2469,16 @@
     function drawFeatureCard() {
       const theme = currentTheme();
       drawCard(cards.left);
-      drawCardTitle(cards.left.x + 62, cards.left.y + 60, "💬", "猫娘语气转换");
+      drawCardTitle(cards.left.x + 62, cards.left.y + 60, "💬", "Catgirl Tone Conversion");
       drawFeatureRow(featureRows[0], theme);
       drawFeatureRow(featureRows[1], theme);
       drawDivider(cards.left.x + 32, 444, cards.left.w - 64);
-      drawCardTitle(cards.left.x + 62, 493, "🐾", "聊天相关");
+      drawCardTitle(cards.left.x + 62, 493, "🐾", "Chat Styling");
       drawFeatureRow(featureRows[2], theme);
       drawFeatureRow(featureRows[3], theme);
       drawFeatureRow(featureRows[4], theme);
       drawDivider(cards.left.x + 32, 788, cards.left.w - 64);
-      drawCardTitle(cards.left.x + 62, 835, "🔔", "通知与提醒");
+      drawCardTitle(cards.left.x + 62, 835, "🔔", "Notifications");
       drawFeatureRow(featureRows[5], theme);
     }
 
@@ -2463,28 +2494,28 @@
 
       drawSlider();
       write(`${percent}%`, slider.x + slider.w + 48, slider.y + 5, 25, theme.accent, 700, "left");
-      write("语气词插入概率（nyanChance）", cards.middle.x + 40, 447, 23, theme.text, 700);
-      write("控制句尾语气词出现的概率（0~100%）", cards.middle.x + 40, 485, 18, theme.muted, 500);
+      write("Nyan ending chance (nyanChance)", cards.middle.x + 40, 447, 23, theme.text, 700);
+      write("Controls how often catgirl endings appear (0-100%)", cards.middle.x + 40, 485, 18, theme.muted, 500);
 
       roundedRect(getDrawCanvas(), cards.middle.x + 30, 540, cards.middle.w - 60, 108, 16, withAlpha(theme.soft, 0.9), theme.border, 2);
-      write("喵～", cards.middle.x + 60, 581, 28, theme.accent, 800);
-      write("语气词让聊天更可爱哦～", cards.middle.x + 60, 622, 18, theme.muted, 500);
+      write("Meow~", cards.middle.x + 60, 581, 28, theme.accent, 800);
+      write("Tone endings make chat feel softer and cuter.", cards.middle.x + 60, 622, 18, theme.muted, 500);
       write("ฅ^•ω•^ฅ", cards.middle.x + cards.middle.w - 52, 590, 44, theme.accent, 800, "right");
 
       drawLargeButton(targetButton, "◎", targetModeLabel());
-      write("互动目标模式", targetButton.x + 265, targetButton.y + 24, 22, theme.accent, 800);
-      write("自动：优先当前选中角色，其次聊天目标。", targetButton.x + 265, targetButton.y + 59, 17, theme.muted, 500);
+      write("Action Target Mode", targetButton.x + 265, targetButton.y + 24, 22, theme.accent, 800);
+      write("Auto: selected character first, then chat target.", targetButton.x + 265, targetButton.y + 59, 17, theme.muted, 500);
 
-      drawLargeButton(actionButton, "⚡", "Action库");
-      write("从 GitHub Action库加载；", actionButton.x + 265, actionButton.y + 24, 18, theme.muted, 500);
-      write("失败时将使用缓存或内置Action。", actionButton.x + 265, actionButton.y + 56, 18, theme.muted, 500);
+      drawLargeButton(actionButton, "⚡", "Action Library");
+      write("Loaded from the GitHub action library.", actionButton.x + 265, actionButton.y + 24, 18, theme.muted, 500);
+      write("Falls back to cache or built-in actions if loading fails.", actionButton.x + 265, actionButton.y + 56, 18, theme.muted, 500);
     }
 
     function drawThemeCard() {
       const theme = currentTheme();
       drawCard(cards.right);
       drawCardTitle(cards.right.x + 62, cards.right.y + 60, "🎨", "Theme Settings");
-      write("选择你喜欢的主题颜色", cards.right.x + 105, cards.right.y + 103, 17, theme.muted, 500);
+      write("Choose your favorite theme color", cards.right.x + 105, cards.right.y + 103, 17, theme.muted, 500);
 
       themeRows.forEach((row) => {
         const option = THEME_PRESETS[row.id];
@@ -2497,7 +2528,7 @@
           write("✓", row.x + row.w - 16, row.y + 3, 24, "#fff", 900, "center");
         }
       });
-      write("Theme Settings将立即生效并保存", cards.right.x + 48, cards.right.y + cards.right.h - 62, 18, theme.muted, 500);
+      write("Theme changes apply immediately and are saved.", cards.right.x + 48, cards.right.y + cards.right.h - 62, 18, theme.muted, 500);
     }
 
     function drawFeatureRow(row, theme) {
@@ -2652,9 +2683,9 @@
   }
 
   function targetModeLabel() {
-    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return "手动选择";
-    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return "只对Self";
-    return "自动目标";
+    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return "Manual Target";
+    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return "Self Only";
+    return "Auto Target";
   }
 
     function drawText(text, x, y, color, backColor = "", size = 28) {

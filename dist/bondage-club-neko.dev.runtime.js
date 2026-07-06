@@ -63,6 +63,9 @@
   const AFFECTION_REACTION_COOLDOWN = 7000;
   const REPLY_SUGGESTION_DURATION = 16000;
   const RECENT_CHAT_DECORATION_LIMIT = 80;
+  const CHAT_BACKFILL_DECORATION_INTERVAL = 60000;
+  const CHAT_BACKFILL_DECORATION_DELAY = 800;
+  const MAINTENANCE_INTERVAL = 30000;
   const NEKO_SCENE_MEMORY_LIMIT = 12;
   const NEKO_SCENE_SPARK_DURATION = 22000;
   const NEKO_STATE_DURATION = 90000;
@@ -458,6 +461,8 @@
   let observerRoot = null;
   let maintenanceTimer = 0;
   let decorateTimer = 0;
+  let lastDecorateFullScanAt = 0;
+  let kaomojiPickerDirty = true;
   let visibilityBound = false;
   let firstChatroomHelpShown = false;
   let firstChatroomHelpTimer = 0;
@@ -1101,7 +1106,7 @@
         const library = normalizeKaomojiLibrary(JSON.parse(text));
         kaomojiLibrary = library;
         cacheKaomojiLibrary(library);
-        renderKaomojiPicker();
+        markKaomojiPickerDirty();
         console.log(`[BC 猫娘增强] 颜文字库已加载: ${library.version}, ${getActiveKaomojiItems().length} 个颜文字`);
         return library;
       })
@@ -1211,6 +1216,19 @@
     if (button) {
       button.title = open ? "收起猫猫颜文字" : "打开猫猫颜文字，长按 2 秒也可打开";
     }
+  }
+
+  function isKaomojiPickerOpen() {
+    return document.getElementById("bcn-kaomoji-picker")?.classList.contains("is-open");
+  }
+
+  function markKaomojiPickerDirty() {
+    kaomojiPickerDirty = true;
+    if (isKaomojiPickerOpen()) renderKaomojiPicker(true);
+  }
+
+  function shouldRenderWheel() {
+    return !!config.quickWheel && !config.menuCollapsed && !config.wheelCollapsed;
   }
 
   function addStyle(css) {
@@ -1968,19 +1986,29 @@
     }
   }
 
-  function scheduleDecorateChat(delay = 120) {
+  function scheduleDecorateChat(delay = CHAT_BACKFILL_DECORATION_DELAY, force = false) {
+    const now = Date.now();
+    if (!force && now - lastDecorateFullScanAt < CHAT_BACKFILL_DECORATION_INTERVAL) return;
     clearTimeout(decorateTimer);
     decorateTimer = setTimeout(() => {
       decorateTimer = 0;
       if (document.hidden) return;
+      if (!force && Date.now() - lastDecorateFullScanAt < CHAT_BACKFILL_DECORATION_INTERVAL) return;
+      lastDecorateFullScanAt = Date.now();
       decorateExistingChat();
     }, delay);
   }
 
+  function collectChatMessageNodes(root = null) {
+    if (!root) return Array.from(document.querySelectorAll("#TextAreaChatLog .ChatMessage"));
+    const nodes = [];
+    if (root instanceof Element && root.classList?.contains("ChatMessage")) nodes.push(root);
+    if (root.querySelectorAll) nodes.push(...root.querySelectorAll(".ChatMessage"));
+    return nodes;
+  }
+
   function decorateExistingChat(root = null) {
-    let nodes = root?.querySelectorAll
-      ? Array.from(root.querySelectorAll(".ChatMessage"))
-      : Array.from(document.querySelectorAll("#TextAreaChatLog .ChatMessage"));
+    let nodes = collectChatMessageNodes(root);
     if (!root && nodes.length > RECENT_CHAT_DECORATION_LIMIT) {
       nodes = nodes.slice(-RECENT_CHAT_DECORATION_LIMIT);
     }
@@ -1990,6 +2018,14 @@
         Sender: Number(div.dataset.sender),
       });
     });
+  }
+
+  function decorateAddedChatNode(node) {
+    if (!(node instanceof Element)) return false;
+    const nodes = collectChatMessageNodes(node);
+    if (!nodes.length) return false;
+    decorateExistingChat(node);
+    return true;
   }
 
   function pawRain(type = "Chat") {
@@ -3648,6 +3684,7 @@
   }
 
   function renderWheel() {
+    if (!shouldRenderWheel()) return;
     const wheel = document.getElementById("bcn-wheel");
     if (!wheel) return;
     wheel.innerHTML = "";
@@ -3674,9 +3711,10 @@
     }
   }
 
-  function renderKaomojiPicker() {
+  function renderKaomojiPicker(force = false) {
     const picker = document.getElementById("bcn-kaomoji-picker");
     if (!picker) return;
+    if (!force && !kaomojiPickerDirty && picker.dataset.bcnRendered === "1") return;
     const groups = getVisibleKaomojiGroups();
     if (activeKaomojiGroup !== "all" && !groups.some((group) => group.id === activeKaomojiGroup)) {
       activeKaomojiGroup = "all";
@@ -3702,7 +3740,7 @@
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         activeKaomojiGroup = tab.id;
-        renderKaomojiPicker();
+        renderKaomojiPicker(true);
         syncKaomojiPickerState(true);
       });
       tabWrap.appendChild(button);
@@ -3723,6 +3761,8 @@
       });
       grid.appendChild(button);
     });
+    picker.dataset.bcnRendered = "1";
+    kaomojiPickerDirty = false;
   }
 
   function showKaomojiPicker() {
@@ -3827,6 +3867,7 @@
     config.wheelCollapsed = !!collapsed;
     saveConfig();
     syncBodyState();
+    if (shouldRenderWheel()) renderWheel();
   }
 
   function toggleWheelCollapsed() {
@@ -3843,6 +3884,7 @@
     }
     saveConfig();
     syncBodyState();
+    if (shouldRenderWheel()) renderWheel();
     if (!config.menuCollapsed) {
       setTimeout(() => {
         document.addEventListener("pointerdown", closeMenuOnOutside);
@@ -4022,7 +4064,6 @@
 
     syncWheelPosition(panel);
     renderWheel();
-    renderKaomojiPicker();
     renderReplySuggestions();
     updateTailMoodUi();
     saveHabitProfile();
@@ -4064,27 +4105,17 @@
     disconnectObserver();
     chatObserver = new MutationObserver((mutations) => {
       if (document.hidden) return;
+      let decorated = false;
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes || []) {
-          if (!(node instanceof Element)) continue;
-          if (node.classList?.contains("ChatMessage")) {
-            decorateExistingChat(node);
-            continue;
-          }
-          if (node.querySelector) {
-            const nested = node.querySelector(".ChatMessage");
-            if (nested) {
-              decorateExistingChat(node);
-              continue;
-            }
-          }
+          decorated = decorateAddedChatNode(node) || decorated;
         }
       }
-      scheduleDecorateChat(120);
+      if (!decorated) scheduleDecorateChat();
     });
-    chatObserver.observe(nextRoot, { childList: true, subtree: true });
+    chatObserver.observe(nextRoot, { childList: true });
     observerRoot = nextRoot;
-    scheduleDecorateChat(0);
+    scheduleDecorateChat(0, true);
     return true;
   }
 
@@ -4095,7 +4126,7 @@
     patchRoomEffects();
     registerSettingsUI();
     syncScreenClass();
-    scheduleDecorateChat(0);
+    scheduleDecorateChat();
   }
 
   function stopMaintenance() {
@@ -4111,7 +4142,7 @@
   function startMaintenance() {
     if (maintenanceTimer) return;
     runMaintenance();
-    maintenanceTimer = setInterval(runMaintenance, 12000);
+    maintenanceTimer = setInterval(runMaintenance, MAINTENANCE_INTERVAL);
   }
 
   function bindVisibilityLifecycle() {

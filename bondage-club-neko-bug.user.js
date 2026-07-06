@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer (Bug)
 // @namespace    https://penyo.ru/
-// @version      3.0.4
+// @version      3.0.5
 // @description  Bondage Club Bug猫娘增强动态加载版；用于测试 RP 语气包等实验功能
 // @author       Penyo (Modified)
 // @icon         https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/assets/neko-icon.png

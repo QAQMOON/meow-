@@ -18,8 +18,8 @@
 // @match        *://www.bondage-asia.com/club/R*/*
 // @match        *://bondage-asia.com/club/R*/*
 // @include      /^https:\/\/(www\.)?bondage(projects\.elementfx|-(europe|asia))\.com\/.*/
-// @downloadURL  https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.user.js
-// @updateURL    https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.user.js
+// @downloadURL  https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.user.js
+// @updateURL    https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.user.js
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
@@ -37,9 +37,9 @@
   const VERSION = "2.10.7";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
-  const ACTION_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/actions/catgirl-actions.en.json";
+  const ACTION_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/actions/catgirl-actions.en.json";
   const ACTION_LIBRARY_CACHE_KEY = "bcNekoEnhancer.actionLibrary.v1";
-  const KAOMOJI_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/kaomoji/cute-kaomoji.json";
+  const KAOMOJI_LIBRARY_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/kaomoji/cute-kaomoji.json";
   const KAOMOJI_LIBRARY_CACHE_KEY = "bcNekoEnhancer.kaomojiLibrary.v1";
   const PEER_SIGNAL_CONTENT = "BCNekoEnhancer.Hello";
   const PEER_SIGNAL_INTERVAL = 45000;
@@ -572,7 +572,7 @@
           name: MOD_ID,
           fullName: "Bondage Club Neko Chat Enhancer",
           version: VERSION,
-          repository: "https://github.com/QAQMOON/bondage-club-neko-chat-enhancer",
+          repository: "https://github.com/QAQMOON/meow-",
         }, { allowReplace: true });
         console.log("[BC Neko Enhancer] BC Mod SDK registered meow~");
         return bcModApi;
@@ -1836,7 +1836,7 @@
   }
 
   function editActions() {
-    window.open?.("https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/blob/main/actions/catgirl-actions.en.json", "_blank", "noopener");
+    window.open?.("https://github.com/QAQMOON/meow-/blob/main/actions/catgirl-actions.en.json", "_blank", "noopener");
     showToast("Action library now managed via GitHub JSON meow~");
   }
 

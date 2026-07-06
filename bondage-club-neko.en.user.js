@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer (English)
 // @namespace    https://penyo.ru/
-// @version      3.0.1-en
+// @version      3.0.2-en
 // @description  Bondage Club catgirl enhancer English version - dynamically loads the latest plugin core from GitHub on game refresh
 // @author       Penyo (Modified)
-// @icon         https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/assets/neko-icon.png
-// @icon64       https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/assets/neko-icon-64.png
+// @icon         https://raw.githubusercontent.com/QAQMOON/meow-/main/assets/neko-icon.png
+// @icon64       https://raw.githubusercontent.com/QAQMOON/meow-/main/assets/neko-icon-64.png
 // @match        *://www.bondageprojects.com/club_game*
 // @match        *://www.bondageprojects.elementfx.com/*
 // @match        *://bondageprojects.elementfx.com/*
@@ -20,8 +20,8 @@
 // @match        *://www.bondage-asia.com/club/R*/*
 // @match        *://bondage-asia.com/club/R*/*
 // @include      /^https:\/\/(www\.)?bondage(projects\.elementfx|-(europe|asia))\.com\/.*/
-// @downloadURL  https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.en.user.js
-// @updateURL    https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.en.user.js
+// @downloadURL  https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.en.user.js
+// @updateURL    https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.en.user.js
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
@@ -35,7 +35,7 @@
   "use strict";
 
   const CHANNEL = "stable-en";
-  const RUNTIME_URL = "https://raw.githubusercontent.com/QAQMOON/bondage-club-neko-chat-enhancer/main/dist/bondage-club-neko.en.runtime.js";
+  const RUNTIME_URL = "https://raw.githubusercontent.com/QAQMOON/meow-/main/dist/bondage-club-neko.en.runtime.js";
   const CACHE_KEY = "bcNekoEnhancer.runtimeCache.stable-en";
 
   function log(message, detail) {

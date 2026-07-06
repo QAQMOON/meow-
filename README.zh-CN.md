@@ -39,16 +39,16 @@ https://sidiousious.gitlab.io/bc-addon-loader/
 也可以先安装油猴或其他 userscript 管理器，然后选择一个版本安装：
 
 正式版：
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.user.js
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.user.js
 
 测试版：
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko-dev.user.js
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-dev.user.js
 
 Bug 版：
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko-bug.user.js
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-bug.user.js
 
 英文版（UI 英文化）：
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.en.user.js
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.en.user.js
 
 Bug 版只建议用油猴安装，用来测试 RP 语气包等实验功能；不加入 FUSAM。英文版将所有 UI 文本和设置翻译为英文。
 
@@ -66,7 +66,7 @@ Bug 版只建议用油猴安装，用来测试 RP 语气包等实验功能；不
 
 动作文案放在：
 
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/blob/main/actions/catgirl-actions.json
+https://github.com/QAQMOON/meow-/blob/main/actions/catgirl-actions.json
 
 插件启动时会尝试从 GitHub 加载动作库；如果加载失败，会使用上次缓存，缓存也没有时会使用内置默认动作。
 
@@ -92,7 +92,7 @@ https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/blob/main/actions/cat
 
 颜文字库放在：
 
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/blob/main/kaomoji/cute-kaomoji.json
+https://github.com/QAQMOON/meow-/blob/main/kaomoji/cute-kaomoji.json
 
 插件启动时会尝试从 GitHub 加载颜文字库；如果加载失败，会使用上次缓存，缓存也没有时会使用内置默认猫猫颜文字。
 

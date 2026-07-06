@@ -41,16 +41,16 @@ Search for `BCNeko` or `Bondage Club Neko Chat Enhancer` in FUSAM add-on manager
 Alternatively, install Tampermonkey or another userscript manager, then choose a version to install:
 
 Production version:
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.user.js
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.user.js
 
 Dev version:
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko-dev.user.js
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-dev.user.js
 
 Bug version:
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko-bug.user.js
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-bug.user.js
 
 English version (UI localized):
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/raw/main/bondage-club-neko.en.user.js
+https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.en.user.js
 
 The Bug version is recommended for userscript installation only, for testing experimental features like RP speech packs; it's not included in FUSAM. The English version has all UI text and settings translated to English.
 
@@ -68,7 +68,7 @@ If GitHub is temporarily unreachable, the plugin will try to use the last succes
 
 Action templates are stored at:
 
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/blob/main/actions/catgirl-actions.json
+https://github.com/QAQMOON/meow-/blob/main/actions/catgirl-actions.json
 
 The plugin tries to load the action library from GitHub on startup; if loading fails, it uses the last cache, or built-in default actions if there's no cache.
 
@@ -94,7 +94,7 @@ To add a new action theme, append an item to the `actions` array:
 
 Kaomoji library is stored at:
 
-https://github.com/QAQMOON/bondage-club-neko-chat-enhancer/blob/main/kaomoji/cute-kaomoji.json
+https://github.com/QAQMOON/meow-/blob/main/kaomoji/cute-kaomoji.json
 
 The plugin tries to load the kaomoji library from GitHub on startup; if loading fails, it uses the last cache, or built-in default cat kaomoji if there's no cache.
 

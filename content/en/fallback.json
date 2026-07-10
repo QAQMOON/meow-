@@ -1,0 +1,29 @@
+{
+  "actions": [
+    {
+      "id": "hug",
+      "label": "Hug",
+      "self": "Hugs herself and softly nuzzles her own tail, meow~",
+      "target": "Gently hugs {target} and nuzzles them cheek-to-cheek, meow~"
+    },
+    {
+      "id": "pat",
+      "label": "Pat",
+      "self": "Pats her own head, pretending to glow from the praise, meow~",
+      "target": "Tiptoes to pat {target}'s head and earnestly praises them: Good kitty, meow~"
+    },
+    {
+      "id": "feed",
+      "label": "Feed",
+      "self": "Nibbles a small treat and narrows her eyes contentedly, meow~",
+      "target": "Brings a small treat to {target}'s lips, tail wagging expectantly: Ahm, meow~"
+    }
+  ],
+  "kaomojiGroupLabel": "Cats",
+  "actionLabelFallback": "Action",
+  "kaomojiLabelFallback": "Kaomoji",
+  "actionTargetFallback": "{target} moves a little closer, meow~",
+  "actionSelfFallback": "Her tail sways softly, meow~",
+  "nearbyTarget": "the nearby kitty",
+  "unknownCharacter": "the other person"
+}

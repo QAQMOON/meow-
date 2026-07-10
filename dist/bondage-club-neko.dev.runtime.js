@@ -1165,7 +1165,7 @@
           name: MOD_ID,
           fullName: "Bondage Club Neko Chat Enhancer",
           version: VERSION,
-          repository: "https://github.com/QAQMOON/meow-",
+          repository: "https://github.com/QAQMOON/bondage-club-neko-chat-enhancer",
         }, { allowReplace: true });
         console.log("[BC 猫娘增强] BC Mod SDK 已注册喵~");
         return bcModApi;

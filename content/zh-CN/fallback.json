@@ -1,0 +1,29 @@
+{
+  "actions": [
+    {
+      "id": "hug",
+      "label": "抱抱",
+      "self": "抱住自己软软地蹭了蹭尾巴喵~",
+      "target": "轻轻抱住{target}，把脸颊贴过去蹭了蹭喵~"
+    },
+    {
+      "id": "pat",
+      "label": "摸头",
+      "self": "摸了摸自己的头，假装被夸奖得很开心喵~",
+      "target": "踮起脚摸了摸{target}的头，认真夸奖了一句：好乖喵~"
+    },
+    {
+      "id": "feed",
+      "label": "喂食",
+      "self": "捧着小点心小口吃掉，满足地眯起眼睛喵~",
+      "target": "把小点心递到{target}嘴边，期待地晃了晃尾巴：啊呜喵~"
+    }
+  ],
+  "kaomojiGroupLabel": "猫猫",
+  "actionLabelFallback": "动作",
+  "kaomojiLabelFallback": "颜文字",
+  "actionTargetFallback": "{target}靠近了一点喵~",
+  "actionSelfFallback": "轻轻晃了晃尾巴喵~",
+  "nearbyTarget": "身边的猫猫",
+  "unknownCharacter": "对方"
+}

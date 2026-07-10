@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer (English)
 // @namespace    https://penyo.ru/
-// @version      3.0.5-en
+// @version      3.1.0-en
 // @description  Bondage Club catgirl enhancer English version - dynamically loads the latest plugin core from GitHub on game refresh
 // @author       Penyo (Modified)
 // @icon         https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/assets/neko-icon.png
@@ -35,8 +35,9 @@
   "use strict";
 
   const CHANNEL = "stable-en";
-  const RUNTIME_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.en.runtime.js";
+  const RUNTIME_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.11.0";
   const CACHE_KEY = "bcNekoEnhancer.runtimeCache.stable-en";
+  const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
 
   function log(message, detail) {
     console.log(`[BC Neko Enhancer loader/${CHANNEL}] ${message}`, detail || "");
@@ -87,6 +88,12 @@
 
   function runRuntime(code, source) {
     if (!code || !code.trim()) throw new Error("empty runtime");
+    W.BCNekoBootstrap = {
+      ...(W.BCNekoBootstrap && typeof W.BCNekoBootstrap === "object" ? W.BCNekoBootstrap : {}),
+      channel: "stable",
+      defaultUiLocale: "en",
+      defaultContentLocale: "en",
+    };
     log(`Executing ${source} plugin core`);
     new Function(code)();
   }

@@ -1,0 +1,200 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-07-10",
+  "description": "猫娘动作编排器中文内容包。所有保存和传递的数据使用稳定 ID。",
+  "moods": [
+    {
+      "id": "shy",
+      "label": "害羞",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["有些害羞地移开视线，", "耳尖微微发红，", "偷偷深吸一口气后，"]
+    },
+    {
+      "id": "happy",
+      "label": "开心",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["开心地晃着尾巴，", "眼睛亮晶晶地，", "带着藏不住的笑意，"]
+    },
+    {
+      "id": "playful",
+      "label": "调皮",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["调皮地眨了眨眼，", "尾巴尖狡黠地一翘，", "故意卖了个小关子后，"]
+    },
+    {
+      "id": "sleepy",
+      "label": "困倦",
+      "compatibleActions": ["hug", "pat", "cuddle"],
+      "leads": ["迷迷糊糊地打了个哈欠，", "半眯着困倦的眼睛，", "带着软绵绵的睡意，"]
+    },
+    {
+      "id": "caring",
+      "label": "温柔",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["温柔地看向对方，", "放轻声音和动作，", "带着让人安心的笑意，"]
+    },
+    {
+      "id": "tsundere",
+      "label": "傲娇",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["别过脸假装不在意，", "嘴上小声说着才不是特意的，", "轻哼一声掩饰住脸红，"]
+    }
+  ],
+  "styles": [
+    { "id": "gentle", "label": "轻柔" },
+    { "id": "normal", "label": "自然" },
+    { "id": "enthusiastic", "label": "热情" }
+  ],
+  "extras": [
+    {
+      "id": "tail",
+      "label": "尾巴",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": ["，尾巴尖也跟着轻轻晃了晃", "，尾巴悄悄绕到身边画了个小圈"]
+    },
+    {
+      "id": "ears",
+      "label": "耳朵",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": ["，耳朵因为期待轻轻抖了抖", "，发红的耳尖不安分地颤了一下"]
+    },
+    {
+      "id": "purr",
+      "label": "呼噜",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": ["，忍不住发出轻轻的呼噜声", "，胸口传出满足的小小呼噜"]
+    },
+    {
+      "id": "eyes",
+      "label": "眼神",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": ["，又抬起眼睛偷偷观察对方的反应", "，目光软软地停留了一小会儿"]
+    },
+    {
+      "id": "kaomoji",
+      "label": "颜文字",
+      "kind": "kaomoji",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": [""]
+    },
+    {
+      "id": "none",
+      "label": "无",
+      "kind": "none",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": [""]
+    }
+  ],
+  "templates": {
+    "target": ["{moodLead}{actionCore}{extraTrail}{ending}"],
+    "self": ["{moodLead}{actionCore}{extraTrail}{ending}"],
+    "none": ["{moodLead}{actionCore}{extraTrail}{ending}"]
+  },
+  "endings": {
+    "target": ["喵~", "喵。"],
+    "self": ["喵~", "喵。"],
+    "none": ["喵~", "喵？"]
+  },
+  "actions": {
+    "hug": {
+      "incompatiblePairs": [{ "mood": "sleepy", "style": "enthusiastic" }],
+      "styles": {
+        "gentle": {
+          "target": ["轻轻靠近{target}，小心地抱住对方"],
+          "self": ["把自己抱成暖暖的一小团"],
+          "none": ["轻轻张开手臂，小声问有没有人想抱抱"]
+        },
+        "normal": {
+          "target": ["张开手臂把{target}抱进怀里"],
+          "self": ["环住自己的肩膀，给了自己一个抱抱"],
+          "none": ["张开手臂，期待地等着一个抱抱"]
+        },
+        "enthusiastic": {
+          "target": ["一下子扑向{target}，给了对方一个满满的拥抱"],
+          "self": ["用力抱紧自己，精神满满地晃了两下"],
+          "none": ["大大张开双臂，宣布今天要派送抱抱"]
+        }
+      }
+    },
+    "pat": {
+      "incompatiblePairs": [{ "mood": "sleepy", "style": "enthusiastic" }],
+      "styles": {
+        "gentle": {
+          "target": ["抬起手轻轻摸了摸{target}的头"],
+          "self": ["轻轻摸了摸自己的头，认真哄了哄自己"],
+          "none": ["举起爪爪，小声问有没有人想要摸头"]
+        },
+        "normal": {
+          "target": ["自然地揉了揉{target}的头发"],
+          "self": ["揉了揉自己的头发，重新打起精神"],
+          "none": ["晃了晃准备好的爪爪，等着摸摸谁的头"]
+        },
+        "enthusiastic": {
+          "target": ["快步凑过去，把{target}的头发揉得软乎乎的"],
+          "self": ["认真地揉了揉自己的头，夸奖自己今天很乖"],
+          "none": ["高高举起双爪，准备送出一份元气摸头"]
+        }
+      }
+    },
+    "feed": {
+      "incompatiblePairs": [{ "mood": "shy", "style": "enthusiastic" }],
+      "styles": {
+        "gentle": {
+          "target": ["把小点心送到{target}面前，耐心地递向对方"],
+          "self": ["捧起一块小点心，小口小口地吃掉"],
+          "none": ["捧着一盘小点心，轻声问有没有人饿了"]
+        },
+        "normal": {
+          "target": ["拿出准备好的点心递给{target}"],
+          "self": ["拿出一块点心，满足地咬了一口"],
+          "none": ["举起手里的点心，问谁想来尝一口"]
+        },
+        "enthusiastic": {
+          "target": ["端来一大盘点心，邀请{target}尽管挑选"],
+          "self": ["抱来一堆点心，决定好好奖励自己"],
+          "none": ["端出满满的点心，招呼大家快来尝尝"]
+        }
+      }
+    },
+    "cuddle": {
+      "incompatiblePairs": [{ "mood": "sleepy", "style": "enthusiastic" }],
+      "styles": {
+        "gentle": {
+          "target": ["轻轻挨到{target}身边，软软地贴住对方"],
+          "self": ["抱着自己的尾巴，安静地缩成一团贴贴"],
+          "none": ["悄悄空出身边的位置，小声问要不要来贴贴"]
+        },
+        "normal": {
+          "target": ["自然地靠到{target}身旁，亲昵地贴了贴"],
+          "self": ["靠进软软的角落，给自己留了一点温暖的贴贴"],
+          "none": ["拍了拍身边的位置，邀请一只猫猫过来贴贴"]
+        },
+        "enthusiastic": {
+          "target": ["一下子凑到{target}身边，黏糊糊地贴了上去"],
+          "self": ["把抱枕和尾巴都搂过来，热热闹闹地贴成一团"],
+          "none": ["用力晃着尾巴，宣布现在是猫猫贴贴时间"]
+        }
+      }
+    },
+    "kiss": {
+      "incompatiblePairs": [],
+      "styles": {
+        "gentle": {
+          "target": ["靠近{target}，在对方脸颊上落下轻轻一吻"],
+          "self": ["用指尖碰了碰自己的脸颊，送给自己一个轻轻的亲亲"],
+          "none": ["轻轻点了点自己的脸颊，小声问有没有人想要亲亲"]
+        },
+        "normal": {
+          "target": ["凑到{target}身边，认真地亲了亲对方的脸颊"],
+          "self": ["对着掌心亲了一下，把这个亲亲送给自己"],
+          "none": ["眨着眼靠近一点，问谁愿意收下一个亲亲"]
+        },
+        "enthusiastic": {
+          "target": ["一下子扑到{target}面前，响亮地亲了对方一下"],
+          "self": ["对着镜子送出一个大大的飞吻"],
+          "none": ["送出一个大大的飞吻，问谁想把它接住"]
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "updatedAt": "2026-06-30",
   "description": "Bondage Club 猫娘插件动作文案库。新增动作时向 actions 数组追加主题即可。",
   "actions": [
@@ -7,6 +7,7 @@
       "id": "hug",
       "label": "抱抱",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needHands": true,
         "needReach": true
@@ -251,6 +252,7 @@
       "id": "pat",
       "label": "摸头",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needHands": true,
         "needReach": true
@@ -473,6 +475,7 @@
       "id": "feed",
       "label": "喂食",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needHands": true,
         "needReach": true
@@ -634,6 +637,7 @@
       "id": "cuddle",
       "label": "贴贴",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needReach": true,
         "needMobility": true
@@ -843,6 +847,7 @@
       "id": "kiss",
       "label": "亲亲",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needMouth": true,
         "needReach": true,

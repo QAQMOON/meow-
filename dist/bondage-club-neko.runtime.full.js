@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer
 // @namespace    https://penyo.ru/
-// @version      2.11.0
+// @version      2.12.0
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -34,7 +34,7 @@
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   const BOOTSTRAP = W.BCNekoBootstrap && typeof W.BCNekoBootstrap === "object" ? W.BCNekoBootstrap : {};
-  const UI_MESSAGES = {"zh-CN":{"locale.name":"简体中文","toast.kaomojiUsageReset":"猫猫颜文字记忆已清空喵~","toast.privateMessage":"悄悄喵~ 有私聊来了！","toast.newMessage":"喵~ 新消息来啦！","toast.chatMissing":"还没找到聊天框，进入聊天室后再点喵~","toast.kaomojiInserted":"猫猫颜文字已插入喵~","toast.modeEnabled":"猫娘模式开启喵~","toast.modeDisabled":"猫娘模式已关闭","toast.actionCopied":"动作已复制，进聊天室后可直接发送喵~","toast.actionUnavailable":"当前姿势暂时做不了这个动作喵~","toast.actionLibraryManaged":"动作库现在从 GitHub JSON 管理喵~","toast.mainHoldHint":"按住主猫猫 10 秒可切换猫娘模式喵~","toast.actionWheelHint":"点击动作猫猫可展开动作轮盘喵~","toast.themeChanged":"已切换到{theme}主题喵~","ui.mainButton.title":"展开猫猫菜单，按住可拖动，长按 10 秒切换猫娘模式","ui.kaomojiButton.open":"打开猫猫颜文字，长按 2 秒展开","ui.kaomojiButton.close":"收起猫猫颜文字","ui.kaomojiPicker.label":"猫猫颜文字选择器","ui.kaomojiGroup.show":"显示{group}颜文字","ui.kaomojiUsage.count":"{face} · 已使用 {count} 次","ui.mode.enable":"开启猫娘模式","ui.mode.disable":"关闭猫娘模式","ui.wheel.open":"展开动作轮盘","ui.wheel.close":"收起动作轮盘","settings.button":"猫娘设置","settings.back":"返回","settings.header":"猫 娘 聊 天 室 增 强","settings.uiLocale.button":"界面：{locale}","settings.uiLocale.auto":"自动","settings.uiLocale.tooltip":"切换界面语言：自动、简体中文、English","settings.contentLocale.button":"输出：{locale}","settings.contentLocale.zh-CN":"中文","settings.contentLocale.en":"English","settings.contentLocale.tooltip":"切换动作、猫娘语气和颜文字分类语言","toast.contentLocaleChanged":"猫娘输出语言已切换为{locale}喵~","settings.title.tone":"猫娘语气转换","settings.title.chat":"聊天相关","settings.title.notifications":"通知与提醒","settings.title.behavior":"行为设置","settings.title.theme":"主题设置","settings.enabled.title":"猫娘模式（enabled）","settings.enabled.on":"当前会转换语气并启用装饰～","settings.enabled.off":"当前暂停转换，只保留设置入口～","settings.nyanChance.title":"语气词插入概率（nyanChance）","settings.nyanChance.description":"控制句尾语气词出现的概率（0~100%）","settings.nyanChance.preview":"语气词让聊天更可爱哦～","settings.target.title":"互动目标模式","settings.target.description":"自动：优先当前选中角色，其次聊天目标。","settings.target.auto":"自动目标","settings.target.picker":"手动选择","settings.target.self":"仅自己","settings.actions.button":"动作库","settings.actions.source":"从 GitHub 动作库加载；","settings.actions.fallback":"失败时将使用缓存或内置动作。","settings.theme.choose":"选择你喜欢的主题颜色","settings.theme.saved":"主题设置将立即生效并保存","theme.sakura":"樱粉","theme.mint":"薄荷","theme.sky":"天空","theme.cream":"奶油","theme.lavender":"薰衣草","theme.tea":"白茶","settings.convertOutgoing.title":"转换发送语气（convertOutgoing）","settings.convertOutgoing.description":"发送的消息自动转换为猫娘语气～","settings.convertDisplayed.title":"转换显示语气（convertDisplayed）","settings.convertDisplayed.description":"接收的消息也会变成猫娘语气哦～","settings.decorateChat.title":"聊天室美化（decorateChat）","settings.decorateChat.description":"美化聊天界面，添加猫娘风格装饰～","settings.rainOnSend.title":"猫爪表情雨（rainOnSend）","settings.rainOnSend.description":"发送消息时，下起猫爪表情雨～","settings.quickWheel.title":"动作快捷轮盘（quickWheel）","settings.quickWheel.description":"右下角显示抱抱、摸头、喂食动作～","settings.notifyIncoming.title":"新消息通知（notifyIncoming）","settings.notifyIncoming.description":"有新消息时显示通知提醒～","common.none":"无","common.on":"开","common.off":"关","common.enabled":"开启","common.disabled":"关闭","common.yes":"有","common.no":"无","common.registered":"已注册","common.unregistered":"未注册","common.collapsed":"已收起","common.expanded":"已展开","common.armed":"已准备","common.idle":"未启用","speech.normal":"正常","speech.gag.light":"轻堵嘴","speech.gag.medium":"中堵嘴","speech.gag.heavy":"重堵嘴","peer.self":"猫娘插件 v{version}","peer.other":"猫娘同好 v{version}","status.capability":"手:{hands} | 嘴:{mouth} | 移动:{move} | 够到:{reach} | 姿态:{posture}","status.capability.available":"可用","status.capability.limited":"受限","status.capability.move":"可","status.posture.normal":"正常","status.posture.kneeling":"跪姿","status.posture.lying":"躺下","status.posture.suspended":"悬吊","status.posture.restrained":"束缚","status.posture.helpless":"无助","status.lines":["[猫娘状态] Bondage Club Neko Chat Enhancer v{version}（正式版）","猫娘模式：{enabled}","发送转换：{outgoing} | 显示转换：{displayed}","聊天装饰：{decorate} | 发送猫爪雨：{rain} | 新消息提醒：{notify}","堵嘴说话：{speech}{gagSuffix}","主题：{theme}","动作目标：{targetMode}","当前选中：{selectedTarget} | 可互动目标：{actionTargetCount}","动作库：{activeActions}/{enabledActions} 当前可用 | 过滤：{filteredActions} | 缓存：{actionCache} | v{actionVersion}","动作能力：{capability}","颜文字：{kaomojiItems} 个 | 分组：{visibleGroups}/{totalGroups} | 缓存：{kaomojiCache}","同插件玩家：{peerCount} | SDK：{sdk} | hooks：{hooks}","命令注册：{commands}","逃脱辅助：pick {pick} | goddess {goddess}","猫猫菜单：{menu} | 快捷动作：{quickWheel}"],"status.command.registered":"已注册（{source}）","status.command.fallback":"输入拦截兜底","status.pick.inactive":"未开启","escape.toast.pickTimeout":"猫猫单件移除已超时。","escape.toast.pickArmed":"猫猫单件移除已准备：请点击一个自己的物品栏位。","escape.toast.pickRemoved":"猫猫已移除 {group}。","escape.toast.unlocked":"猫猫已解锁 {count} 件束缚物品。","escape.toast.noLocked":"没有找到已上锁的束缚物品。","escape.toast.boostUnavailable":"当前环境无法启用逃脱技能强化。","escape.toast.boostActive":"逃脱技能强化已启用 1 小时。","escape.toast.leaveUnavailable":"当前环境无法立即离开房间。","escape.toast.goddessEnabled":"猫猫女神模式已启用。","escape.toast.goddessDisabled":"猫猫女神模式已关闭。","escape.toast.easyChanged":"已将 {count} 件束缚物品的难度降低 {amount}。","escape.toast.easyNone":"没有找到可调整难度的束缚物品。","escape.statusLines":["[猫猫逃脱辅助]","女神模式：{goddess}","单件移除：{pick}","命令：","/neko escape release | unlock | boost | leave | goddess on | goddess off | status","/neko easy 99","/neko pick"],"escape.helpLines":["[猫猫逃脱辅助]","/neko escape release  - 解锁自己当前所有已上锁的束缚物品","/neko escape unlock   - release 的别名","/neko escape boost    - 逃脱相关技能 +5，持续 1 小时","/neko escape leave    - 立即离开当前房间","/neko escape goddess on|off","/neko escape status","/neko easy 99         - 将当前大部分束缚物品难度降低 99","/neko pick            - 进入 5 秒单件物品移除模式"],"help.rp":["[猫娘帮助 / rp]","这一类用于猫娘 RP 语气和输出风格。","正式版暂不提供 /neko rp 切换指令，主要使用普通猫娘转换。","Bug 版提供独立 RP 人设切换，测试版提供状态和灵感系统。","堵嘴状态会在 RP 转换之后再做压制，保留人设味道。"],"help.action":["[猫娘帮助 / action]","右下角动作猫猫可快速发送抱抱、摸头、喂食、贴贴、亲亲。","当前目标模式：{targetMode}","左键优先对当前选中目标生效，菜单展开后可快捷使用。"],"help.emoji":["[猫娘帮助 / emoji]","颜文字猫猫可点击插入，长按打开颜文字选择器。","颜文字库会远程加载，分类更新后刷新即可生效。"],"help.mode":["[猫娘帮助 / mode]","主猫猫长按 10 秒可切换猫娘模式。","堵嘴说话联动会根据当前堵嘴程度自动压缩句子。","发送转换、接收显示转换、聊天室美化都可在猫娘设置页调整。"],"help.theme":["[猫娘帮助 / theme]","当前主题：{theme}","可用主题：{themes}","主题可在扩展组件设置页内切换。"],"help.spark":["[猫娘帮助 / spark]","测试版可用：/neko spark 会根据最近聊天、选中目标和角色状态生成 RP 灵感短句。","正式版当前未启用 spark 生成器，建议在测试版验证稳定后再合入。"],"help.voice":["[猫娘帮助 / voice]","测试版可用：/neko voice <text> 本地触发 NekoVoice，[NekoVoice] <text> 可从聊天内触发。","效果包括 *mew* / *purr* / *nyaa* 视觉声效、粉色闪光、声波圈、弹幕口癖和气息粒子。","正式版当前未启用 NekoVoice，避免视觉干扰过强。"],"help.reactions":["[猫娘帮助 / reactions]","测试版可用：/neko reactions 查看互动功能类目，/neko reactions <keyword> 搜索触发类目。","功能包括敏感部位反应、对方互动反应、角色状态反应和粒子反馈。","正式版当前保留基础动作轮盘，未启用 101 个测试互动类目。"],"help.mood":["[猫娘帮助 / mood]","测试版可用：/neko mood 查看状态，也可手动切换高兴、伤心、高冷、黏人、困困等状态。","状态会影响语气尾巴、粒子和互动反应。","正式版当前未启用状态持续系统。"],"help.systems":["[猫娘帮助 / systems]","测试版可用：/neko systems 或 /neko profile 查看敏感度档案、关系温度计、持续状态和事件计数。","敏感度：ear / tail / nape / chin / belly 会随互动累积。","关系温度：对方和你互动越多，warmth/trust/familiar 越高。","正式版当前未启用这些实验系统。"],"help.status":["[猫娘帮助 / status]","使用 /neko status 可查看插件开关、转换开关、聊天装饰、堵嘴说话档位、主题和动作目标。","还会显示动作库、颜文字库、当前选中目标、同插件玩家、SDK/hooks 和逃脱辅助状态。"],"help.main":["[猫娘命令帮助] /neko help <分类>","正式版可用：rp / action / emoji / mode / theme / status / escape","测试版说明：spark / voice / reactions / mood / systems","快捷例子：/neko help status | /neko help action | /neko status"],"command.description":"Bondage Club 猫娘增强命令。","targetPicker.title":"选择互动对象","targetPicker.self":"自己","wheel.actionTooltip":"{label}\n左键随机动作，右键选择目标","kaomoji.all":"全部","settings.nyanChance.sample":"喵～"},"en":{"locale.name":"English","toast.kaomojiUsageReset":"Kaomoji usage history cleared, meow~","toast.privateMessage":"Psst meow~ Private message incoming!","toast.newMessage":"Meow~ New message arrived!","toast.chatMissing":"Chat box not found. Try again after entering a chat room, meow~","toast.kaomojiInserted":"Catgirl kaomoji inserted, meow~","toast.modeEnabled":"Catgirl mode enabled, meow~","toast.modeDisabled":"Catgirl mode disabled","toast.actionCopied":"Action copied. Enter a chat room to send it directly, meow~","toast.actionUnavailable":"Your current pose cannot perform this action, meow~","toast.actionLibraryManaged":"The action library is managed through GitHub JSON, meow~","toast.mainHoldHint":"Hold the main catgirl button for 10 seconds to toggle catgirl mode, meow~","toast.actionWheelHint":"Click the action catgirl button to expand the action wheel, meow~","toast.themeChanged":"Switched to the {theme} theme, meow~","ui.mainButton.title":"Expand the catgirl menu, drag to move, or hold for 10 seconds to toggle catgirl mode","ui.kaomojiButton.open":"Open catgirl kaomoji, hold for 2 seconds to expand","ui.kaomojiButton.close":"Close catgirl kaomoji","ui.kaomojiPicker.label":"Catgirl kaomoji picker","ui.kaomojiGroup.show":"Show {group} kaomoji","ui.kaomojiUsage.count":"{face} · used {count} times","ui.mode.enable":"Enable catgirl mode","ui.mode.disable":"Disable catgirl mode","ui.wheel.open":"Expand action wheel","ui.wheel.close":"Collapse action wheel","settings.button":"Neko settings","settings.back":"Back","settings.header":"NEKO CHAT ENHANCER","settings.uiLocale.button":"UI: {locale}","settings.uiLocale.auto":"Auto","settings.uiLocale.tooltip":"Switch UI language: Auto, Simplified Chinese, or English","settings.contentLocale.button":"Output: {locale}","settings.contentLocale.zh-CN":"Chinese","settings.contentLocale.en":"English","settings.contentLocale.tooltip":"Switch action, catgirl tone, and kaomoji-category language","toast.contentLocaleChanged":"Catgirl output language switched to {locale}, meow~","settings.title.tone":"Catgirl tone conversion","settings.title.chat":"Chat features","settings.title.notifications":"Notifications","settings.title.behavior":"Behavior settings","settings.title.theme":"Theme settings","settings.enabled.title":"Catgirl mode (enabled)","settings.enabled.on":"Tone conversion and decorations are active.","settings.enabled.off":"Conversion is paused; the settings entry remains available.","settings.nyanChance.title":"Tone suffix chance (nyanChance)","settings.nyanChance.description":"Controls the chance of adding a catgirl suffix (0–100%).","settings.nyanChance.preview":"Tone suffixes make chat more playful.","settings.target.title":"Interaction target mode","settings.target.description":"Auto prioritizes the selected character, then the current chat target.","settings.target.auto":"Automatic","settings.target.picker":"Manual pick","settings.target.self":"Self only","settings.actions.button":"Action library","settings.actions.source":"Loads from the GitHub action library.","settings.actions.fallback":"Falls back to cache or built-in actions if loading fails.","settings.theme.choose":"Choose your preferred theme color","settings.theme.saved":"Theme changes apply immediately and are saved","theme.sakura":"Sakura","theme.mint":"Mint","theme.sky":"Sky","theme.cream":"Cream","theme.lavender":"Lavender","theme.tea":"White Tea","settings.convertOutgoing.title":"Outgoing tone conversion (convertOutgoing)","settings.convertOutgoing.description":"Automatically rewrites sent messages in a catgirl tone.","settings.convertDisplayed.title":"Displayed tone conversion (convertDisplayed)","settings.convertDisplayed.description":"Also rewrites received chat messages in a catgirl tone.","settings.decorateChat.title":"Chat room styling (decorateChat)","settings.decorateChat.description":"Adds catgirl-themed styling and decorative touches.","settings.rainOnSend.title":"Paw reaction rain (rainOnSend)","settings.rainOnSend.description":"Drops a paw-and-heart effect when you send a message.","settings.quickWheel.title":"Quick action wheel (quickWheel)","settings.quickWheel.description":"Shows Hug, Pat, Feed, Cuddle, and Kiss actions in the corner.","settings.notifyIncoming.title":"New message notice (notifyIncoming)","settings.notifyIncoming.description":"Shows a small notification when a new message arrives.","common.none":"none","common.on":"on","common.off":"off","common.enabled":"enabled","common.disabled":"disabled","common.yes":"yes","common.no":"no","common.registered":"registered","common.unregistered":"not registered","common.collapsed":"collapsed","common.expanded":"expanded","common.armed":"armed","common.idle":"idle","speech.normal":"normal","speech.gag.light":"lightly gagged","speech.gag.medium":"moderately gagged","speech.gag.heavy":"heavily gagged","peer.self":"Neko plugin v{version}","peer.other":"Fellow neko v{version}","status.capability":"Hands: {hands} | Mouth: {mouth} | Move: {move} | Reach: {reach} | Posture: {posture}","status.capability.available":"available","status.capability.limited":"limited","status.capability.move":"yes","status.posture.normal":"normal","status.posture.kneeling":"kneeling","status.posture.lying":"lying","status.posture.suspended":"suspended","status.posture.restrained":"restrained","status.posture.helpless":"helpless","status.lines":["[Neko status] Bondage Club Neko Chat Enhancer v{version} (stable)","Catgirl mode: {enabled}","Outgoing conversion: {outgoing} | Display conversion: {displayed}","Chat styling: {decorate} | Paw rain: {rain} | Message notice: {notify}","Gag speech: {speech}{gagSuffix}","Theme: {theme}","Action target: {targetMode}","Selected target: {selectedTarget} | Available targets: {actionTargetCount}","Action library: {activeActions}/{enabledActions} available | Filtered: {filteredActions} | Cache: {actionCache} | v{actionVersion}","Action capability: {capability}","Kaomoji: {kaomojiItems} | Groups: {visibleGroups}/{totalGroups} | Cache: {kaomojiCache}","Plugin peers: {peerCount} | SDK: {sdk} | hooks: {hooks}","Command registration: {commands}","Escape helper: pick {pick} | goddess {goddess}","Cat menu: {menu} | Quick actions: {quickWheel}"],"status.command.registered":"registered ({source})","status.command.fallback":"input interception fallback","status.pick.inactive":"inactive","escape.toast.pickTimeout":"Neko single-item removal timed out.","escape.toast.pickArmed":"Neko single-item removal armed: click one of your item slots.","escape.toast.pickRemoved":"Neko removed {group}.","escape.toast.unlocked":"Neko unlocked {count} restraint item(s).","escape.toast.noLocked":"No locked restraint items were found.","escape.toast.boostUnavailable":"Escape skill boost is unavailable here.","escape.toast.boostActive":"Escape skill boost is active for 1 hour.","escape.toast.leaveUnavailable":"Leaving the room immediately is unavailable here.","escape.toast.goddessEnabled":"Neko goddess mode enabled.","escape.toast.goddessDisabled":"Neko goddess mode disabled.","escape.toast.easyChanged":"Lowered the difficulty of {count} restraint item(s) by {amount}.","escape.toast.easyNone":"No restraint items were available for difficulty adjustment.","escape.statusLines":["[Neko escape helper]","Goddess mode: {goddess}","Single-item removal: {pick}","Commands:","/neko escape release | unlock | boost | leave | goddess on | goddess off | status","/neko easy 99","/neko pick"],"escape.helpLines":["[Neko escape helper]","/neko escape release  - unlock every currently locked restraint item on yourself","/neko escape unlock   - alias of release","/neko escape boost    - +5 to escape-related skills for 1 hour","/neko escape leave    - leave the current room immediately","/neko escape goddess on|off","/neko escape status","/neko easy 99         - lower most current restraint difficulties by 99","/neko pick            - enter 5-second single-item removal mode"],"help.rp":["[Neko help / rp]","This section covers catgirl RP tone and output style.","The stable build does not provide /neko rp switching; it mainly uses standard catgirl conversion.","The bug build provides separate RP personas, while the dev build provides state and inspiration systems.","Gag speech is applied after tone conversion so the character flavor remains readable."],"help.action":["[Neko help / action]","Use the action cat button for quick Hug, Pat, Feed, Cuddle, and Kiss actions.","Current target mode: {targetMode}","Left-click prioritizes the selected target; expand the menu for quick access."],"help.emoji":["[Neko help / emoji]","Click the kaomoji cat to insert a face; hold it to open the kaomoji picker.","The kaomoji library loads remotely, so category updates apply after refreshing the game."],"help.mode":["[Neko help / mode]","Hold the main cat button for 10 seconds to toggle catgirl mode.","Gag speech automatically compresses messages based on the current gag level.","Outgoing conversion, displayed conversion, and chat styling can be adjusted in Neko settings."],"help.theme":["[Neko help / theme]","Current theme: {theme}","Available themes: {themes}","Themes can be switched from the extension settings page."],"help.spark":["[Neko help / spark]","Available in dev: /neko spark generates short RP ideas from recent chat, the selected target, and character state.","The stable build does not currently enable the spark generator."],"help.voice":["[Neko help / voice]","Available in dev: /neko voice <text> triggers NekoVoice locally; [NekoVoice] <text> can trigger it from chat.","Effects include *mew* / *purr* / *nyaa* visuals, pink flashes, sound-wave rings, captions, and breath particles.","The stable build does not currently enable NekoVoice to avoid excessive visual noise."],"help.reactions":["[Neko help / reactions]","Available in dev: /neko reactions lists interaction categories; /neko reactions <keyword> searches them.","Features include sensitive-zone responses, partner interactions, character-state reactions, and particles.","Stable keeps the basic action wheel and does not enable the 101 experimental interaction categories."],"help.mood":["[Neko help / mood]","Available in dev: /neko mood shows state and can switch between happy, sad, aloof, clingy, sleepy, and more.","Mood affects tone tails, particles, and interaction responses.","The stable build does not currently enable persistent mood state."],"help.systems":["[Neko help / systems]","Available in dev: /neko systems or /neko profile shows sensitivity, relationship warmth, persistent state, and event counts.","Sensitivity for ear / tail / nape / chin / belly accumulates through interactions.","More interaction raises warmth, trust, and familiarity with that person.","The stable build does not currently enable these experimental systems."],"help.status":["[Neko help / status]","Use /neko status to view plugin switches, conversions, chat styling, gag speech, theme, and action targeting.","It also shows action and kaomoji libraries, selected targets, plugin peers, SDK/hooks, and escape-helper state."],"help.main":["[Neko command help] /neko help <section>","Stable sections: rp / action / emoji / mode / theme / status / escape","Dev documentation: spark / voice / reactions / mood / systems","Quick examples: /neko help status | /neko help action | /neko status"],"command.description":"Bondage Club Neko Chat Enhancer commands.","targetPicker.title":"Choose an interaction target","targetPicker.self":"Self","wheel.actionTooltip":"{label}\nLeft-click for a random action; right-click to choose a target","kaomoji.all":"All","settings.nyanChance.sample":"Meow~"}};
+  const UI_MESSAGES = {"zh-CN":{"locale.name":"简体中文","toast.kaomojiUsageReset":"猫猫颜文字记忆已清空喵~","toast.privateMessage":"悄悄喵~ 有私聊来了！","toast.newMessage":"喵~ 新消息来啦！","toast.chatMissing":"还没找到聊天框，进入聊天室后再点喵~","toast.kaomojiInserted":"猫猫颜文字已插入喵~","toast.modeEnabled":"猫娘模式开启喵~","toast.modeDisabled":"猫娘模式已关闭","toast.actionCopied":"动作已复制，进聊天室后可直接发送喵~","toast.actionUnavailable":"当前姿势暂时做不了这个动作喵~","toast.actionUnavailableReason":"当前无法执行：{reason}","toast.composerUnavailable":"这个动作还没有编排器内容，仍可单击随机发送喵~","toast.composerFavorited":"已收藏这个动作组合喵~","toast.composerUnfavorited":"已取消收藏这个动作组合","toast.actionLibraryManaged":"动作库现在从 GitHub JSON 管理喵~","toast.mainHoldHint":"按住主猫猫 10 秒可切换猫娘模式喵~","toast.actionWheelHint":"点击动作猫猫可展开动作轮盘喵~","toast.themeChanged":"已切换到{theme}主题喵~","ui.mainButton.title":"展开猫猫菜单，按住可拖动，长按 10 秒切换猫娘模式","ui.kaomojiButton.open":"打开猫猫颜文字，长按 2 秒展开","ui.kaomojiButton.close":"收起猫猫颜文字","ui.kaomojiPicker.label":"猫猫颜文字选择器","ui.kaomojiGroup.show":"显示{group}颜文字","ui.kaomojiUsage.count":"{face} · 已使用 {count} 次","ui.mode.enable":"开启猫娘模式","ui.mode.disable":"关闭猫娘模式","ui.wheel.open":"展开动作轮盘","ui.wheel.close":"收起动作轮盘","settings.button":"猫娘设置","settings.back":"返回","settings.header":"猫 娘 聊 天 室 增 强","settings.uiLocale.button":"界面：{locale}","settings.uiLocale.auto":"自动","settings.uiLocale.tooltip":"切换界面语言：自动、简体中文、English","settings.contentLocale.button":"输出：{locale}","settings.contentLocale.zh-CN":"中文","settings.contentLocale.en":"English","settings.contentLocale.tooltip":"切换动作、猫娘语气和颜文字分类语言","toast.contentLocaleChanged":"猫娘输出语言已切换为{locale}喵~","settings.title.tone":"猫娘语气转换","settings.title.chat":"聊天相关","settings.title.notifications":"通知与提醒","settings.title.behavior":"行为设置","settings.title.theme":"主题设置","settings.enabled.title":"猫娘模式（enabled）","settings.enabled.on":"当前会转换语气并启用装饰～","settings.enabled.off":"当前暂停转换，只保留设置入口～","settings.nyanChance.title":"语气词插入概率（nyanChance）","settings.nyanChance.description":"控制句尾语气词出现的概率（0~100%）","settings.nyanChance.preview":"语气词让聊天更可爱哦～","settings.target.title":"互动目标模式","settings.target.description":"自动：优先当前选中角色，其次聊天目标。","settings.target.auto":"自动目标","settings.target.picker":"手动选择","settings.target.self":"仅自己","settings.actions.button":"动作库","settings.actions.source":"从 GitHub 动作库加载；","settings.actions.fallback":"失败时将使用缓存或内置动作。","settings.theme.choose":"选择你喜欢的主题颜色","settings.theme.saved":"主题设置将立即生效并保存","theme.sakura":"樱粉","theme.mint":"薄荷","theme.sky":"天空","theme.cream":"奶油","theme.lavender":"薰衣草","theme.tea":"白茶","settings.convertOutgoing.title":"转换发送语气（convertOutgoing）","settings.convertOutgoing.description":"发送的消息自动转换为猫娘语气～","settings.convertDisplayed.title":"转换显示语气（convertDisplayed）","settings.convertDisplayed.description":"接收的消息也会变成猫娘语气哦～","settings.decorateChat.title":"聊天室美化（decorateChat）","settings.decorateChat.description":"美化聊天界面，添加猫娘风格装饰～","settings.rainOnSend.title":"猫爪表情雨（rainOnSend）","settings.rainOnSend.description":"发送消息时，下起猫爪表情雨～","settings.quickWheel.title":"动作快捷轮盘（quickWheel）","settings.quickWheel.description":"右下角显示抱抱、摸头、喂食动作～","settings.notifyIncoming.title":"新消息通知（notifyIncoming）","settings.notifyIncoming.description":"有新消息时显示通知提醒～","common.none":"无","common.on":"开","common.off":"关","common.enabled":"开启","common.disabled":"关闭","common.yes":"有","common.no":"无","common.registered":"已注册","common.unregistered":"未注册","common.collapsed":"已收起","common.expanded":"已展开","common.armed":"已准备","common.idle":"未启用","speech.normal":"正常","speech.gag.light":"轻堵嘴","speech.gag.medium":"中堵嘴","speech.gag.heavy":"重堵嘴","peer.self":"猫娘插件 v{version}","peer.other":"猫娘同好 v{version}","status.capability":"手:{hands} | 嘴:{mouth} | 移动:{move} | 够到:{reach} | 姿态:{posture}","status.capability.available":"可用","status.capability.limited":"受限","status.capability.move":"可","status.posture.normal":"正常","status.posture.kneeling":"跪姿","status.posture.lying":"躺下","status.posture.suspended":"悬吊","status.posture.restrained":"束缚","status.posture.helpless":"无助","status.lines":["[猫娘状态] Bondage Club Neko Chat Enhancer v{version}（正式版）","猫娘模式：{enabled}","发送转换：{outgoing} | 显示转换：{displayed}","聊天装饰：{decorate} | 发送猫爪雨：{rain} | 新消息提醒：{notify}","堵嘴说话：{speech}{gagSuffix}","主题：{theme}","动作目标：{targetMode}","当前选中：{selectedTarget} | 可互动目标：{actionTargetCount}","动作库：{activeActions}/{enabledActions} 当前可用 | 过滤：{filteredActions} | 缓存：{actionCache} | v{actionVersion}","动作能力：{capability}","颜文字：{kaomojiItems} 个 | 分组：{visibleGroups}/{totalGroups} | 缓存：{kaomojiCache}","同插件玩家：{peerCount} | SDK：{sdk} | hooks：{hooks}","命令注册：{commands}","逃脱辅助：pick {pick} | goddess {goddess}","猫猫菜单：{menu} | 快捷动作：{quickWheel}"],"status.command.registered":"已注册（{source}）","status.command.fallback":"输入拦截兜底","status.pick.inactive":"未开启","escape.toast.pickTimeout":"猫猫单件移除已超时。","escape.toast.pickArmed":"猫猫单件移除已准备：请点击一个自己的物品栏位。","escape.toast.pickRemoved":"猫猫已移除 {group}。","escape.toast.unlocked":"猫猫已解锁 {count} 件束缚物品。","escape.toast.noLocked":"没有找到已上锁的束缚物品。","escape.toast.boostUnavailable":"当前环境无法启用逃脱技能强化。","escape.toast.boostActive":"逃脱技能强化已启用 1 小时。","escape.toast.leaveUnavailable":"当前环境无法立即离开房间。","escape.toast.goddessEnabled":"猫猫女神模式已启用。","escape.toast.goddessDisabled":"猫猫女神模式已关闭。","escape.toast.easyChanged":"已将 {count} 件束缚物品的难度降低 {amount}。","escape.toast.easyNone":"没有找到可调整难度的束缚物品。","escape.statusLines":["[猫猫逃脱辅助]","女神模式：{goddess}","单件移除：{pick}","命令：","/neko escape release | unlock | boost | leave | goddess on | goddess off | status","/neko easy 99","/neko pick"],"escape.helpLines":["[猫猫逃脱辅助]","/neko escape release  - 解锁自己当前所有已上锁的束缚物品","/neko escape unlock   - release 的别名","/neko escape boost    - 逃脱相关技能 +5，持续 1 小时","/neko escape leave    - 立即离开当前房间","/neko escape goddess on|off","/neko escape status","/neko easy 99         - 将当前大部分束缚物品难度降低 99","/neko pick            - 进入 5 秒单件物品移除模式"],"help.rp":["[猫娘帮助 / rp]","这一类用于猫娘 RP 语气和输出风格。","正式版暂不提供 /neko rp 切换指令，主要使用普通猫娘转换。","Bug 版提供独立 RP 人设切换，测试版提供状态和灵感系统。","堵嘴状态会在 RP 转换之后再做压制，保留人设味道。"],"help.action":["[猫娘帮助 / action]","右下角动作猫猫可快速发送抱抱、摸头、喂食、贴贴、亲亲。","当前目标模式：{targetMode}","左键优先对当前选中目标生效，菜单展开后可快捷使用。"],"help.emoji":["[猫娘帮助 / emoji]","颜文字猫猫可点击插入，长按打开颜文字选择器。","颜文字库会远程加载，分类更新后刷新即可生效。"],"help.mode":["[猫娘帮助 / mode]","主猫猫长按 10 秒可切换猫娘模式。","堵嘴说话联动会根据当前堵嘴程度自动压缩句子。","发送转换、接收显示转换、聊天室美化都可在猫娘设置页调整。"],"help.theme":["[猫娘帮助 / theme]","当前主题：{theme}","可用主题：{themes}","主题可在扩展组件设置页内切换。"],"help.spark":["[猫娘帮助 / spark]","测试版可用：/neko spark 会根据最近聊天、选中目标和角色状态生成 RP 灵感短句。","正式版当前未启用 spark 生成器，建议在测试版验证稳定后再合入。"],"help.voice":["[猫娘帮助 / voice]","测试版可用：/neko voice <text> 本地触发 NekoVoice，[NekoVoice] <text> 可从聊天内触发。","效果包括 *mew* / *purr* / *nyaa* 视觉声效、粉色闪光、声波圈、弹幕口癖和气息粒子。","正式版当前未启用 NekoVoice，避免视觉干扰过强。"],"help.reactions":["[猫娘帮助 / reactions]","测试版可用：/neko reactions 查看互动功能类目，/neko reactions <keyword> 搜索触发类目。","功能包括敏感部位反应、对方互动反应、角色状态反应和粒子反馈。","正式版当前保留基础动作轮盘，未启用 101 个测试互动类目。"],"help.mood":["[猫娘帮助 / mood]","测试版可用：/neko mood 查看状态，也可手动切换高兴、伤心、高冷、黏人、困困等状态。","状态会影响语气尾巴、粒子和互动反应。","正式版当前未启用状态持续系统。"],"help.systems":["[猫娘帮助 / systems]","测试版可用：/neko systems 或 /neko profile 查看敏感度档案、关系温度计、持续状态和事件计数。","敏感度：ear / tail / nape / chin / belly 会随互动累积。","关系温度：对方和你互动越多，warmth/trust/familiar 越高。","正式版当前未启用这些实验系统。"],"help.status":["[猫娘帮助 / status]","使用 /neko status 可查看插件开关、转换开关、聊天装饰、堵嘴说话档位、主题和动作目标。","还会显示动作库、颜文字库、当前选中目标、同插件玩家、SDK/hooks 和逃脱辅助状态。"],"help.main":["[猫娘命令帮助] /neko help <分类>","正式版可用：rp / action / emoji / mode / theme / status / escape","测试版说明：spark / voice / reactions / mood / systems","快捷例子：/neko help status | /neko help action | /neko status"],"command.description":"Bondage Club 猫娘增强命令。","targetPicker.title":"选择互动对象","targetPicker.self":"自己","wheel.actionTooltip":"{label}\n左键随机动作，右键选择目标","wheel.actionComposerTooltip":"{label}\n单击随机发送，长按 3 秒打开动作编排器，右键选择目标","composer.title":"动作编排器","composer.subtitle":"用受限制的自然片段编排动作；预览确认后才会发送","composer.close":"关闭动作编排器","composer.recent":"最近组合","composer.dice":"随机组合","composer.favorites":"收藏的动作组合","composer.noFavorites":"暂无收藏","composer.loadFavorite":"载入收藏","composer.field.action":"动作","composer.field.mood":"情绪","composer.field.style":"风格","composer.field.target":"目标","composer.field.extra":"附加","composer.target.auto":"自动（当前选中）","composer.target.self":"自己","composer.target.none":"无目标","composer.preview":"预览","composer.previewUnavailable":"当前组合暂时无法生成预览","composer.reroll":"换一句","composer.favorite":"收藏组合","composer.unfavorite":"取消收藏","composer.send":"发送","composer.unavailableTitle":"当前无法执行“{action}”","composer.alternatives":"可改用：{actions}","composer.requirement.hands":"需要可以使用双手","composer.requirement.mouth":"需要嘴部可以自由活动","composer.requirement.reach":"需要能够接近目标","composer.requirement.mobility":"需要能够移动","composer.requirement.gag":"当前堵嘴等级过高","composer.requirement.separator":"、","kaomoji.all":"全部","settings.nyanChance.sample":"喵～"},"en":{"locale.name":"English","toast.kaomojiUsageReset":"Kaomoji usage history cleared, meow~","toast.privateMessage":"Psst meow~ Private message incoming!","toast.newMessage":"Meow~ New message arrived!","toast.chatMissing":"Chat box not found. Try again after entering a chat room, meow~","toast.kaomojiInserted":"Catgirl kaomoji inserted, meow~","toast.modeEnabled":"Catgirl mode enabled, meow~","toast.modeDisabled":"Catgirl mode disabled","toast.actionCopied":"Action copied. Enter a chat room to send it directly, meow~","toast.actionUnavailable":"Your current pose cannot perform this action, meow~","toast.actionUnavailableReason":"This action is unavailable: {reason}","toast.composerUnavailable":"This action has no composer content yet. You can still click it for a random line, meow~","toast.composerFavorited":"Action combination saved to favorites, meow~","toast.composerUnfavorited":"Action combination removed from favorites","toast.actionLibraryManaged":"The action library is managed through GitHub JSON, meow~","toast.mainHoldHint":"Hold the main catgirl button for 10 seconds to toggle catgirl mode, meow~","toast.actionWheelHint":"Click the action catgirl button to expand the action wheel, meow~","toast.themeChanged":"Switched to the {theme} theme, meow~","ui.mainButton.title":"Expand the catgirl menu, drag to move, or hold for 10 seconds to toggle catgirl mode","ui.kaomojiButton.open":"Open catgirl kaomoji, hold for 2 seconds to expand","ui.kaomojiButton.close":"Close catgirl kaomoji","ui.kaomojiPicker.label":"Catgirl kaomoji picker","ui.kaomojiGroup.show":"Show {group} kaomoji","ui.kaomojiUsage.count":"{face} · used {count} times","ui.mode.enable":"Enable catgirl mode","ui.mode.disable":"Disable catgirl mode","ui.wheel.open":"Expand action wheel","ui.wheel.close":"Collapse action wheel","settings.button":"Neko settings","settings.back":"Back","settings.header":"NEKO CHAT ENHANCER","settings.uiLocale.button":"UI: {locale}","settings.uiLocale.auto":"Auto","settings.uiLocale.tooltip":"Switch UI language: Auto, Simplified Chinese, or English","settings.contentLocale.button":"Output: {locale}","settings.contentLocale.zh-CN":"Chinese","settings.contentLocale.en":"English","settings.contentLocale.tooltip":"Switch action, catgirl tone, and kaomoji-category language","toast.contentLocaleChanged":"Catgirl output language switched to {locale}, meow~","settings.title.tone":"Catgirl tone conversion","settings.title.chat":"Chat features","settings.title.notifications":"Notifications","settings.title.behavior":"Behavior settings","settings.title.theme":"Theme settings","settings.enabled.title":"Catgirl mode (enabled)","settings.enabled.on":"Tone conversion and decorations are active.","settings.enabled.off":"Conversion is paused; the settings entry remains available.","settings.nyanChance.title":"Tone suffix chance (nyanChance)","settings.nyanChance.description":"Controls the chance of adding a catgirl suffix (0–100%).","settings.nyanChance.preview":"Tone suffixes make chat more playful.","settings.target.title":"Interaction target mode","settings.target.description":"Auto prioritizes the selected character, then the current chat target.","settings.target.auto":"Automatic","settings.target.picker":"Manual pick","settings.target.self":"Self only","settings.actions.button":"Action library","settings.actions.source":"Loads from the GitHub action library.","settings.actions.fallback":"Falls back to cache or built-in actions if loading fails.","settings.theme.choose":"Choose your preferred theme color","settings.theme.saved":"Theme changes apply immediately and are saved","theme.sakura":"Sakura","theme.mint":"Mint","theme.sky":"Sky","theme.cream":"Cream","theme.lavender":"Lavender","theme.tea":"White Tea","settings.convertOutgoing.title":"Outgoing tone conversion (convertOutgoing)","settings.convertOutgoing.description":"Automatically rewrites sent messages in a catgirl tone.","settings.convertDisplayed.title":"Displayed tone conversion (convertDisplayed)","settings.convertDisplayed.description":"Also rewrites received chat messages in a catgirl tone.","settings.decorateChat.title":"Chat room styling (decorateChat)","settings.decorateChat.description":"Adds catgirl-themed styling and decorative touches.","settings.rainOnSend.title":"Paw reaction rain (rainOnSend)","settings.rainOnSend.description":"Drops a paw-and-heart effect when you send a message.","settings.quickWheel.title":"Quick action wheel (quickWheel)","settings.quickWheel.description":"Shows Hug, Pat, Feed, Cuddle, and Kiss actions in the corner.","settings.notifyIncoming.title":"New message notice (notifyIncoming)","settings.notifyIncoming.description":"Shows a small notification when a new message arrives.","common.none":"none","common.on":"on","common.off":"off","common.enabled":"enabled","common.disabled":"disabled","common.yes":"yes","common.no":"no","common.registered":"registered","common.unregistered":"not registered","common.collapsed":"collapsed","common.expanded":"expanded","common.armed":"armed","common.idle":"idle","speech.normal":"normal","speech.gag.light":"lightly gagged","speech.gag.medium":"moderately gagged","speech.gag.heavy":"heavily gagged","peer.self":"Neko plugin v{version}","peer.other":"Fellow neko v{version}","status.capability":"Hands: {hands} | Mouth: {mouth} | Move: {move} | Reach: {reach} | Posture: {posture}","status.capability.available":"available","status.capability.limited":"limited","status.capability.move":"yes","status.posture.normal":"normal","status.posture.kneeling":"kneeling","status.posture.lying":"lying","status.posture.suspended":"suspended","status.posture.restrained":"restrained","status.posture.helpless":"helpless","status.lines":["[Neko status] Bondage Club Neko Chat Enhancer v{version} (stable)","Catgirl mode: {enabled}","Outgoing conversion: {outgoing} | Display conversion: {displayed}","Chat styling: {decorate} | Paw rain: {rain} | Message notice: {notify}","Gag speech: {speech}{gagSuffix}","Theme: {theme}","Action target: {targetMode}","Selected target: {selectedTarget} | Available targets: {actionTargetCount}","Action library: {activeActions}/{enabledActions} available | Filtered: {filteredActions} | Cache: {actionCache} | v{actionVersion}","Action capability: {capability}","Kaomoji: {kaomojiItems} | Groups: {visibleGroups}/{totalGroups} | Cache: {kaomojiCache}","Plugin peers: {peerCount} | SDK: {sdk} | hooks: {hooks}","Command registration: {commands}","Escape helper: pick {pick} | goddess {goddess}","Cat menu: {menu} | Quick actions: {quickWheel}"],"status.command.registered":"registered ({source})","status.command.fallback":"input interception fallback","status.pick.inactive":"inactive","escape.toast.pickTimeout":"Neko single-item removal timed out.","escape.toast.pickArmed":"Neko single-item removal armed: click one of your item slots.","escape.toast.pickRemoved":"Neko removed {group}.","escape.toast.unlocked":"Neko unlocked {count} restraint item(s).","escape.toast.noLocked":"No locked restraint items were found.","escape.toast.boostUnavailable":"Escape skill boost is unavailable here.","escape.toast.boostActive":"Escape skill boost is active for 1 hour.","escape.toast.leaveUnavailable":"Leaving the room immediately is unavailable here.","escape.toast.goddessEnabled":"Neko goddess mode enabled.","escape.toast.goddessDisabled":"Neko goddess mode disabled.","escape.toast.easyChanged":"Lowered the difficulty of {count} restraint item(s) by {amount}.","escape.toast.easyNone":"No restraint items were available for difficulty adjustment.","escape.statusLines":["[Neko escape helper]","Goddess mode: {goddess}","Single-item removal: {pick}","Commands:","/neko escape release | unlock | boost | leave | goddess on | goddess off | status","/neko easy 99","/neko pick"],"escape.helpLines":["[Neko escape helper]","/neko escape release  - unlock every currently locked restraint item on yourself","/neko escape unlock   - alias of release","/neko escape boost    - +5 to escape-related skills for 1 hour","/neko escape leave    - leave the current room immediately","/neko escape goddess on|off","/neko escape status","/neko easy 99         - lower most current restraint difficulties by 99","/neko pick            - enter 5-second single-item removal mode"],"help.rp":["[Neko help / rp]","This section covers catgirl RP tone and output style.","The stable build does not provide /neko rp switching; it mainly uses standard catgirl conversion.","The bug build provides separate RP personas, while the dev build provides state and inspiration systems.","Gag speech is applied after tone conversion so the character flavor remains readable."],"help.action":["[Neko help / action]","Use the action cat button for quick Hug, Pat, Feed, Cuddle, and Kiss actions.","Current target mode: {targetMode}","Left-click prioritizes the selected target; expand the menu for quick access."],"help.emoji":["[Neko help / emoji]","Click the kaomoji cat to insert a face; hold it to open the kaomoji picker.","The kaomoji library loads remotely, so category updates apply after refreshing the game."],"help.mode":["[Neko help / mode]","Hold the main cat button for 10 seconds to toggle catgirl mode.","Gag speech automatically compresses messages based on the current gag level.","Outgoing conversion, displayed conversion, and chat styling can be adjusted in Neko settings."],"help.theme":["[Neko help / theme]","Current theme: {theme}","Available themes: {themes}","Themes can be switched from the extension settings page."],"help.spark":["[Neko help / spark]","Available in dev: /neko spark generates short RP ideas from recent chat, the selected target, and character state.","The stable build does not currently enable the spark generator."],"help.voice":["[Neko help / voice]","Available in dev: /neko voice <text> triggers NekoVoice locally; [NekoVoice] <text> can trigger it from chat.","Effects include *mew* / *purr* / *nyaa* visuals, pink flashes, sound-wave rings, captions, and breath particles.","The stable build does not currently enable NekoVoice to avoid excessive visual noise."],"help.reactions":["[Neko help / reactions]","Available in dev: /neko reactions lists interaction categories; /neko reactions <keyword> searches them.","Features include sensitive-zone responses, partner interactions, character-state reactions, and particles.","Stable keeps the basic action wheel and does not enable the 101 experimental interaction categories."],"help.mood":["[Neko help / mood]","Available in dev: /neko mood shows state and can switch between happy, sad, aloof, clingy, sleepy, and more.","Mood affects tone tails, particles, and interaction responses.","The stable build does not currently enable persistent mood state."],"help.systems":["[Neko help / systems]","Available in dev: /neko systems or /neko profile shows sensitivity, relationship warmth, persistent state, and event counts.","Sensitivity for ear / tail / nape / chin / belly accumulates through interactions.","More interaction raises warmth, trust, and familiarity with that person.","The stable build does not currently enable these experimental systems."],"help.status":["[Neko help / status]","Use /neko status to view plugin switches, conversions, chat styling, gag speech, theme, and action targeting.","It also shows action and kaomoji libraries, selected targets, plugin peers, SDK/hooks, and escape-helper state."],"help.main":["[Neko command help] /neko help <section>","Stable sections: rp / action / emoji / mode / theme / status / escape","Dev documentation: spark / voice / reactions / mood / systems","Quick examples: /neko help status | /neko help action | /neko status"],"command.description":"Bondage Club Neko Chat Enhancer commands.","targetPicker.title":"Choose an interaction target","targetPicker.self":"Self","wheel.actionTooltip":"{label}\nLeft-click for a random action; right-click to choose a target","wheel.actionComposerTooltip":"{label}\nClick to send a random action, hold for 3 seconds to open the composer, or right-click to choose a target","composer.title":"Action Composer","composer.subtitle":"Build natural actions from compatible pieces; nothing is sent until you confirm the preview","composer.close":"Close action composer","composer.recent":"Recent combination","composer.dice":"Random combination","composer.favorites":"Favorite action combinations","composer.noFavorites":"No favorites yet","composer.loadFavorite":"Load favorite","composer.field.action":"Action","composer.field.mood":"Mood","composer.field.style":"Style","composer.field.target":"Target","composer.field.extra":"Extra","composer.target.auto":"Auto (current selection)","composer.target.self":"Self","composer.target.none":"No target","composer.preview":"Preview","composer.previewUnavailable":"A preview cannot be generated for this combination","composer.reroll":"Another line","composer.favorite":"Favorite combination","composer.unfavorite":"Remove favorite","composer.send":"Send","composer.unavailableTitle":"Cannot perform “{action}” right now","composer.alternatives":"Available alternatives: {actions}","composer.requirement.hands":"both hands must be usable","composer.requirement.mouth":"the mouth must be free","composer.requirement.reach":"the target must be reachable","composer.requirement.mobility":"movement is required","composer.requirement.gag":"the current gag level is too high","composer.requirement.separator":", ","kaomoji.all":"All","settings.nyanChance.sample":"Meow~"}};
   const CONTENT_FALLBACKS = {"zh-CN":{"actions":[{"id":"hug","label":"抱抱","self":"抱住自己软软地蹭了蹭尾巴喵~","target":"轻轻抱住{target}，把脸颊贴过去蹭了蹭喵~"},{"id":"pat","label":"摸头","self":"摸了摸自己的头，假装被夸奖得很开心喵~","target":"踮起脚摸了摸{target}的头，认真夸奖了一句：好乖喵~"},{"id":"feed","label":"喂食","self":"捧着小点心小口吃掉，满足地眯起眼睛喵~","target":"把小点心递到{target}嘴边，期待地晃了晃尾巴：啊呜喵~"}],"kaomojiGroupLabel":"猫猫","actionLabelFallback":"动作","kaomojiLabelFallback":"颜文字","actionTargetFallback":"{target}靠近了一点喵~","actionSelfFallback":"轻轻晃了晃尾巴喵~","nearbyTarget":"身边的猫猫","unknownCharacter":"对方"},"en":{"actions":[{"id":"hug","label":"Hug","self":"Hugs herself and softly nuzzles her own tail, meow~","target":"Gently hugs {target} and nuzzles them cheek-to-cheek, meow~"},{"id":"pat","label":"Pat","self":"Pats her own head, pretending to glow from the praise, meow~","target":"Tiptoes to pat {target}'s head and earnestly praises them: Good kitty, meow~"},{"id":"feed","label":"Feed","self":"Nibbles a small treat and narrows her eyes contentedly, meow~","target":"Brings a small treat to {target}'s lips, tail wagging expectantly: Ahm, meow~"}],"kaomojiGroupLabel":"Cats","actionLabelFallback":"Action","kaomojiLabelFallback":"Kaomoji","actionTargetFallback":"{target} moves a little closer, meow~","actionSelfFallback":"Her tail sways softly, meow~","nearbyTarget":"the nearby kitty","unknownCharacter":"the other person"}};
   const CONTENT_LABELS = {"zh-CN":{"cat":"猫猫","cute":"可爱","heart":"爱心","shy":"害羞","happy":"开心","sleepy":"困困","clingy":"撒娇","kiss":"亲亲","pleading":"求求","surprised":"惊讶","smug":"得意","comfort":"安慰"},"en":{"cat":"Cats","cute":"Cute","heart":"Hearts","shy":"Shy","happy":"Happy","sleepy":"Sleepy","clingy":"Clingy","kiss":"Kisses","pleading":"Pleading","surprised":"Surprised","smug":"Smug","comfort":"Comfort"}};
   const CONTENT_PROCESSORS = ({
@@ -171,7 +171,7 @@
   const SUPPORTED_CONTENT_LOCALES = ["zh-CN", "en"];
   const INITIAL_CONTENT_LOCALE = normalizeLocale(BOOTSTRAP.defaultContentLocale) || "zh-CN";
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.11.0";
+  const VERSION = "2.12.0";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const CONTENT_BASE_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/content";
@@ -181,6 +181,17 @@
   };
   const ACTION_LIBRARY_LEGACY_CACHE_KEY = "bcNekoEnhancer.actionLibrary.v1";
   const ACTION_LIBRARY_CACHE_PREFIX = "bcNekoEnhancer.actionLibrary.v2";
+  const COMPOSER_LIBRARY_URLS = {
+    "zh-CN": `${CONTENT_BASE_URL}/zh-CN/composer.json`,
+    en: `${CONTENT_BASE_URL}/en/composer.json`,
+  };
+  const COMPOSER_LIBRARY_CACHE_PREFIX = "bcNekoEnhancer.composerLibrary.v1";
+  const COMPOSER_STATE_KEY = "bcNekoEnhancer.actionComposer.v1";
+  const ACTION_COMPOSER_HOLD_MS = 3000;
+  const ACTION_COMPOSER_MOVE_TOLERANCE = 12;
+  const ACTION_COMPOSER_RECENT_LIMIT = 16;
+  const ACTION_COMPOSER_FAVORITE_LIMIT = 12;
+  const ACTION_MESSAGE_MAX_LENGTH = 900;
   const KAOMOJI_LIBRARY_URL = `${CONTENT_BASE_URL}/shared/kaomoji.json`;
   const KAOMOJI_LIBRARY_LEGACY_CACHE_KEY = "bcNekoEnhancer.kaomojiLibrary.v1";
   const KAOMOJI_LIBRARY_CACHE_KEY = "bcNekoEnhancer.kaomojiLibrary.v2.shared";
@@ -296,8 +307,11 @@
   let DEFAULT_ACTION_LIBRARY = createDefaultActionLibrary(config.contentLocale);
   let DEFAULT_KAOMOJI_LIBRARY = createDefaultKaomojiLibrary(config.contentLocale);
   let actionLibrary = loadCachedActionLibrary() || normalizeActionLibrary(DEFAULT_ACTION_LIBRARY);
+  let composerLibrary = loadCachedComposerLibrary();
   let kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
   let kaomojiUsage = loadKaomojiUsage();
+  let composerState = loadComposerState();
+  let activeComposerSession = null;
   const processedMessages = new WeakSet();
   const atmosphereMessages = new WeakSet();
   let patched = false;
@@ -341,6 +355,7 @@
     contentLocale: () => config.contentLocale,
     setContentLocale,
     actionLibrary: () => actionLibrary,
+    composerLibrary: () => composerLibrary,
     kaomojiLibrary: () => kaomojiLibrary,
     version: VERSION,
     insertFace,
@@ -351,7 +366,9 @@
     toggle: toggleNekoMode,
     rain: pawRain,
     sendAction: sendQuickAction,
+    openActionComposer,
     reloadActions: loadRemoteActionLibrary,
+    reloadComposer: loadRemoteComposerLibrary,
     reloadKaomoji: loadRemoteKaomojiLibrary,
     diagnostic,
     status: () => ({
@@ -553,6 +570,7 @@
     markKaomojiPickerDirty();
     syncKaomojiPickerState(pickerOpen);
     if (shouldRenderWheel()) renderWheel();
+    if (activeComposerSession) renderActionComposer();
     return true;
   }
 
@@ -574,6 +592,14 @@
 
   function actionLibraryCacheKey(locale = config.contentLocale) {
     return `${ACTION_LIBRARY_CACHE_PREFIX}.${normalizeLocale(locale) || "zh-CN"}`;
+  }
+
+  function composerLibraryUrl(locale = config.contentLocale) {
+    return COMPOSER_LIBRARY_URLS[normalizeLocale(locale)] || COMPOSER_LIBRARY_URLS["zh-CN"];
+  }
+
+  function composerLibraryCacheKey(locale = config.contentLocale) {
+    return `${COMPOSER_LIBRARY_CACHE_PREFIX}.${normalizeLocale(locale) || "zh-CN"}`;
   }
 
   function createDefaultActionLibrary(locale) {
@@ -612,10 +638,12 @@
     DEFAULT_ACTION_LIBRARY = createDefaultActionLibrary(value);
     DEFAULT_KAOMOJI_LIBRARY = createDefaultKaomojiLibrary(value);
     actionLibrary = loadCachedActionLibrary() || normalizeActionLibrary(DEFAULT_ACTION_LIBRARY);
+    composerLibrary = loadCachedComposerLibrary();
     kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
+    hideActionComposer();
     markKaomojiPickerDirty();
     if (shouldRenderWheel()) renderWheel();
-    await Promise.all([loadRemoteActionLibrary(), loadRemoteKaomojiLibrary()]);
+    await Promise.all([loadRemoteActionLibrary(), loadRemoteComposerLibrary(), loadRemoteKaomojiLibrary()]);
     return true;
   }
 
@@ -671,6 +699,9 @@
           id: String(action.id || `action-${index}`).trim() || `action-${index}`,
           label: String(action.label || action.id || contentFallback().actionLabelFallback).trim().slice(0, 12),
           enabled: action.enabled !== false,
+          composer: action.composer === true || (action.composer && typeof action.composer === "object")
+            ? action.composer
+            : undefined,
           self,
           target,
           requirements: normalizeActionRequirements(action.requirements),
@@ -842,6 +873,115 @@
     kaomojiUsage[key] = getKaomojiUsage(key) + 1;
     saveKaomojiUsage();
     kaomojiPickerDirty = true;
+  }
+
+  function normalizeComposerTextList(value) {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((item, index) => {
+        if (typeof item === "string") return { id: `line-${index}`, text: item, weight: 1 };
+        if (!item || typeof item !== "object") return null;
+        const text = String(item.text || "");
+        return {
+          id: String(item.id || `line-${index}`),
+          text,
+          weight: Math.max(0.01, Number(item.weight) || 1),
+          compatibleActions: Array.isArray(item.compatibleActions) ? item.compatibleActions.map(String) : undefined,
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function normalizeComposerModeLines(value) {
+    return {
+      target: normalizeComposerTextList(value?.target),
+      self: normalizeComposerTextList(value?.self),
+      none: normalizeComposerTextList(value?.none),
+    };
+  }
+
+  function normalizeComposerLibrary(source) {
+    if (!source || typeof source !== "object") return null;
+    const moods = (Array.isArray(source.moods) ? source.moods : []).map((item) => ({
+      id: String(item?.id || ""),
+      label: String(item?.label || item?.id || ""),
+      compatibleActions: Array.isArray(item?.compatibleActions) ? item.compatibleActions.map(String) : [],
+      leads: normalizeComposerTextList(item?.leads),
+    })).filter((item) => item.id && item.label && item.leads.length);
+    const styles = (Array.isArray(source.styles) ? source.styles : []).map((item) => ({
+      id: String(item?.id || ""),
+      label: String(item?.label || item?.id || ""),
+    })).filter((item) => item.id && item.label);
+    const extras = (Array.isArray(source.extras) ? source.extras : []).map((item) => ({
+      id: String(item?.id || ""),
+      label: String(item?.label || item?.id || ""),
+      kind: item?.kind === "kaomoji" || item?.kind === "none" ? item.kind : "text",
+      compatibleActions: Array.isArray(item?.compatibleActions) ? item.compatibleActions.map(String) : [],
+      requirements: normalizeActionRequirements(item?.requirements),
+      trails: normalizeComposerTextList(item?.trails),
+    })).filter((item) => item.id && item.label && item.trails.length);
+    const actions = {};
+    for (const [actionId, definition] of Object.entries(source.actions || {})) {
+      const stylesById = {};
+      for (const [styleId, lines] of Object.entries(definition?.styles || {})) {
+        const normalized = normalizeComposerModeLines(lines);
+        if (normalized.target.length || normalized.self.length || normalized.none.length) stylesById[styleId] = normalized;
+      }
+      if (!Object.keys(stylesById).length) continue;
+      actions[actionId] = {
+        styles: stylesById,
+        incompatiblePairs: (Array.isArray(definition?.incompatiblePairs) ? definition.incompatiblePairs : [])
+          .map((pair) => ({ mood: String(pair?.mood || ""), style: String(pair?.style || "") }))
+          .filter((pair) => pair.mood && pair.style),
+      };
+    }
+    if (!moods.length || !styles.length || !extras.length || !Object.keys(actions).length) return null;
+    return {
+      version: String(source.version || "unknown"),
+      locale: normalizeLocale(source.locale) || config.contentLocale,
+      moods,
+      styles,
+      extras,
+      templates: normalizeComposerModeLines(source.templates),
+      endings: normalizeComposerModeLines(source.endings),
+      actions,
+    };
+  }
+
+  function loadCachedComposerLibrary() {
+    try {
+      const cached = localStorage.getItem(composerLibraryCacheKey());
+      return cached ? normalizeComposerLibrary(JSON.parse(cached)) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function cacheComposerLibrary(library) {
+    try {
+      localStorage.setItem(composerLibraryCacheKey(), JSON.stringify({ ...library, locale: config.contentLocale }));
+    } catch {
+      // The composer remains available for this page even when storage is unavailable.
+    }
+  }
+
+  function loadRemoteComposerLibrary() {
+    const requestedLocale = config.contentLocale;
+    return requestText(composerLibraryUrl(requestedLocale))
+      .then((text) => {
+        if (requestedLocale !== config.contentLocale) return composerLibrary;
+        const library = normalizeComposerLibrary({ ...JSON.parse(text), locale: requestedLocale });
+        if (!library) throw new Error("invalid composer library");
+        composerLibrary = library;
+        cacheComposerLibrary(library);
+        if (activeComposerSession) openActionComposer(activeComposerSession.action);
+        console.log(`[BC 猫娘增强] 动作编排器内容已加载: ${library.version}`);
+        return library;
+      })
+      .catch((error) => {
+        console.warn("[BC 猫娘增强] 动作编排器内容加载失败，使用缓存:", error);
+        return composerLibrary;
+      });
   }
 
   function resetKaomojiUsage() {
@@ -2499,6 +2639,181 @@
     return line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : contentFallback().nearbyTarget);
   }
 
+  function loadComposerState() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(COMPOSER_STATE_KEY) || "{}");
+      return {
+        last: parsed?.last && typeof parsed.last === "object" ? parsed.last : null,
+        favorites: (Array.isArray(parsed?.favorites) ? parsed.favorites : []).slice(0, ACTION_COMPOSER_FAVORITE_LIMIT),
+        recentHashes: (Array.isArray(parsed?.recentHashes) ? parsed.recentHashes : [])
+          .map(String)
+          .slice(0, ACTION_COMPOSER_RECENT_LIMIT),
+      };
+    } catch {
+      return { last: null, favorites: [], recentHashes: [] };
+    }
+  }
+
+  function saveComposerState() {
+    try {
+      localStorage.setItem(COMPOSER_STATE_KEY, JSON.stringify(composerState));
+    } catch {
+      // Composer choices still work for this page when persistent storage is unavailable.
+    }
+  }
+
+  function composerComboKey(combo) {
+    return [combo?.action, combo?.mood, combo?.style, combo?.target, combo?.extra].map((value) => String(value || "")).join("|");
+  }
+
+  function simpleHash(value) {
+    let hash = 5381;
+    for (const char of String(value)) hash = ((hash << 5) + hash) ^ char.codePointAt(0);
+    return (hash >>> 0).toString(36);
+  }
+
+  function weightedPick(items) {
+    const candidates = (Array.isArray(items) ? items : []).filter((item) => item && Number(item.weight || 1) > 0);
+    if (!candidates.length) return null;
+    const total = candidates.reduce((sum, item) => sum + Number(item.weight || 1), 0);
+    let cursor = Math.random() * total;
+    for (const item of candidates) {
+      cursor -= Number(item.weight || 1);
+      if (cursor <= 0) return item;
+    }
+    return candidates.at(-1);
+  }
+
+  function getComposerDefinition(action) {
+    if (!action?.composer || !composerLibrary) return null;
+    if (action.composer === true) return composerLibrary.actions?.[action.id] || null;
+    if (typeof action.composer !== "object") return null;
+    const styles = {};
+    for (const [styleId, lines] of Object.entries(action.composer.styles || {})) {
+      styles[styleId] = normalizeComposerModeLines(lines);
+    }
+    return {
+      styles,
+      incompatiblePairs: Array.isArray(action.composer.incompatiblePairs) ? action.composer.incompatiblePairs : [],
+    };
+  }
+
+  function getComposerActions() {
+    return (actionLibrary.actions || []).filter((action) => action.enabled !== false && getComposerDefinition(action));
+  }
+
+  function isComposerPairCompatible(definition, moodId, styleId) {
+    return !(definition?.incompatiblePairs || []).some((pair) => pair.mood === moodId && pair.style === styleId);
+  }
+
+  function getCompatibleComposerMoods(action) {
+    return (composerLibrary?.moods || []).filter((mood) => (
+      !mood.compatibleActions.length || mood.compatibleActions.includes(action.id)
+    ));
+  }
+
+  function getCompatibleComposerStyles(action, moodId) {
+    const definition = getComposerDefinition(action);
+    return (composerLibrary?.styles || []).filter((style) => (
+      definition?.styles?.[style.id] && isComposerPairCompatible(definition, moodId, style.id)
+    ));
+  }
+
+  function getCompatibleComposerExtras(action) {
+    const state = detectPlayerActionCapability();
+    return (composerLibrary?.extras || []).filter((extra) => (
+      (!extra.compatibleActions.length || extra.compatibleActions.includes(action.id))
+      && actionMeetsRequirements({ requirements: extra.requirements }, state)
+    ));
+  }
+
+  function normalizeComposerSelection(action, selection = {}) {
+    const moods = getCompatibleComposerMoods(action);
+    const mood = moods.some((item) => item.id === selection.mood) ? selection.mood : moods[0]?.id;
+    const styles = getCompatibleComposerStyles(action, mood);
+    const style = styles.some((item) => item.id === selection.style) ? selection.style : styles[0]?.id;
+    const extras = getCompatibleComposerExtras(action);
+    const extra = extras.some((item) => item.id === selection.extra) ? selection.extra : extras.at(-1)?.id;
+    const knownTarget = ["auto", "self", "none"].includes(selection.target)
+      || /^member:\d+$/.test(String(selection.target || ""));
+    return {
+      action: action.id,
+      mood,
+      style,
+      target: knownTarget ? selection.target : config.actionTargetMode === ACTION_TARGET_MODE.SELF ? "self" : "auto",
+      extra,
+    };
+  }
+
+  function resolveComposerTarget(targetId) {
+    if (targetId === "self") return { mode: "self", target: null };
+    if (targetId === "none") return { mode: "none", target: null };
+    if (String(targetId).startsWith("member:")) {
+      const memberNumber = Number(String(targetId).slice(7));
+      const target = (W.ChatRoomCharacter || []).find((character) => Number(character?.MemberNumber) === memberNumber) || null;
+      if (target) return { mode: "target", target };
+    }
+    const selected = getSelectedTarget();
+    return selected ? { mode: "target", target: selected } : { mode: "none", target: null };
+  }
+
+  function normalizeComposedActionText(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .replace(/\s+([,.;!?，。！？])/g, "$1")
+      .replace(/([,，]){2,}/g, "$1")
+      .replace(/([。！？.!?])\1+/g, "$1")
+      .trim();
+  }
+
+  function generateComposerPreview(action, selection, rememberHash = true) {
+    const definition = getComposerDefinition(action);
+    if (!definition || !composerLibrary) return null;
+    const normalized = normalizeComposerSelection(action, selection);
+    const mood = getCompatibleComposerMoods(action).find((item) => item.id === normalized.mood);
+    const styleLines = definition.styles?.[normalized.style];
+    const extra = getCompatibleComposerExtras(action).find((item) => item.id === normalized.extra);
+    const resolvedTarget = resolveComposerTarget(normalized.target);
+    const mode = resolvedTarget.mode;
+    if (!mood || !styleLines || !extra) return null;
+
+    let generated = null;
+    for (let attempt = 0; attempt < 24; attempt += 1) {
+      const moodLead = weightedPick(mood.leads);
+      const actionCore = weightedPick(styleLines[mode]);
+      const extraTrail = extra.kind === "kaomoji"
+        ? { id: `kaomoji-${attempt}`, text: ` ${pickRandomKaomoji()}`, weight: 1 }
+        : weightedPick(extra.trails);
+      const ending = weightedPick(composerLibrary.endings?.[mode]);
+      const template = weightedPick(composerLibrary.templates?.[mode]);
+      if (!moodLead || !actionCore || !extraTrail || !ending || !template) continue;
+      const targetName = resolvedTarget.target ? getCharacterName(resolvedTarget.target) : "";
+      const coreText = formatTemplate(actionCore.text, { target: targetName });
+      const text = normalizeComposedActionText(formatTemplate(template.text, {
+        moodLead: moodLead.text,
+        actionCore: coreText,
+        extraTrail: extraTrail.text,
+        ending: ending.text,
+      }));
+      const hash = simpleHash([
+        composerComboKey(normalized), mode, moodLead.id, actionCore.id, extraTrail.id, ending.id, template.id, text,
+      ].join("|"));
+      generated = { text, hash, selection: normalized, target: resolvedTarget.target, mode };
+      if (!composerState.recentHashes.includes(hash)) break;
+    }
+    if (!generated) return null;
+    if (generated.text.length > ACTION_MESSAGE_MAX_LENGTH) {
+      generated.text = `${generated.text.slice(0, ACTION_MESSAGE_MAX_LENGTH - 1).trimEnd()}…`;
+      generated.hash = simpleHash(generated.text);
+    }
+    if (rememberHash) {
+      composerState.recentHashes = [generated.hash, ...composerState.recentHashes.filter((hash) => hash !== generated.hash)]
+        .slice(0, ACTION_COMPOSER_RECENT_LIMIT);
+      saveComposerState();
+    }
+    return generated;
+  }
+
   function sendEmote(text) {
     const input = getChatInput();
     if (input && typeof W.ChatRoomSendChat === "function") {
@@ -2513,10 +2828,248 @@
     return false;
   }
 
+  function getComposerFavoriteLabel(combo) {
+    const action = (actionLibrary.actions || []).find((item) => item.id === combo.action);
+    const mood = composerLibrary?.moods?.find((item) => item.id === combo.mood);
+    const style = composerLibrary?.styles?.find((item) => item.id === combo.style);
+    return [action?.label || combo.action, mood?.label || combo.mood, style?.label || combo.style].filter(Boolean).join(" · ");
+  }
+
+  function getComposerAlternativeLabels(action) {
+    const state = detectPlayerActionCapability();
+    const actions = getComposerActions()
+      .filter((candidate) => candidate.id !== action.id && actionMeetsRequirements(candidate, state))
+      .slice(0, 3)
+      .map((candidate) => candidate.label);
+    if (actions.length) return actions;
+    return (composerLibrary?.extras || [])
+      .filter((extra) => ["tail", "ears", "purr", "eyes"].includes(extra.id))
+      .slice(0, 3)
+      .map((extra) => extra.label);
+  }
+
+  function renderComposerOptionGroup(dimension, label, options, selectedId) {
+    return `
+      <div class="bcn-composer-field">
+        <div class="bcn-composer-label">${escapeHtml(label)}</div>
+        <div class="bcn-composer-options">
+          ${options.map((option) => `
+            <button type="button" data-composer-option="${escapeHtml(dimension)}" data-value="${escapeHtml(option.id)}"
+              class="${option.id === selectedId ? "is-selected" : ""}">${escapeHtml(option.label)}</button>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function composerTargetOptions(selectedId) {
+    const fixed = [
+      { id: "auto", label: t("composer.target.auto") },
+      { id: "self", label: t("composer.target.self") },
+      { id: "none", label: t("composer.target.none") },
+    ];
+    const people = getActionTargets().map((item) => ({ id: `member:${item.memberNumber}`, label: item.name }));
+    return [...fixed, ...people].map((option) => (
+      `<option value="${escapeHtml(option.id)}"${option.id === selectedId ? " selected" : ""}>${escapeHtml(option.label)}</option>`
+    )).join("");
+  }
+
+  function renderActionComposer() {
+    const overlay = document.getElementById("bcn-action-composer-overlay");
+    if (!overlay || !activeComposerSession) return;
+    const action = activeComposerSession.action;
+    activeComposerSession.selection = normalizeComposerSelection(action, activeComposerSession.selection);
+    activeComposerSession.preview = generateComposerPreview(action, activeComposerSession.selection);
+    const selection = activeComposerSession.selection;
+    const actions = getComposerActions();
+    const moods = getCompatibleComposerMoods(action);
+    const styles = getCompatibleComposerStyles(action, selection.mood);
+    const extras = getCompatibleComposerExtras(action);
+    const reasons = getActionUnavailableReasons(action);
+    const alternatives = reasons.length ? getComposerAlternativeLabels(action) : [];
+    const favoriteKey = composerComboKey(selection);
+    const isFavorite = composerState.favorites.some((item) => composerComboKey(item) === favoriteKey);
+    const favorites = composerState.favorites
+      .map((combo, index) => `<option value="${index}">${escapeHtml(getComposerFavoriteLabel(combo))}</option>`)
+      .join("");
+
+    overlay.innerHTML = `
+      <section id="bcn-action-composer" role="dialog" aria-modal="true" aria-label="${escapeHtml(t("composer.title"))}">
+        <header class="bcn-composer-header">
+          <div>
+            <div class="bcn-composer-title">${escapeHtml(t("composer.title"))}</div>
+            <div class="bcn-composer-subtitle">${escapeHtml(t("composer.subtitle"))}</div>
+          </div>
+          <button type="button" class="bcn-composer-close" data-composer-command="close" aria-label="${escapeHtml(t("composer.close"))}">×</button>
+        </header>
+        <div class="bcn-composer-shortcuts">
+          <button type="button" data-composer-command="recent"${composerState.last ? "" : " disabled"}>${escapeHtml(t("composer.recent"))}</button>
+          <button type="button" data-composer-command="dice">🎲 ${escapeHtml(t("composer.dice"))}</button>
+          <select id="bcn-composer-favorites"${favorites ? "" : " disabled"} aria-label="${escapeHtml(t("composer.favorites"))}">
+            ${favorites || `<option>${escapeHtml(t("composer.noFavorites"))}</option>`}
+          </select>
+          <button type="button" data-composer-command="load-favorite"${favorites ? "" : " disabled"}>${escapeHtml(t("composer.loadFavorite"))}</button>
+        </div>
+        <div class="bcn-composer-scroll">
+          ${renderComposerOptionGroup("action", t("composer.field.action"), actions, action.id)}
+          ${renderComposerOptionGroup("mood", t("composer.field.mood"), moods, selection.mood)}
+          ${renderComposerOptionGroup("style", t("composer.field.style"), styles, selection.style)}
+          <label class="bcn-composer-field">
+            <span class="bcn-composer-label">${escapeHtml(t("composer.field.target"))}</span>
+            <select id="bcn-composer-target">${composerTargetOptions(selection.target)}</select>
+          </label>
+          ${renderComposerOptionGroup("extra", t("composer.field.extra"), extras, selection.extra)}
+          ${reasons.length ? `
+            <div class="bcn-composer-warning">
+              <strong>${escapeHtml(t("composer.unavailableTitle", { action: action.label }))}</strong>
+              <span>${escapeHtml(reasons.join(t("composer.requirement.separator")))}</span>
+              ${alternatives.length ? `<span>${escapeHtml(t("composer.alternatives", { actions: alternatives.join(t("composer.requirement.separator")) }))}</span>` : ""}
+            </div>
+          ` : ""}
+          <div class="bcn-composer-preview-label">${escapeHtml(t("composer.preview"))}</div>
+          <div id="bcn-composer-preview">${escapeHtml(activeComposerSession.preview?.text || t("composer.previewUnavailable"))}</div>
+        </div>
+        <footer class="bcn-composer-footer">
+          <button type="button" data-composer-command="reroll">${escapeHtml(t("composer.reroll"))}</button>
+          <button type="button" data-composer-command="favorite">${escapeHtml(t(isFavorite ? "composer.unfavorite" : "composer.favorite"))}</button>
+          <button type="button" class="bcn-composer-send" data-composer-command="send"${reasons.length || !activeComposerSession.preview ? " disabled" : ""}>${escapeHtml(t("composer.send"))}</button>
+        </footer>
+      </section>
+    `;
+
+    overlay.onclick = (event) => {
+      const option = event.target.closest?.("[data-composer-option]");
+      const commandButton = event.target.closest?.("[data-composer-command]");
+      if (event.target === overlay) {
+        if (Date.now() - activeComposerSession.openedAt < 500) return;
+        hideActionComposer();
+        return;
+      }
+      if (option) {
+        const dimension = option.dataset.composerOption;
+        const value = option.dataset.value;
+        if (dimension === "action") {
+          const nextAction = actions.find((item) => item.id === value);
+          if (nextAction) {
+            activeComposerSession.action = nextAction;
+            activeComposerSession.selection = normalizeComposerSelection(nextAction, activeComposerSession.selection);
+          }
+        } else {
+          activeComposerSession.selection[dimension] = value;
+        }
+        renderActionComposer();
+        return;
+      }
+      if (!commandButton) return;
+      const command = commandButton.dataset.composerCommand;
+      if (command === "close") hideActionComposer();
+      else if (command === "reroll") renderActionComposer();
+      else if (command === "recent" && composerState.last) {
+        const recentAction = actions.find((item) => item.id === composerState.last.action) || action;
+        activeComposerSession.action = recentAction;
+        activeComposerSession.selection = normalizeComposerSelection(recentAction, composerState.last);
+        renderActionComposer();
+      } else if (command === "dice") {
+        const randomAction = actions[Math.floor(Math.random() * actions.length)] || action;
+        const randomMoods = getCompatibleComposerMoods(randomAction);
+        const mood = randomMoods[Math.floor(Math.random() * randomMoods.length)]?.id;
+        const randomStyles = getCompatibleComposerStyles(randomAction, mood);
+        const randomExtras = getCompatibleComposerExtras(randomAction);
+        const targetIds = ["auto", "self", "none", ...getActionTargets().map((item) => `member:${item.memberNumber}`)];
+        activeComposerSession.action = randomAction;
+        activeComposerSession.selection = normalizeComposerSelection(randomAction, {
+          mood,
+          style: randomStyles[Math.floor(Math.random() * randomStyles.length)]?.id,
+          extra: randomExtras[Math.floor(Math.random() * randomExtras.length)]?.id,
+          target: targetIds[Math.floor(Math.random() * targetIds.length)],
+        });
+        renderActionComposer();
+      } else if (command === "load-favorite") {
+        const index = Number(document.getElementById("bcn-composer-favorites")?.value);
+        const favorite = composerState.favorites[index];
+        if (!favorite) return;
+        const favoriteAction = actions.find((item) => item.id === favorite.action) || action;
+        activeComposerSession.action = favoriteAction;
+        activeComposerSession.selection = normalizeComposerSelection(favoriteAction, favorite);
+        renderActionComposer();
+      } else if (command === "favorite") {
+        const key = composerComboKey(activeComposerSession.selection);
+        const existing = composerState.favorites.findIndex((item) => composerComboKey(item) === key);
+        if (existing >= 0) {
+          composerState.favorites.splice(existing, 1);
+          showToast(t("toast.composerUnfavorited"));
+        } else {
+          composerState.favorites = [{ ...activeComposerSession.selection }, ...composerState.favorites]
+            .slice(0, ACTION_COMPOSER_FAVORITE_LIMIT);
+          showToast(t("toast.composerFavorited"));
+        }
+        saveComposerState();
+        renderActionComposer();
+      } else if (command === "send" && activeComposerSession.preview) {
+        const currentReasons = getActionUnavailableReasons(activeComposerSession.action);
+        if (currentReasons.length) {
+          showToast(formatActionUnavailableReason(activeComposerSession.action));
+          renderActionComposer();
+          return;
+        }
+        const preview = activeComposerSession.preview;
+        composerState.last = { ...preview.selection };
+        saveComposerState();
+        if (sendEmote(preview.text) && config.rainOnSend) pawRain("Action");
+        hideActionComposer();
+      }
+    };
+
+    const targetSelect = document.getElementById("bcn-composer-target");
+    if (targetSelect) {
+      targetSelect.onchange = () => {
+        activeComposerSession.selection.target = targetSelect.value;
+        renderActionComposer();
+      };
+    }
+  }
+
+  function onComposerEscape(event) {
+    if (event.key === "Escape") hideActionComposer();
+  }
+
+  function openActionComposer(action) {
+    if (!getComposerDefinition(action)) {
+      showToast(t("toast.composerUnavailable"));
+      return false;
+    }
+    hideTargetPicker();
+    hideKaomojiPicker();
+    let overlay = document.getElementById("bcn-action-composer-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "bcn-action-composer-overlay";
+      document.body.appendChild(overlay);
+    }
+    const seed = activeComposerSession?.action?.id === action.id
+      ? activeComposerSession.selection
+      : composerState.last?.action === action.id ? composerState.last : {};
+    activeComposerSession = {
+      action,
+      selection: normalizeComposerSelection(action, seed),
+      preview: null,
+      openedAt: Date.now(),
+    };
+    document.addEventListener("keydown", onComposerEscape);
+    renderActionComposer();
+    return true;
+  }
+
+  function hideActionComposer() {
+    document.removeEventListener("keydown", onComposerEscape);
+    document.getElementById("bcn-action-composer-overlay")?.remove();
+    activeComposerSession = null;
+  }
+
   function sendQuickAction(action, target = undefined) {
     if (!action) return;
     if (!actionMeetsRequirements(action, detectPlayerActionCapability())) {
-      showToast(t("toast.actionUnavailable"));
+      showToast(formatActionUnavailableReason(action));
       renderWheel();
       return;
     }
@@ -2591,24 +3144,78 @@
     showToast(t("toast.actionLibraryManaged"));
   }
 
+  function bindWheelActionButton(button, action) {
+    let holdTimer = 0;
+    let holdTriggered = false;
+    let startX = 0;
+    let startY = 0;
+
+    const cancelHold = () => {
+      clearTimeout(holdTimer);
+      holdTimer = 0;
+      button.classList.remove("is-holding");
+    };
+
+    button.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      holdTriggered = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      cancelHold();
+      if (!action.composer) return;
+      button.classList.add("is-holding");
+      holdTimer = setTimeout(() => {
+        holdTriggered = true;
+        cancelHold();
+        openActionComposer(action);
+      }, ACTION_COMPOSER_HOLD_MS);
+    });
+
+    button.addEventListener("pointermove", (event) => {
+      if (!holdTimer) return;
+      if (Math.hypot(event.clientX - startX, event.clientY - startY) > ACTION_COMPOSER_MOVE_TOLERANCE) cancelHold();
+    });
+
+    ["pointerup", "pointercancel", "pointerleave"].forEach((type) => {
+      button.addEventListener(type, cancelHold);
+    });
+
+    button.addEventListener("click", (event) => {
+      if (holdTriggered) {
+        event.preventDefault();
+        event.stopPropagation();
+        holdTriggered = false;
+        return;
+      }
+      sendQuickAction(action);
+    });
+
+    button.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      if (event.button !== 2) return;
+      cancelHold();
+      showTargetPicker(action, button);
+    });
+  }
+
   function renderWheel() {
     if (!shouldRenderWheel()) return;
     const wheel = document.getElementById("bcn-wheel");
     if (!wheel) return;
     wheel.innerHTML = "";
-    const actions = getActiveActions().slice(0, 5);
+    const state = detectPlayerActionCapability();
+    const actions = (actionLibrary.actions || []).filter((action) => action.enabled !== false).slice(0, 5);
     actions.forEach((action, index) => {
       const btn = document.createElement("button");
       btn.className = "bcn-wheel-btn";
       btn.type = "button";
       btn.textContent = action.label;
-      btn.title = t("wheel.actionTooltip", { label: action.label });
+      const available = actionMeetsRequirements(action, state);
+      btn.title = t(action.composer ? "wheel.actionComposerTooltip" : "wheel.actionTooltip", { label: action.label });
       btn.style.setProperty("--i", String(index));
-      btn.addEventListener("click", () => sendQuickAction(action));
-      btn.addEventListener("contextmenu", (ev) => {
-        ev.preventDefault();
-        showTargetPicker(action, btn);
-      });
+      btn.classList.toggle("is-unavailable", !available);
+      btn.setAttribute("aria-disabled", available ? "false" : "true");
+      bindWheelActionButton(btn, action);
       wheel.appendChild(btn);
     });
     for (let index = actions.length; index < 6; index++) {
@@ -3014,6 +3621,26 @@
     observerRoot = nextRoot;
     scheduleDecorateChat(0, true);
     return true;
+  }
+
+  function getActionUnavailableReasons(action, state = detectPlayerActionCapability()) {
+    const requirements = getActionRequirements(action);
+    const reasons = [];
+    if (requirements.needHands && !state.handsFree) reasons.push(t("composer.requirement.hands"));
+    if (requirements.needMouth && !state.mouthFree) reasons.push(t("composer.requirement.mouth"));
+    if (requirements.needReach && !state.canReach) reasons.push(t("composer.requirement.reach"));
+    if (requirements.needMobility && !state.canMove) reasons.push(t("composer.requirement.mobility"));
+    if (Number.isFinite(requirements.maxGagLevel) && state.gagLevel > requirements.maxGagLevel) {
+      reasons.push(t("composer.requirement.gag"));
+    }
+    return [...new Set(reasons)];
+  }
+
+  function formatActionUnavailableReason(action) {
+    const reasons = getActionUnavailableReasons(action);
+    return reasons.length
+      ? t("toast.actionUnavailableReason", { reason: reasons.join(t("composer.requirement.separator")) })
+      : t("toast.actionUnavailable");
   }
 
   function runMaintenance() {
@@ -4076,6 +4703,230 @@
         border-radius: 10px !important;
       }
 
+      .bcn-wheel-btn {
+        position: relative;
+        overflow: hidden;
+        touch-action: manipulation;
+        -webkit-touch-callout: none;
+        user-select: none;
+      }
+
+      .bcn-wheel-btn.is-unavailable {
+        opacity: 0.56;
+        filter: saturate(0.55);
+      }
+
+      .bcn-wheel-btn.is-holding::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 4px;
+        transform-origin: left center;
+        background: var(--bcn-accent);
+        animation: bcn-composer-hold ${ACTION_COMPOSER_HOLD_MS}ms linear forwards;
+      }
+
+      @keyframes bcn-composer-hold {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+      }
+
+      #bcn-action-composer-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100020;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background: rgba(30, 24, 29, 0.38);
+        backdrop-filter: blur(5px);
+      }
+
+      #bcn-action-composer {
+        width: min(760px, 96vw);
+        max-height: min(86vh, 820px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 2px solid var(--bcn-border);
+        border-radius: 22px;
+        background: var(--bcn-panel);
+        color: var(--bcn-text);
+        box-shadow: 0 24px 70px rgba(35, 23, 31, 0.28), 0 8px 28px var(--bcn-glow);
+      }
+
+      .bcn-composer-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px 12px;
+        border-bottom: 1px solid var(--bcn-border);
+        background: linear-gradient(180deg, var(--bcn-soft), var(--bcn-panel));
+      }
+
+      .bcn-composer-title {
+        color: var(--bcn-accent);
+        font-size: clamp(22px, 3vw, 30px);
+        font-weight: 900;
+      }
+
+      .bcn-composer-subtitle {
+        max-width: 620px;
+        margin-top: 4px;
+        color: var(--bcn-muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .bcn-composer-close {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 auto;
+        border: 1px solid var(--bcn-border);
+        border-radius: 12px;
+        background: var(--bcn-panel);
+        color: var(--bcn-muted);
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      .bcn-composer-shortcuts,
+      .bcn-composer-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: var(--bcn-soft);
+      }
+
+      .bcn-composer-shortcuts {
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--bcn-border);
+      }
+
+      .bcn-composer-shortcuts select {
+        min-width: 170px;
+        flex: 1 1 190px;
+        min-height: 36px;
+        padding: 5px 9px;
+      }
+
+      .bcn-composer-shortcuts button,
+      .bcn-composer-footer button,
+      .bcn-composer-options button {
+        min-height: 36px;
+        padding: 7px 12px;
+        border: 1px solid var(--bcn-border);
+        border-radius: 11px;
+        background: var(--bcn-panel);
+        color: var(--bcn-text);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .bcn-composer-shortcuts button:disabled,
+      .bcn-composer-footer button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .bcn-composer-scroll {
+        overflow-y: auto;
+        padding: 16px 20px 20px;
+      }
+
+      .bcn-composer-field {
+        display: grid;
+        grid-template-columns: minmax(72px, 100px) 1fr;
+        align-items: start;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .bcn-composer-label,
+      .bcn-composer-preview-label {
+        padding-top: 8px;
+        color: var(--bcn-muted);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .bcn-composer-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .bcn-composer-options button.is-selected {
+        border-color: var(--bcn-accent);
+        background: var(--bcn-accent);
+        color: #fff;
+        box-shadow: 0 4px 12px var(--bcn-glow);
+      }
+
+      #bcn-composer-target {
+        width: 100%;
+        min-height: 40px;
+        padding: 6px 10px;
+      }
+
+      .bcn-composer-warning {
+        display: grid;
+        gap: 4px;
+        margin: 4px 0 14px;
+        padding: 11px 13px;
+        border: 1px solid #efb4aa;
+        border-radius: 12px;
+        background: #fff3f0;
+        color: #8b493e;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .bcn-composer-preview-label {
+        padding: 0 0 7px;
+      }
+
+      #bcn-composer-preview {
+        min-height: 78px;
+        padding: 14px 16px;
+        border: 2px dashed var(--bcn-border);
+        border-radius: 14px;
+        background: var(--bcn-soft);
+        color: var(--bcn-text);
+        font-size: clamp(15px, 2.2vw, 18px);
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .bcn-composer-footer {
+        justify-content: flex-end;
+        border-top: 1px solid var(--bcn-border);
+      }
+
+      .bcn-composer-footer .bcn-composer-send {
+        border-color: var(--bcn-accent);
+        background: var(--bcn-accent);
+        color: #fff;
+      }
+
+      @media (max-width: 620px) {
+        #bcn-action-composer-overlay { padding: 8px; }
+        #bcn-action-composer { max-height: 94vh; border-radius: 16px; }
+        .bcn-composer-header { padding: 14px 14px 10px; }
+        .bcn-composer-shortcuts,
+        .bcn-composer-footer { padding: 9px 14px; }
+        .bcn-composer-scroll { padding: 13px 14px 16px; }
+        .bcn-composer-field { grid-template-columns: 1fr; gap: 5px; }
+        .bcn-composer-label { padding-top: 0; }
+        .bcn-composer-footer { flex-wrap: wrap; }
+        .bcn-composer-footer button { flex: 1 1 110px; }
+      }
+
       #bcn-target-picker {
         position: fixed;
         right: 18px;
@@ -4173,6 +5024,7 @@
     createPanel();
     registerModSdk();
     loadRemoteActionLibrary();
+    loadRemoteComposerLibrary();
     loadRemoteKaomojiLibrary();
     bindVisibilityLifecycle();
     syncScreenClass();

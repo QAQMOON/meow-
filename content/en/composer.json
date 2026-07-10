@@ -1,0 +1,200 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-07-10",
+  "description": "English content pack for the neko action composer. Saved and transmitted values always use stable IDs.",
+  "moods": [
+    {
+      "id": "shy",
+      "label": "Shy",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["Shyly looking away, she ", "With the tips of her ears turning pink, she ", "After taking a quiet breath, she "]
+    },
+    {
+      "id": "happy",
+      "label": "Happy",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["Happily swishing her tail, she ", "With her eyes shining brightly, she ", "Unable to hide her smile, she "]
+    },
+    {
+      "id": "playful",
+      "label": "Playful",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["Giving a playful wink, she ", "With a mischievous flick of her tail, she ", "After teasingly drawing out the moment, she "]
+    },
+    {
+      "id": "sleepy",
+      "label": "Sleepy",
+      "compatibleActions": ["hug", "pat", "cuddle"],
+      "leads": ["Letting out a sleepy yawn, she ", "With her drowsy eyes half closed, she ", "Wrapped in soft, fuzzy sleepiness, she "]
+    },
+    {
+      "id": "caring",
+      "label": "Caring",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["Looking over with gentle care, she ", "Softening her voice and movements, she ", "With a warm and reassuring smile, she "]
+    },
+    {
+      "id": "tsundere",
+      "label": "Tsundere",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "leads": ["Turning away as if she does not care, she ", "Muttering that this is not especially for anyone, she ", "Hiding her blush behind a tiny huff, she "]
+    }
+  ],
+  "styles": [
+    { "id": "gentle", "label": "Gentle" },
+    { "id": "normal", "label": "Natural" },
+    { "id": "enthusiastic", "label": "Enthusiastic" }
+  ],
+  "extras": [
+    {
+      "id": "tail",
+      "label": "Tail",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": [", her tail tip swaying softly along with her", ", her tail quietly curling in a small circle nearby"]
+    },
+    {
+      "id": "ears",
+      "label": "Ears",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": [", her ears twitching with anticipation", ", the pink tips of her ears giving a restless little tremble"]
+    },
+    {
+      "id": "purr",
+      "label": "Purr",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": [", a quiet purr escaping before she can stop it", ", a small, contented purr rumbling in her chest"]
+    },
+    {
+      "id": "eyes",
+      "label": "Gaze",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": [", then glancing up to secretly watch the reaction", ", her soft gaze lingering for one more moment"]
+    },
+    {
+      "id": "kaomoji",
+      "label": "Kaomoji",
+      "kind": "kaomoji",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": [""]
+    },
+    {
+      "id": "none",
+      "label": "None",
+      "kind": "none",
+      "compatibleActions": ["hug", "pat", "feed", "cuddle", "kiss"],
+      "trails": [""]
+    }
+  ],
+  "templates": {
+    "target": ["{moodLead}{actionCore}{extraTrail}{ending}"],
+    "self": ["{moodLead}{actionCore}{extraTrail}{ending}"],
+    "none": ["{moodLead}{actionCore}{extraTrail}{ending}"]
+  },
+  "endings": {
+    "target": [", meow~", ", meow."],
+    "self": [", meow~", ", meow."],
+    "none": [", meow~", ", meow?"]
+  },
+  "actions": {
+    "hug": {
+      "incompatiblePairs": [{ "mood": "sleepy", "style": "enthusiastic" }],
+      "styles": {
+        "gentle": {
+          "target": ["moves close to {target} and carefully wraps them in a gentle hug"],
+          "self": ["curls into a warm little bundle and hugs herself"],
+          "none": ["opens her arms gently and quietly asks whether anyone would like a hug"]
+        },
+        "normal": {
+          "target": ["opens her arms and pulls {target} into a cozy hug"],
+          "self": ["wraps her arms around her shoulders and gives herself a hug"],
+          "none": ["opens her arms and waits hopefully for a hug"]
+        },
+        "enthusiastic": {
+          "target": ["bounds over to {target} and gives them a big, full hug"],
+          "self": ["squeezes herself in a big hug and sways twice"],
+          "none": ["throws her arms open and announces that hugs are being delivered today"]
+        }
+      }
+    },
+    "pat": {
+      "incompatiblePairs": [{ "mood": "sleepy", "style": "enthusiastic" }],
+      "styles": {
+        "gentle": {
+          "target": ["raises a hand and softly pats {target} on the head"],
+          "self": ["gently pats her own head and gives herself a little reassurance"],
+          "none": ["raises one paw and quietly asks whether anyone wants head pats"]
+        },
+        "normal": {
+          "target": ["casually ruffles {target}'s hair with an affectionate pat"],
+          "self": ["ruffles her own hair and gathers her energy again"],
+          "none": ["wiggles her ready paws and waits for someone to pat"]
+        },
+        "enthusiastic": {
+          "target": ["hurries over and ruffles {target}'s hair until it is all fluffy"],
+          "self": ["energetically pats her own head and praises herself for being good today"],
+          "none": ["raises both paws with excitement, ready to deliver an enthusiastic head pat"]
+        }
+      }
+    },
+    "feed": {
+      "incompatiblePairs": [{ "mood": "shy", "style": "enthusiastic" }],
+      "styles": {
+        "gentle": {
+          "target": ["brings a small treat to {target} and patiently offers it to them"],
+          "self": ["cups a little treat in both hands and eats it in tiny bites"],
+          "none": ["holds up a plate of treats and softly asks whether anyone is hungry"]
+        },
+        "normal": {
+          "target": ["takes out a prepared snack and offers it to {target}"],
+          "self": ["takes out a snack and bites into it with satisfaction"],
+          "none": ["holds up a snack and asks who would like a bite"]
+        },
+        "enthusiastic": {
+          "target": ["brings in a full tray of treats and invites {target} to choose anything they like"],
+          "self": ["gathers a pile of treats and decides to reward herself properly"],
+          "none": ["sets out a full tray of treats and calls everyone over to try them"]
+        }
+      }
+    },
+    "cuddle": {
+      "incompatiblePairs": [{ "mood": "sleepy", "style": "enthusiastic" }],
+      "styles": {
+        "gentle": {
+          "target": ["settles softly beside {target} and cuddles close to them"],
+          "self": ["hugs her own tail and curls into a quiet little cuddle"],
+          "none": ["quietly makes room beside her and asks whether anyone would like to cuddle"]
+        },
+        "normal": {
+          "target": ["leans naturally against {target} for an affectionate cuddle"],
+          "self": ["nestles into a soft corner and keeps a little warmth for herself"],
+          "none": ["pats the place beside her and invites another kitty over for a cuddle"]
+        },
+        "enthusiastic": {
+          "target": ["scoots right up to {target} and cuddles closely against them"],
+          "self": ["gathers a pillow and her tail into one lively, cozy cuddle pile"],
+          "none": ["swishes her tail excitedly and announces that it is kitty cuddle time"]
+        }
+      }
+    },
+    "kiss": {
+      "incompatiblePairs": [],
+      "styles": {
+        "gentle": {
+          "target": ["moves close to {target} and places a soft kiss on their cheek"],
+          "self": ["touches her cheek with her fingertips and gives herself a tiny kiss"],
+          "none": ["taps her cheek softly and asks whether anyone would like a kiss"]
+        },
+        "normal": {
+          "target": ["leans beside {target} and gives their cheek a sincere little kiss"],
+          "self": ["kisses her palm and keeps the little kiss for herself"],
+          "none": ["leans closer with a blink and asks who would like to receive a kiss"]
+        },
+        "enthusiastic": {
+          "target": ["bounces up to {target} and plants a big kiss on them"],
+          "self": ["blows a big kiss toward her reflection"],
+          "none": ["sends out a big flying kiss and asks who wants to catch it"]
+        }
+      }
+    }
+  }
+}

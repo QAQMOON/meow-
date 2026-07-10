@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "updatedAt": "2026-06-02",
   "description": "Bondage Club catgirl plugin action text library. To add a new action, append a new theme object to the actions array.",
   "actions": [
@@ -7,6 +7,7 @@
       "id": "hug",
       "label": "Hug",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needHands": true,
         "needReach": true
@@ -86,6 +87,7 @@
       "id": "pat",
       "label": "Pat",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needHands": true,
         "needReach": true
@@ -165,6 +167,7 @@
       "id": "feed",
       "label": "Feed",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needHands": true,
         "needReach": true
@@ -244,6 +247,7 @@
       "id": "cuddle",
       "label": "Cuddle",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needReach": true,
         "needMobility": true
@@ -313,6 +317,7 @@
       "id": "kiss",
       "label": "Kiss",
       "enabled": true,
+      "composer": true,
       "requirements": {
         "needMouth": true,
         "needReach": true,

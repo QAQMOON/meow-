@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "locale": "zh-CN",
+  "replySuggestions": [
+    { "id": "good-night", "patterns": ["晚安", "好梦", "困困", "睡觉"], "replies": ["晚安喵，做个甜甜的梦呀", "猫猫也要缩进被窝啦，晚安喵", "睡醒再来贴贴喵"] },
+    { "id": "head-pat", "patterns": ["摸摸", "摸头"], "replies": ["给你蹭一下喵", "耳朵都被摸热啦喵", "再摸一下也可以喵"] },
+    { "id": "hug", "patterns": ["抱抱"], "replies": ["抱住不撒爪喵", "给你一个软乎乎的抱抱喵", "已经贴过来啦喵"] },
+    { "id": "cuddle", "patterns": ["贴贴", "蹭蹭", "蹭"], "replies": ["贴过去一点喵", "尾巴也想跟着蹭蹭喵", "好哦，给你贴贴喵"] },
+    { "id": "kiss", "patterns": ["亲亲", "亲一口"], "replies": ["会害羞的喵", "偷偷回你一个小亲亲喵", "耳朵都红起来了喵"] }
+  ],
+  "voicePhrases": [
+    "听见猫娘的声音，尾巴会慢慢放松喵",
+    "耳朵只要跟着声音走就好了喵",
+    "呼吸放轻一点，乖乖听完这一句喵",
+    "小猫爪会把注意力轻轻带回来喵",
+    "现在只需要看着猫娘，慢慢眨眼喵",
+    "被温柔声音包住的时候，可以不用逞强喵"
+  ],
+  "habit": {
+    "styles": { "gentle": "温柔", "playful": "活泼", "cozy": "黏人" },
+    "tails": ["喵~", "呜喵", "呼噜", "蹭蹭喵"],
+    "moodTails": {
+      "happy": " 开心地晃着尾巴喵~",
+      "sad": " 耳朵软软地垂下来喵...",
+      "cool": " 轻轻别过脸去喵。",
+      "clingy": " 忍不住又贴近一点喵~",
+      "sleepy": " 困困地揉了揉眼睛喵...",
+      "maid": " 会乖乖侍奉主人大人喵~",
+      "princess": " 本公主今天也允许汝靠近喵~",
+      "nurse": " 请把不舒服的地方交给猫猫护士喵~",
+      "default": " 喵~"
+    }
+  },
+  "sceneTemplates": {
+    "chat": ["认真听着{target}的话，给出一段轻柔又贴合上下文的猫娘回应喵。", "把{target}刚才的话轻轻接住，尾巴也跟着回应了一下喵。"],
+    "room": ["观察房间气氛后靠近{target}，用合适的猫娘动作融入场景喵。", "把房间里的节奏记好，再温柔地回应{target}喵。"],
+    "state": ["留意到{target}当前的状态，放慢动作温柔照看喵。", "根据{target}的姿势和限制调整距离，小心陪在旁边喵。"],
+    "action": ["向{target}做出一个软乎乎的猫娘互动，尾巴开心地晃了晃喵。", "轻轻靠近{target}完成互动，又害羞地观察对方反应喵。"],
+    "rp": ["顺着当前 RP 气氛回应{target}，把猫娘语气拿捏得软软的喵。", "用符合场景的猫娘口吻接住{target}的话，耳朵认真竖着喵。"],
+    "aftercare": ["确认{target}还舒服后，放慢节奏陪着对方缓一缓喵。", "把照顾和安抚留给{target}，安静守在身边喵。"],
+    "default": ["围绕{target}给出一段自然的猫娘 RP 灵感喵。", "轻轻回应{target}，让当前场景继续自然发展喵。"]
+  },
+  "relationHints": {
+    "owner": "对主人大人的语气已经变得更乖巧喵~",
+    "lover": "对恋人殿下的尾音悄悄变甜了喵~",
+    "dual": "同时认出主人与恋人关系，猫猫会更亲近喵~"
+  },
+  "rpTones": {
+    "soft": {
+      "label": "软萌猫娘",
+      "chatPrefixes": ["", "", "本喵软软地说："],
+      "chatSuffixes": ["喵~", "喵喵~", "呀喵"],
+      "whisperPrefix": "悄悄咪咪喵~ ",
+      "actionTarget": "软软地{action}{target}，尾巴开心地晃呀晃喵~",
+      "actionSelf": "软软地{action}自己一下，像小猫晒太阳一样眯起眼睛喵~"
+    },
+    "classic": {
+      "label": "古风猫娘",
+      "chatPrefixes": ["", "猫儿敛袖轻声道："],
+      "chatSuffixes": ["喵乎。", "甚好喵。", "愿君安然喵。"],
+      "whisperPrefix": "附耳轻语喵：",
+      "actionTarget": "轻移脚步向{target}{action}，尾尖微晃，似是甚欢喵。",
+      "actionSelf": "垂眸轻笑，悄悄{action}自己一下，甚是安然喵。"
+    },
+    "tsundere": {
+      "label": "傲娇猫娘",
+      "chatPrefixes": ["", "哼，", "本喵别过脸说："],
+      "chatSuffixes": ["哼喵。", "才不是呢喵。", "你可别误会喵。"],
+      "whisperPrefix": "小声傲娇喵~ ",
+      "actionTarget": "别过脸装作不在意地对{target}{action}，才、才不是特意的喵！",
+      "actionSelf": "哼了一声，勉强{action}自己一下，才不是需要安慰呢喵。"
+    },
+    "polite": {
+      "label": "礼貌猫娘",
+      "chatPrefixes": ["", "猫娘礼貌地说道："],
+      "chatSuffixes": ["喵。", "还请多关照喵。", "谢谢汝喵。"],
+      "whisperPrefix": "轻声打扰了喵：",
+      "actionTarget": "温柔而克制地向{target}{action}，希望能让对方安心一些喵。",
+      "actionSelf": "安静地{action}自己一下，认真整理好心情喵。"
+    },
+    "simple": {
+      "label": "简洁猫娘",
+      "chatPrefixes": [""],
+      "chatSuffixes": ["喵。", "喵~"],
+      "whisperPrefix": "悄悄喵：",
+      "actionTarget": "对{target}{action}喵。",
+      "actionSelf": "{action}自己喵。"
+    }
+  },
+  "featureDescription": "根据当前互动触发 {label} 猫娘反应。",
+  "voiceDefault": "猫娘声音效果启动喵~",
+  "nearbyTarget": "身边的猫猫"
+}

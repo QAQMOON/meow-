@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "locale": "en",
+  "replySuggestions": [
+    { "id": "good-night", "patterns": ["good night", "sweet dreams", "sleepy", "bedtime"], "replies": ["Good night, sleep sweetly, meow~", "This kitty is curling up too. Good night, meow~", "Come cuddle again after we wake up, meow~"] },
+    { "id": "head-pat", "patterns": ["headpat", "head pat", "pat pat"], "replies": ["Leans in for another little pat, meow~", "My ears are getting warm from all those pats, meow~", "One more pat would be nice, meow~"] },
+    { "id": "hug", "patterns": ["hug", "hugs"], "replies": ["Hugs tight and refuses to let go, meow~", "Here is one soft, fluffy hug, meow~", "Already snuggled up beside you, meow~"] },
+    { "id": "cuddle", "patterns": ["cuddle", "snuggle", "nuzzle"], "replies": ["Scoots a little closer, meow~", "My tail wants to join the cuddle too, meow~", "Okay, come snuggle, meow~"] },
+    { "id": "kiss", "patterns": ["kiss", "kisses"], "replies": ["That is going to make me blush, meow~", "Sneaks a tiny kiss back, meow~", "My ears are turning red, meow~"] }
+  ],
+  "voicePhrases": [
+    "Let the neko voice soften your tail and shoulders, meow~",
+    "Just follow the sound with your ears, meow~",
+    "Breathe gently and listen to the whole phrase, meow~",
+    "A tiny paw guides your attention back, meow~",
+    "For now, just watch this catgirl and blink slowly, meow~",
+    "You do not have to stay strong inside a gentle voice, meow~"
+  ],
+  "habit": {
+    "styles": { "gentle": "Gentle", "playful": "Playful", "cozy": "Clingy" },
+    "tails": ["meow~", "mew~", "purr~", "snuggle meow~"],
+    "moodTails": {
+      "happy": " Her tail sways happily, meow~",
+      "sad": " Her ears droop softly, meow...",
+      "cool": " She turns her face aside with a quiet meow.",
+      "clingy": " She cannot help moving a little closer, meow~",
+      "sleepy": " She rubs her sleepy eyes, meow...",
+      "maid": " This maid kitty will serve properly, meow~",
+      "princess": " This princess permits you to come closer today, meow~",
+      "nurse": "Leave the uncomfortable parts to nurse kitty, meow~",
+      "default": " Meow~"
+    }
+  },
+  "sceneTemplates": {
+    "chat": ["Listens closely to {target} and offers a soft, context-aware neko response, meow~", "Gently picks up {target}'s last thought while her tail answers too, meow~"],
+    "room": ["Reads the room before moving closer to {target} with a fitting neko gesture, meow~", "Follows the room's rhythm and responds warmly to {target}, meow~"],
+    "state": ["Notices {target}'s current state and slows down to care for them gently, meow~", "Adjusts her distance to {target}'s posture and restraints, staying carefully nearby, meow~"],
+    "action": ["Shares a soft catgirl interaction with {target}, tail swaying happily, meow~", "Moves close to {target}, completes the gesture, then shyly watches their reaction, meow~"],
+    "rp": ["Matches the current roleplay mood and answers {target} in a soft neko voice, meow~", "Keeps the scene flowing with {target}, ears perked attentively, meow~"],
+    "aftercare": ["Checks that {target} is comfortable, then slows down and stays close, meow~", "Leaves calm care and reassurance with {target}, quietly guarding them, meow~"],
+    "default": ["Offers a natural catgirl roleplay idea involving {target}, meow~", "Responds softly to {target} and lets the scene continue naturally, meow~"]
+  },
+  "relationHints": {
+    "owner": "Her voice becomes more obedient for her owner, meow~",
+    "lover": "Her ending turns sweeter for her lover, meow~",
+    "dual": "She recognizes both owner and lover bonds and becomes extra affectionate, meow~"
+  },
+  "rpTones": {
+    "soft": {
+      "label": "Soft Neko",
+      "chatPrefixes": ["", "", "The soft kitty says: "],
+      "chatSuffixes": ["meow~", "mew mew~", "nya~"],
+      "whisperPrefix": "Psst, soft meow~ ",
+      "actionTarget": "Softly {action} {target}, her tail swaying happily, meow~",
+      "actionSelf": "Softly {action} herself and closes her eyes like a cat in warm sunlight, meow~"
+    },
+    "classic": {
+      "label": "Classic Neko",
+      "chatPrefixes": ["", "The graceful catgirl says: "],
+      "chatSuffixes": ["meow.", "How lovely, meow.", "May you be at ease, meow."],
+      "whisperPrefix": "She leans closer and whispers, meow: ",
+      "actionTarget": "Steps lightly toward {target} and {action}, her tail swaying with quiet delight, meow.",
+      "actionSelf": "Lowers her gaze with a smile and gently {action} herself, peaceful and composed, meow."
+    },
+    "tsundere": {
+      "label": "Tsundere Neko",
+      "chatPrefixes": ["", "Hmph, ", "The kitty looks away and says: "],
+      "chatSuffixes": ["hmph, meow.", "It is not like that, meow.", "Do not misunderstand, meow."],
+      "whisperPrefix": "In a tiny stubborn whisper, meow~ ",
+      "actionTarget": "Looks away and pretends not to care while she {action} {target}—i-it was not on purpose, meow!",
+      "actionSelf": "Huffs and reluctantly {action} herself; it is not as if she needs comfort, meow."
+    },
+    "polite": {
+      "label": "Polite Neko",
+      "chatPrefixes": ["", "The catgirl says politely: "],
+      "chatSuffixes": ["meow.", "Please take care, meow.", "Thank you kindly, meow."],
+      "whisperPrefix": "Pardon the quiet interruption, meow: ",
+      "actionTarget": "Gently and respectfully {action} {target}, hoping to put them at ease, meow.",
+      "actionSelf": "Quietly {action} herself and carefully settles her feelings, meow."
+    },
+    "simple": {
+      "label": "Simple Neko",
+      "chatPrefixes": [""],
+      "chatSuffixes": ["meow.", "meow~"],
+      "whisperPrefix": "Psst, meow: ",
+      "actionTarget": "{action} {target}, meow.",
+      "actionSelf": "{action} herself, meow."
+    }
+  },
+  "featureDescription": "Triggers the {label} neko response for the current interaction.",
+  "voiceDefault": "The neko voice effect begins, meow~",
+  "nearbyTarget": "a nearby kitty"
+}

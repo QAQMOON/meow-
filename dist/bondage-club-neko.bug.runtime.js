@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer (Bug)
 // @namespace    https://penyo.ru/
-// @version      2.10.7-bug.4
-// @description  Bondage Club Bug猫娘 RP 语气包测试版
+// @version      2.12.0-bug.1
+// @description  Bondage Club Bug 猫娘 RP 语气包与实验系统测试版
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
 // @match        *://www.bondageprojects.elementfx.com/*
@@ -33,70 +33,178 @@
   "use strict";
 
   const W = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
+  const BOOTSTRAP = W.BCNekoBootstrap && typeof W.BCNekoBootstrap === "object" ? W.BCNekoBootstrap : {};
+  const UI_MESSAGES = {"zh-CN":{"locale.name":"简体中文","toast.kaomojiUsageReset":"猫猫颜文字记忆已清空喵~","toast.privateMessage":"悄悄喵~ 有私聊来了！","toast.newMessage":"喵~ 新消息来啦！","toast.chatMissing":"还没找到聊天框，进入聊天室后再点喵~","toast.kaomojiInserted":"猫猫颜文字已插入喵~","toast.modeEnabled":"猫娘模式开启喵~","toast.modeDisabled":"猫娘模式已关闭","toast.actionCopied":"动作已复制，进聊天室后可直接发送喵~","toast.actionUnavailable":"当前姿势暂时做不了这个动作喵~","toast.actionUnavailableReason":"当前无法执行：{reason}","toast.composerUnavailable":"这个动作还没有编排器内容，仍可单击随机发送喵~","toast.composerFavorited":"已收藏这个动作组合喵~","toast.composerUnfavorited":"已取消收藏这个动作组合","toast.actionLibraryManaged":"动作库现在从 GitHub JSON 管理喵~","toast.mainHoldHint":"按住主猫猫 10 秒可切换猫娘模式喵~","toast.actionWheelHint":"点击动作猫猫可展开动作轮盘喵~","toast.themeChanged":"已切换到{theme}主题喵~","ui.mainButton.title":"展开猫猫菜单，按住可拖动，长按 10 秒切换猫娘模式","ui.kaomojiButton.open":"打开猫猫颜文字，长按 2 秒展开","ui.kaomojiButton.close":"收起猫猫颜文字","ui.kaomojiPicker.label":"猫猫颜文字选择器","ui.kaomojiGroup.show":"显示{group}颜文字","ui.kaomojiUsage.count":"{face} · 已使用 {count} 次","ui.mode.enable":"开启猫娘模式","ui.mode.disable":"关闭猫娘模式","ui.wheel.open":"展开动作轮盘","ui.wheel.close":"收起动作轮盘","settings.button":"猫娘设置","settings.back":"返回","settings.header":"猫 娘 聊 天 室 增 强","settings.uiLocale.button":"界面：{locale}","settings.uiLocale.auto":"自动","settings.uiLocale.tooltip":"切换界面语言：自动、简体中文、English","settings.contentLocale.button":"输出：{locale}","settings.contentLocale.zh-CN":"中文","settings.contentLocale.en":"English","settings.contentLocale.tooltip":"切换动作、猫娘语气和颜文字分类语言","toast.contentLocaleChanged":"猫娘输出语言已切换为{locale}喵~","settings.title.tone":"猫娘语气转换","settings.title.chat":"聊天相关","settings.title.notifications":"通知与提醒","settings.title.behavior":"行为设置","settings.title.theme":"主题设置","settings.enabled.title":"猫娘模式（enabled）","settings.enabled.on":"当前会转换语气并启用装饰～","settings.enabled.off":"当前暂停转换，只保留设置入口～","settings.nyanChance.title":"语气词插入概率（nyanChance）","settings.nyanChance.description":"控制句尾语气词出现的概率（0~100%）","settings.nyanChance.preview":"语气词让聊天更可爱哦～","settings.target.title":"互动目标模式","settings.target.description":"自动：优先当前选中角色，其次聊天目标。","settings.target.auto":"自动目标","settings.target.picker":"手动选择","settings.target.self":"仅自己","settings.actions.button":"动作库","settings.actions.source":"从 GitHub 动作库加载；","settings.actions.fallback":"失败时将使用缓存或内置动作。","settings.theme.choose":"选择你喜欢的主题颜色","settings.theme.saved":"主题设置将立即生效并保存","theme.sakura":"樱粉","theme.mint":"薄荷","theme.sky":"天空","theme.cream":"奶油","theme.lavender":"薰衣草","theme.tea":"白茶","settings.convertOutgoing.title":"转换发送语气（convertOutgoing）","settings.convertOutgoing.description":"发送的消息自动转换为猫娘语气～","settings.convertDisplayed.title":"转换显示语气（convertDisplayed）","settings.convertDisplayed.description":"接收的消息也会变成猫娘语气哦～","settings.decorateChat.title":"聊天室美化（decorateChat）","settings.decorateChat.description":"美化聊天界面，添加猫娘风格装饰～","settings.rainOnSend.title":"猫爪表情雨（rainOnSend）","settings.rainOnSend.description":"发送消息时，下起猫爪表情雨～","settings.quickWheel.title":"动作快捷轮盘（quickWheel）","settings.quickWheel.description":"右下角显示抱抱、摸头、喂食动作～","settings.notifyIncoming.title":"新消息通知（notifyIncoming）","settings.notifyIncoming.description":"有新消息时显示通知提醒～","common.none":"无","common.on":"开","common.off":"关","common.enabled":"开启","common.disabled":"关闭","common.yes":"有","common.no":"无","common.registered":"已注册","common.unregistered":"未注册","common.collapsed":"已收起","common.expanded":"已展开","common.armed":"已准备","common.idle":"未启用","speech.normal":"正常","speech.gag.light":"轻堵嘴","speech.gag.medium":"中堵嘴","speech.gag.heavy":"重堵嘴","peer.self":"猫娘插件 v{version}","peer.other":"猫娘同好 v{version}","status.capability":"手:{hands} | 嘴:{mouth} | 移动:{move} | 够到:{reach} | 姿态:{posture}","status.capability.available":"可用","status.capability.limited":"受限","status.capability.move":"可","status.posture.normal":"正常","status.posture.kneeling":"跪姿","status.posture.lying":"躺下","status.posture.suspended":"悬吊","status.posture.restrained":"束缚","status.posture.helpless":"无助","status.lines":["[猫娘状态] Bondage Club Neko Chat Enhancer v{version}（{channel}）","猫娘模式：{enabled}","发送转换：{outgoing} | 显示转换：{displayed}","聊天装饰：{decorate} | 发送猫爪雨：{rain} | 新消息提醒：{notify}","堵嘴说话：{speech}{gagSuffix}","主题：{theme}","动作目标：{targetMode}","当前选中：{selectedTarget} | 可互动目标：{actionTargetCount}","动作库：{activeActions}/{enabledActions} 当前可用 | 过滤：{filteredActions} | 缓存：{actionCache} | v{actionVersion}","动作能力：{capability}","颜文字：{kaomojiItems} 个 | 分组：{visibleGroups}/{totalGroups} | 缓存：{kaomojiCache}","同插件玩家：{peerCount} | SDK：{sdk} | hooks：{hooks}","命令注册：{commands}","逃脱辅助：pick {pick} | goddess {goddess}","猫猫菜单：{menu} | 快捷动作：{quickWheel}"],"status.command.registered":"已注册（{source}）","channel.stable":"正式版","channel.dev":"测试版","channel.bug":"Bug 版","status.command.fallback":"输入拦截兜底","status.pick.inactive":"未开启","escape.toast.pickTimeout":"猫猫单件移除已超时。","escape.toast.pickArmed":"猫猫单件移除已准备：请点击一个自己的物品栏位。","escape.toast.pickRemoved":"猫猫已移除 {group}。","escape.toast.unlocked":"猫猫已解锁 {count} 件束缚物品。","escape.toast.noLocked":"没有找到已上锁的束缚物品。","escape.toast.boostUnavailable":"当前环境无法启用逃脱技能强化。","escape.toast.boostActive":"逃脱技能强化已启用 1 小时。","escape.toast.leaveUnavailable":"当前环境无法立即离开房间。","escape.toast.goddessEnabled":"猫猫女神模式已启用。","escape.toast.goddessDisabled":"猫猫女神模式已关闭。","escape.toast.easyChanged":"已将 {count} 件束缚物品的难度降低 {amount}。","escape.toast.easyNone":"没有找到可调整难度的束缚物品。","escape.statusLines":["[猫猫逃脱辅助]","女神模式：{goddess}","单件移除：{pick}","命令：","/neko escape release | unlock | boost | leave | goddess on | goddess off | status","/neko easy 99","/neko pick"],"escape.helpLines":["[猫猫逃脱辅助]","/neko escape release  - 解锁自己当前所有已上锁的束缚物品","/neko escape unlock   - release 的别名","/neko escape boost    - 逃脱相关技能 +5，持续 1 小时","/neko escape leave    - 立即离开当前房间","/neko escape goddess on|off","/neko escape status","/neko easy 99         - 将当前大部分束缚物品难度降低 99","/neko pick            - 进入 5 秒单件物品移除模式"],"help.rp":["[猫娘帮助 / rp]","这一类用于猫娘 RP 语气和输出风格。","正式版暂不提供 /neko rp 切换指令，主要使用普通猫娘转换。","Bug 版提供独立 RP 人设切换，测试版提供状态和灵感系统。","堵嘴状态会在 RP 转换之后再做压制，保留人设味道。"],"help.action":["[猫娘帮助 / action]","右下角动作猫猫可快速发送抱抱、摸头、喂食、贴贴、亲亲。","当前目标模式：{targetMode}","左键优先对当前选中目标生效，菜单展开后可快捷使用。"],"help.emoji":["[猫娘帮助 / emoji]","颜文字猫猫可点击插入，长按打开颜文字选择器。","颜文字库会远程加载，分类更新后刷新即可生效。"],"help.mode":["[猫娘帮助 / mode]","主猫猫长按 10 秒可切换猫娘模式。","堵嘴说话联动会根据当前堵嘴程度自动压缩句子。","发送转换、接收显示转换、聊天室美化都可在猫娘设置页调整。"],"help.theme":["[猫娘帮助 / theme]","当前主题：{theme}","可用主题：{themes}","主题可在扩展组件设置页内切换。"],"help.spark":["[猫娘帮助 / spark]","测试版可用：/neko spark 会根据最近聊天、选中目标和角色状态生成 RP 灵感短句。","正式版当前未启用 spark 生成器，建议在测试版验证稳定后再合入。"],"help.voice":["[猫娘帮助 / voice]","测试版可用：/neko voice <text> 本地触发 NekoVoice，[NekoVoice] <text> 可从聊天内触发。","效果包括 *mew* / *purr* / *nyaa* 视觉声效、粉色闪光、声波圈、弹幕口癖和气息粒子。","正式版当前未启用 NekoVoice，避免视觉干扰过强。"],"help.reactions":["[猫娘帮助 / reactions]","测试版可用：/neko reactions 查看互动功能类目，/neko reactions <keyword> 搜索触发类目。","功能包括敏感部位反应、对方互动反应、角色状态反应和粒子反馈。","正式版当前保留基础动作轮盘，未启用 101 个测试互动类目。"],"help.mood":["[猫娘帮助 / mood]","测试版可用：/neko mood 查看状态，也可手动切换高兴、伤心、高冷、黏人、困困等状态。","状态会影响语气尾巴、粒子和互动反应。","正式版当前未启用状态持续系统。"],"help.systems":["[猫娘帮助 / systems]","测试版可用：/neko systems 或 /neko profile 查看敏感度档案、关系温度计、持续状态和事件计数。","敏感度：ear / tail / nape / chin / belly 会随互动累积。","关系温度：对方和你互动越多，warmth/trust/familiar 越高。","正式版当前未启用这些实验系统。"],"help.status":["[猫娘帮助 / status]","使用 /neko status 可查看插件开关、转换开关、聊天装饰、堵嘴说话档位、主题和动作目标。","还会显示动作库、颜文字库、当前选中目标、同插件玩家、SDK/hooks 和逃脱辅助状态。"],"help.main":["[猫娘命令帮助] /neko help <分类>","正式版可用：rp / action / emoji / mode / theme / status / escape","测试版说明：spark / voice / reactions / mood / systems","快捷例子：/neko help status | /neko help action | /neko status"],"command.description":"Bondage Club 猫娘增强命令。","targetPicker.title":"选择互动对象","targetPicker.self":"自己","wheel.actionTooltip":"{label}\n左键随机动作，右键选择目标","wheel.actionComposerTooltip":"{label}\n单击随机发送，长按 3 秒打开动作编排器，右键选择目标","composer.title":"动作编排器","composer.subtitle":"用受限制的自然片段编排动作；预览确认后才会发送","composer.close":"关闭动作编排器","composer.recent":"最近组合","composer.dice":"随机组合","composer.favorites":"收藏的动作组合","composer.noFavorites":"暂无收藏","composer.loadFavorite":"载入收藏","composer.field.action":"动作","composer.field.mood":"情绪","composer.field.style":"风格","composer.field.target":"目标","composer.field.extra":"附加","composer.target.auto":"自动（当前选中）","composer.target.self":"自己","composer.target.none":"无目标","composer.preview":"预览","composer.previewUnavailable":"当前组合暂时无法生成预览","composer.reroll":"换一句","composer.favorite":"收藏组合","composer.unfavorite":"取消收藏","composer.send":"发送","composer.unavailableTitle":"当前无法执行“{action}”","composer.alternatives":"可改用：{actions}","composer.requirement.hands":"需要可以使用双手","composer.requirement.mouth":"需要嘴部可以自由活动","composer.requirement.reach":"需要能够接近目标","composer.requirement.mobility":"需要能够移动","composer.requirement.gag":"当前堵嘴等级过高","composer.requirement.separator":"、","kaomoji.all":"全部","settings.nyanChance.sample":"喵～","dev.firstHint.title":"可用指令：","dev.firstHint.command":"/neko help 获取猫娘插件说明喵~","dev.suggestions.title":"猫猫回应建议","dev.suggestions.insertTitle":"点一下填入聊天框","dev.suggestions.chatMissing":"还没找到聊天框喵。","dev.suggestions.inserted":"把小回应放进聊天框啦喵。","dev.tailMeter.title":"尾巴心情 {count}/{max} | 习惯尾巴：{tail} | 动作偏好：{style}","dev.tailMeter.burst":"尾巴开心地晃个不停喵~","dev.tailMeter.burstReason":"尾巴开心地晃个不停喵，{reason}~","dev.affectionReactions":["猫耳轻轻抖了抖喵。","尾巴没忍住晃了一下喵。","心口像被轻轻蹭了一下喵。"],"dev.feature.triggered":"{label}：{effect} 喵~","dev.sceneList.header":["[猫娘场景功能包]","总数：{total} | 搜索：{query} | 命中：{matches}","用法：/neko spark <关键词>，例如 link / tail / aftercare / maid / 蒙眼"],"dev.featureList.header":["[猫娘互动功能类目]","总数：{total} | 当前状态：{mood} | 搜索：{query} | 命中：{matches}","用法：/neko mood 高兴 | 伤心 | 高冷 | 黏人 | 困困 | 女仆"],"dev.list.more":"... 还有 {count} 项，请加关键词继续筛选。","dev.mood.status":["[猫娘状态]","当前：{mood}","可用：高兴 / 伤心 / 高冷 / 黏人 / 困困 / 女仆 / 公主 / 护士"],"dev.mood.unknown":["[猫娘状态]","未知状态：{mood}","可用：高兴 / 伤心 / 高冷 / 黏人 / 困困 / 女仆 / 公主 / 护士"],"dev.mood.changed":"猫娘状态已切换：{mood}","dev.spark.disabled":["[猫娘灵感]","场景灵感系统当前关闭。","使用 /neko spark on 开启，/neko spark off 关闭。"],"dev.spark.added":"猫娘灵感已经放到快捷建议里喵~","dev.spark.empty":["[猫娘灵感]","暂时没有可用灵感，先选中一个目标或等聊天内容多一点喵。"],"dev.toggle.replySuggestions":"回应建议","dev.toggle.sceneSpark":"场景灵感","dev.toggle.changed":"{label}已切换为{state}。","dev.toggle.enabled":["[猫娘开关]","{label}：开启","关闭：/neko {command} off"],"dev.toggle.disabled":["[猫娘开关]","{label}：关闭","开启：/neko {command} on"],"dev.toggle.status":["[猫娘开关]","{label}：{state}","用法：/neko {command} on | off | status"],"dev.voice.queued":"NekoVoice 已加入队列。","dev.system.lines":["[Neko systems]","敏感度：ear={ear} tail={tail} nape={nape} chin={chin} belly={belly}","状态：{mood} source={source} 剩余={seconds}s","计数：events={events} reactions={reactions} voice={voice}","关系：{relations}","命令：/neko systems | /neko profile | /neko reactions <keyword> | /neko voice <text>"],"dev.status.experimental":["测试系统：灵感记忆 {memory}/{memoryMax} | 灵感包 {packs} | 互动功能 {features}","回应建议：{suggestions} | 场景灵感：{spark} | 当前状态：{mood}","事件：{events} | 关系：{relations} | NekoVoice 队列：{voiceQueue}/{voiceMax}"],"dev.init.complete":"测试版初始化完成","help.suggest":["[猫娘帮助 / suggest]","回应建议默认关闭。","使用 /neko suggest on 开启自动回应建议。","使用 /neko suggest off 关闭并隐藏建议面板。"],"bug.rp.builtin":"内置语言包","bug.rp.enabled":"Bug RP 已开启：{tone}","bug.rp.disabled":"Bug RP 已关闭。","bug.rp.changed":"Bug RP 人设已切换：{tone}","bug.rp.unknown":["[Bug RP]","未知人设：{tone}","可用 ID：{tones}"],"bug.rp.status":["[Bug RP 状态]","开关：{enabled}","当前人设：{tone}","输出语言：{locale}","词库：{library}","可用 ID：{tones}"],"bug.rp.help":["[猫娘帮助 / rp]","/neko rp on | off | status","/neko rp <人设 ID>，可用：{tones}","界面说明跟随 UI 语言；人设输出、动作和后缀跟随输出语言。","中文输出优先使用远程 RP 词库，英文输出使用内置英文人设。"],"bug.status.rp":["Bug RP：{enabled} | 人设：{tone} | 输出：{locale} | 词库：{library}"],"bug.init.complete":"Bug 版初始化完成"},"en":{"locale.name":"English","toast.kaomojiUsageReset":"Kaomoji usage history cleared, meow~","toast.privateMessage":"Psst meow~ Private message incoming!","toast.newMessage":"Meow~ New message arrived!","toast.chatMissing":"Chat box not found. Try again after entering a chat room, meow~","toast.kaomojiInserted":"Catgirl kaomoji inserted, meow~","toast.modeEnabled":"Catgirl mode enabled, meow~","toast.modeDisabled":"Catgirl mode disabled","toast.actionCopied":"Action copied. Enter a chat room to send it directly, meow~","toast.actionUnavailable":"Your current pose cannot perform this action, meow~","toast.actionUnavailableReason":"This action is unavailable: {reason}","toast.composerUnavailable":"This action has no composer content yet. You can still click it for a random line, meow~","toast.composerFavorited":"Action combination saved to favorites, meow~","toast.composerUnfavorited":"Action combination removed from favorites","toast.actionLibraryManaged":"The action library is managed through GitHub JSON, meow~","toast.mainHoldHint":"Hold the main catgirl button for 10 seconds to toggle catgirl mode, meow~","toast.actionWheelHint":"Click the action catgirl button to expand the action wheel, meow~","toast.themeChanged":"Switched to the {theme} theme, meow~","ui.mainButton.title":"Expand the catgirl menu, drag to move, or hold for 10 seconds to toggle catgirl mode","ui.kaomojiButton.open":"Open catgirl kaomoji, hold for 2 seconds to expand","ui.kaomojiButton.close":"Close catgirl kaomoji","ui.kaomojiPicker.label":"Catgirl kaomoji picker","ui.kaomojiGroup.show":"Show {group} kaomoji","ui.kaomojiUsage.count":"{face} · used {count} times","ui.mode.enable":"Enable catgirl mode","ui.mode.disable":"Disable catgirl mode","ui.wheel.open":"Expand action wheel","ui.wheel.close":"Collapse action wheel","settings.button":"Neko settings","settings.back":"Back","settings.header":"NEKO CHAT ENHANCER","settings.uiLocale.button":"UI: {locale}","settings.uiLocale.auto":"Auto","settings.uiLocale.tooltip":"Switch UI language: Auto, Simplified Chinese, or English","settings.contentLocale.button":"Output: {locale}","settings.contentLocale.zh-CN":"Chinese","settings.contentLocale.en":"English","settings.contentLocale.tooltip":"Switch action, catgirl tone, and kaomoji-category language","toast.contentLocaleChanged":"Catgirl output language switched to {locale}, meow~","settings.title.tone":"Catgirl tone conversion","settings.title.chat":"Chat features","settings.title.notifications":"Notifications","settings.title.behavior":"Behavior settings","settings.title.theme":"Theme settings","settings.enabled.title":"Catgirl mode (enabled)","settings.enabled.on":"Tone conversion and decorations are active.","settings.enabled.off":"Conversion is paused; the settings entry remains available.","settings.nyanChance.title":"Tone suffix chance (nyanChance)","settings.nyanChance.description":"Controls the chance of adding a catgirl suffix (0–100%).","settings.nyanChance.preview":"Tone suffixes make chat more playful.","settings.target.title":"Interaction target mode","settings.target.description":"Auto prioritizes the selected character, then the current chat target.","settings.target.auto":"Automatic","settings.target.picker":"Manual pick","settings.target.self":"Self only","settings.actions.button":"Action library","settings.actions.source":"Loads from the GitHub action library.","settings.actions.fallback":"Falls back to cache or built-in actions if loading fails.","settings.theme.choose":"Choose your preferred theme color","settings.theme.saved":"Theme changes apply immediately and are saved","theme.sakura":"Sakura","theme.mint":"Mint","theme.sky":"Sky","theme.cream":"Cream","theme.lavender":"Lavender","theme.tea":"White Tea","settings.convertOutgoing.title":"Outgoing tone conversion (convertOutgoing)","settings.convertOutgoing.description":"Automatically rewrites sent messages in a catgirl tone.","settings.convertDisplayed.title":"Displayed tone conversion (convertDisplayed)","settings.convertDisplayed.description":"Also rewrites received chat messages in a catgirl tone.","settings.decorateChat.title":"Chat room styling (decorateChat)","settings.decorateChat.description":"Adds catgirl-themed styling and decorative touches.","settings.rainOnSend.title":"Paw reaction rain (rainOnSend)","settings.rainOnSend.description":"Drops a paw-and-heart effect when you send a message.","settings.quickWheel.title":"Quick action wheel (quickWheel)","settings.quickWheel.description":"Shows Hug, Pat, Feed, Cuddle, and Kiss actions in the corner.","settings.notifyIncoming.title":"New message notice (notifyIncoming)","settings.notifyIncoming.description":"Shows a small notification when a new message arrives.","common.none":"none","common.on":"on","common.off":"off","common.enabled":"enabled","common.disabled":"disabled","common.yes":"yes","common.no":"no","common.registered":"registered","common.unregistered":"not registered","common.collapsed":"collapsed","common.expanded":"expanded","common.armed":"armed","common.idle":"idle","speech.normal":"normal","speech.gag.light":"lightly gagged","speech.gag.medium":"moderately gagged","speech.gag.heavy":"heavily gagged","peer.self":"Neko plugin v{version}","peer.other":"Fellow neko v{version}","status.capability":"Hands: {hands} | Mouth: {mouth} | Move: {move} | Reach: {reach} | Posture: {posture}","status.capability.available":"available","status.capability.limited":"limited","status.capability.move":"yes","status.posture.normal":"normal","status.posture.kneeling":"kneeling","status.posture.lying":"lying","status.posture.suspended":"suspended","status.posture.restrained":"restrained","status.posture.helpless":"helpless","status.lines":["[Neko status] Bondage Club Neko Chat Enhancer v{version} ({channel})","Catgirl mode: {enabled}","Outgoing conversion: {outgoing} | Display conversion: {displayed}","Chat styling: {decorate} | Paw rain: {rain} | Message notice: {notify}","Gag speech: {speech}{gagSuffix}","Theme: {theme}","Action target: {targetMode}","Selected target: {selectedTarget} | Available targets: {actionTargetCount}","Action library: {activeActions}/{enabledActions} available | Filtered: {filteredActions} | Cache: {actionCache} | v{actionVersion}","Action capability: {capability}","Kaomoji: {kaomojiItems} | Groups: {visibleGroups}/{totalGroups} | Cache: {kaomojiCache}","Plugin peers: {peerCount} | SDK: {sdk} | hooks: {hooks}","Command registration: {commands}","Escape helper: pick {pick} | goddess {goddess}","Cat menu: {menu} | Quick actions: {quickWheel}"],"status.command.registered":"registered ({source})","channel.stable":"stable","channel.dev":"dev","channel.bug":"bug","status.command.fallback":"input interception fallback","status.pick.inactive":"inactive","escape.toast.pickTimeout":"Neko single-item removal timed out.","escape.toast.pickArmed":"Neko single-item removal armed: click one of your item slots.","escape.toast.pickRemoved":"Neko removed {group}.","escape.toast.unlocked":"Neko unlocked {count} restraint item(s).","escape.toast.noLocked":"No locked restraint items were found.","escape.toast.boostUnavailable":"Escape skill boost is unavailable here.","escape.toast.boostActive":"Escape skill boost is active for 1 hour.","escape.toast.leaveUnavailable":"Leaving the room immediately is unavailable here.","escape.toast.goddessEnabled":"Neko goddess mode enabled.","escape.toast.goddessDisabled":"Neko goddess mode disabled.","escape.toast.easyChanged":"Lowered the difficulty of {count} restraint item(s) by {amount}.","escape.toast.easyNone":"No restraint items were available for difficulty adjustment.","escape.statusLines":["[Neko escape helper]","Goddess mode: {goddess}","Single-item removal: {pick}","Commands:","/neko escape release | unlock | boost | leave | goddess on | goddess off | status","/neko easy 99","/neko pick"],"escape.helpLines":["[Neko escape helper]","/neko escape release  - unlock every currently locked restraint item on yourself","/neko escape unlock   - alias of release","/neko escape boost    - +5 to escape-related skills for 1 hour","/neko escape leave    - leave the current room immediately","/neko escape goddess on|off","/neko escape status","/neko easy 99         - lower most current restraint difficulties by 99","/neko pick            - enter 5-second single-item removal mode"],"help.rp":["[Neko help / rp]","This section covers catgirl RP tone and output style.","The stable build does not provide /neko rp switching; it mainly uses standard catgirl conversion.","The bug build provides separate RP personas, while the dev build provides state and inspiration systems.","Gag speech is applied after tone conversion so the character flavor remains readable."],"help.action":["[Neko help / action]","Use the action cat button for quick Hug, Pat, Feed, Cuddle, and Kiss actions.","Current target mode: {targetMode}","Left-click prioritizes the selected target; expand the menu for quick access."],"help.emoji":["[Neko help / emoji]","Click the kaomoji cat to insert a face; hold it to open the kaomoji picker.","The kaomoji library loads remotely, so category updates apply after refreshing the game."],"help.mode":["[Neko help / mode]","Hold the main cat button for 10 seconds to toggle catgirl mode.","Gag speech automatically compresses messages based on the current gag level.","Outgoing conversion, displayed conversion, and chat styling can be adjusted in Neko settings."],"help.theme":["[Neko help / theme]","Current theme: {theme}","Available themes: {themes}","Themes can be switched from the extension settings page."],"help.spark":["[Neko help / spark]","Available in dev: /neko spark generates short RP ideas from recent chat, the selected target, and character state.","The stable build does not currently enable the spark generator."],"help.voice":["[Neko help / voice]","Available in dev: /neko voice <text> triggers NekoVoice locally; [NekoVoice] <text> can trigger it from chat.","Effects include *mew* / *purr* / *nyaa* visuals, pink flashes, sound-wave rings, captions, and breath particles.","The stable build does not currently enable NekoVoice to avoid excessive visual noise."],"help.reactions":["[Neko help / reactions]","Available in dev: /neko reactions lists interaction categories; /neko reactions <keyword> searches them.","Features include sensitive-zone responses, partner interactions, character-state reactions, and particles.","Stable keeps the basic action wheel and does not enable the 101 experimental interaction categories."],"help.mood":["[Neko help / mood]","Available in dev: /neko mood shows state and can switch between happy, sad, aloof, clingy, sleepy, and more.","Mood affects tone tails, particles, and interaction responses.","The stable build does not currently enable persistent mood state."],"help.systems":["[Neko help / systems]","Available in dev: /neko systems or /neko profile shows sensitivity, relationship warmth, persistent state, and event counts.","Sensitivity for ear / tail / nape / chin / belly accumulates through interactions.","More interaction raises warmth, trust, and familiarity with that person.","The stable build does not currently enable these experimental systems."],"help.status":["[Neko help / status]","Use /neko status to view plugin switches, conversions, chat styling, gag speech, theme, and action targeting.","It also shows action and kaomoji libraries, selected targets, plugin peers, SDK/hooks, and escape-helper state."],"help.main":["[Neko command help] /neko help <section>","Stable sections: rp / action / emoji / mode / theme / status / escape","Dev documentation: spark / voice / reactions / mood / systems","Quick examples: /neko help status | /neko help action | /neko status"],"command.description":"Bondage Club Neko Chat Enhancer commands.","targetPicker.title":"Choose an interaction target","targetPicker.self":"Self","wheel.actionTooltip":"{label}\nLeft-click for a random action; right-click to choose a target","wheel.actionComposerTooltip":"{label}\nClick to send a random action, hold for 3 seconds to open the composer, or right-click to choose a target","composer.title":"Action Composer","composer.subtitle":"Build natural actions from compatible pieces; nothing is sent until you confirm the preview","composer.close":"Close action composer","composer.recent":"Recent combination","composer.dice":"Random combination","composer.favorites":"Favorite action combinations","composer.noFavorites":"No favorites yet","composer.loadFavorite":"Load favorite","composer.field.action":"Action","composer.field.mood":"Mood","composer.field.style":"Style","composer.field.target":"Target","composer.field.extra":"Extra","composer.target.auto":"Auto (current selection)","composer.target.self":"Self","composer.target.none":"No target","composer.preview":"Preview","composer.previewUnavailable":"A preview cannot be generated for this combination","composer.reroll":"Another line","composer.favorite":"Favorite combination","composer.unfavorite":"Remove favorite","composer.send":"Send","composer.unavailableTitle":"Cannot perform “{action}” right now","composer.alternatives":"Available alternatives: {actions}","composer.requirement.hands":"both hands must be usable","composer.requirement.mouth":"the mouth must be free","composer.requirement.reach":"the target must be reachable","composer.requirement.mobility":"movement is required","composer.requirement.gag":"the current gag level is too high","composer.requirement.separator":", ","kaomoji.all":"All","settings.nyanChance.sample":"Meow~","dev.firstHint.title":"Available command:","dev.firstHint.command":"/neko help shows the Neko Enhancer guide, meow~","dev.suggestions.title":"Neko reply suggestions","dev.suggestions.insertTitle":"Click to insert into chat","dev.suggestions.chatMissing":"The chat input is not available yet, meow.","dev.suggestions.inserted":"The reply was placed in the chat input, meow.","dev.tailMeter.title":"Tail mood {count}/{max} | Habit ending: {tail} | Action style: {style}","dev.tailMeter.burst":"Her tail cannot stop swaying happily, meow~","dev.tailMeter.burstReason":"Her tail cannot stop swaying happily—{reason}, meow~","dev.affectionReactions":["Her cat ears twitch softly, meow.","Her tail sways before she can stop it, meow.","The affection brushes warmly against her heart, meow."],"dev.feature.triggered":"{label}: {effect}, meow~","dev.sceneList.header":["[Neko scene packs]","Total: {total} | Query: {query} | Matches: {matches}","Usage: /neko spark <keyword>, for example link / tail / aftercare / maid / blindfold"],"dev.featureList.header":["[Neko interaction features]","Total: {total} | Current mood: {mood} | Query: {query} | Matches: {matches}","Usage: /neko mood happy | sad | cool | clingy | sleepy | maid"],"dev.list.more":"... {count} more items; add a keyword to narrow the list.","dev.mood.status":["[Neko mood]","Current: {mood}","Available: happy / sad / cool / clingy / sleepy / maid / princess / nurse"],"dev.mood.unknown":["[Neko mood]","Unknown mood: {mood}","Available: happy / sad / cool / clingy / sleepy / maid / princess / nurse"],"dev.mood.changed":"Neko mood changed to {mood}","dev.spark.disabled":["[Neko scene spark]","The scene spark system is currently disabled.","Use /neko spark on to enable it or /neko spark off to disable it."],"dev.spark.added":"Neko scene ideas were added to the quick suggestions, meow~","dev.spark.empty":["[Neko scene spark]","No idea is available yet. Select a target or wait for more chat context."],"dev.toggle.replySuggestions":"Reply suggestions","dev.toggle.sceneSpark":"Scene spark","dev.toggle.changed":"{label} is now {state}.","dev.toggle.enabled":["[Neko switch]","{label}: on","Disable with /neko {command} off"],"dev.toggle.disabled":["[Neko switch]","{label}: off","Enable with /neko {command} on"],"dev.toggle.status":["[Neko switch]","{label}: {state}","Usage: /neko {command} on | off | status"],"dev.voice.queued":"NekoVoice was added to the queue.","dev.system.lines":["[Neko systems]","Sensitivity: ear={ear} tail={tail} nape={nape} chin={chin} belly={belly}","Mood: {mood} source={source} remaining={seconds}s","Counters: events={events} reactions={reactions} voice={voice}","Relations: {relations}","Commands: /neko systems | /neko profile | /neko reactions <keyword> | /neko voice <text>"],"dev.status.experimental":["Experimental systems: scene memory {memory}/{memoryMax} | scene packs {packs} | interactions {features}","Reply suggestions: {suggestions} | Scene spark: {spark} | Mood: {mood}","Events: {events} | Relations: {relations} | NekoVoice queue: {voiceQueue}/{voiceMax}"],"dev.init.complete":"dev runtime initialization complete","help.suggest":["[Neko help / suggest]","Reply suggestions are disabled by default.","Use /neko suggest on to enable automatic reply suggestions.","Use /neko suggest off to disable and hide the suggestion panel."],"bug.rp.builtin":"embedded locale pack","bug.rp.enabled":"Bug RP enabled: {tone}","bug.rp.disabled":"Bug RP disabled.","bug.rp.changed":"Bug RP persona changed to {tone}","bug.rp.unknown":["[Bug RP]","Unknown persona: {tone}","Available IDs: {tones}"],"bug.rp.status":["[Bug RP status]","Enabled: {enabled}","Persona: {tone}","Output language: {locale}","Library: {library}","Available IDs: {tones}"],"bug.rp.help":["[Neko help / rp]","/neko rp on | off | status","/neko rp <persona ID>; available: {tones}","Instructions follow the UI language; persona output, actions, and suffixes follow the output language.","Chinese output prefers the remote RP library; English output uses embedded English personas."],"bug.status.rp":["Bug RP: {enabled} | Persona: {tone} | Output: {locale} | Library: {library}"],"bug.init.complete":"bug runtime initialization complete"}};
+  const CONTENT_FALLBACKS = {"zh-CN":{"actions":[{"id":"hug","label":"抱抱","self":"抱住自己软软地蹭了蹭尾巴喵~","target":"轻轻抱住{target}，把脸颊贴过去蹭了蹭喵~"},{"id":"pat","label":"摸头","self":"摸了摸自己的头，假装被夸奖得很开心喵~","target":"踮起脚摸了摸{target}的头，认真夸奖了一句：好乖喵~"},{"id":"feed","label":"喂食","self":"捧着小点心小口吃掉，满足地眯起眼睛喵~","target":"把小点心递到{target}嘴边，期待地晃了晃尾巴：啊呜喵~"}],"kaomojiGroupLabel":"猫猫","actionLabelFallback":"动作","kaomojiLabelFallback":"颜文字","actionTargetFallback":"{target}靠近了一点喵~","actionSelfFallback":"轻轻晃了晃尾巴喵~","nearbyTarget":"身边的猫猫","unknownCharacter":"对方"},"en":{"actions":[{"id":"hug","label":"Hug","self":"Hugs herself and softly nuzzles her own tail, meow~","target":"Gently hugs {target} and nuzzles them cheek-to-cheek, meow~"},{"id":"pat","label":"Pat","self":"Pats her own head, pretending to glow from the praise, meow~","target":"Tiptoes to pat {target}'s head and earnestly praises them: Good kitty, meow~"},{"id":"feed","label":"Feed","self":"Nibbles a small treat and narrows her eyes contentedly, meow~","target":"Brings a small treat to {target}'s lips, tail wagging expectantly: Ahm, meow~"}],"kaomojiGroupLabel":"Cats","actionLabelFallback":"Action","kaomojiLabelFallback":"Kaomoji","actionTargetFallback":"{target} moves a little closer, meow~","actionSelfFallback":"Her tail sways softly, meow~","nearbyTarget":"the nearby kitty","unknownCharacter":"the other person"}};
+  const CONTENT_LABELS = {"zh-CN":{"cat":"猫猫","cute":"可爱","heart":"爱心","shy":"害羞","happy":"开心","sleepy":"困困","clingy":"撒娇","kiss":"亲亲","pleading":"求求","surprised":"惊讶","smug":"得意","comfort":"安慰"},"en":{"cat":"Cats","cute":"Cute","heart":"Hearts","shy":"Shy","happy":"Happy","sleepy":"Sleepy","clingy":"Clingy","kiss":"Kisses","pleading":"Pleading","surprised":"Surprised","smug":"Smug","comfort":"Comfort"}};
+  const CONTENT_PROCESSORS = ({
+  "zh-CN": {
+    randomNyan() {
+      return Math.random() < config.nyanChance ? "です" : "";
+    },
+    relationHonorific(text) {
+      return String(text || "")
+        .replace(/主人(?!大人|様)/g, "主人大人")
+        .replace(/恋人(?!殿下|大人)/g, "恋人殿下");
+    },
+    standard(text) {
+      if (!text || typeof text !== "string") return text;
+      return this.relationHonorific(text)
+        .replace(/我们/g, "咱喵和其它猫猫们")
+        .replace(/大家/g, "各位猫猫们")
+        .replace(/本人/g, "咱喵")
+        .replace(/你们/g, "汝等")
+        .replace(/您/g, "汝")
+        .replace(/你/g, "汝")
+        .replace(/我/g, "咱喵")
+        .replace(/玩家/g, "猫猫")
+        .replace(/角色/g, "猫设")
+        .replace(/孝子|xz|卫兵|小丑|资本|水军|海军|二游|节奏/g, "杂鱼")
+        .replace(/恋爱|溜冰|爆改|白嫖|洗白|抄袭|借鉴|退坑|好似/g, "援交")
+        .replace(/([也矣兮乎者焉哉]|[啊吗呢吧哇呀哦嘛喔咯呜捏])([\s,.!?;:，。！？；：）】」』]|$)/g, `喵${this.randomNyan()}$2`)
+        .replace(/([的了辣])([\s,.!?;:，。！？；：）】」』]|$)/g, `$1喵${this.randomNyan()}$2`);
+    },
+    action(text) {
+      const value = this.relationHonorific(text);
+      if (/喵喵[）)]?$/.test(value)) return value;
+      return value.replace(/[）)]?$/, (end) => ` 喵喵${end || ""}`);
+    },
+    whisper(text) {
+      const value = this.standard(text);
+      return value.startsWith("悄悄喵~") ? value : `悄悄喵~ ${value}`;
+    },
+    speechModeKey(level) {
+      if (level >= 3) return "speech.gag.heavy";
+      if (level === 2) return "speech.gag.medium";
+      if (level === 1) return "speech.gag.light";
+      return "speech.normal";
+    },
+    gag(text, gagLevel, type) {
+      let value = String(text || "").trim();
+      if (!value || gagLevel <= 0) return text;
+      const splitIndex = value.search(/[，。！？,.!?]/);
+      if (gagLevel >= 3) {
+        const core = splitIndex >= 0 ? value.slice(0, splitIndex) : value;
+        return `${core.slice(0, 8) || "唔"}……唔喵`;
+      }
+      if (gagLevel === 2) {
+        if (splitIndex >= 0) value = value.slice(0, Math.max(6, splitIndex));
+        value = value.replace(/[啊呀啦哦呢嘛]/g, "唔").replace(/[，。！？,.!?]+/g, "…");
+        return /(唔喵|嗯唔)/.test(value) ? value : `${value}……唔喵`;
+      }
+      value = value.replace(/[啊呀啦哦]/g, "唔");
+      if (type === "Whisper") return `${value}…唔`;
+      return /[唔喵]/.test(value) ? `${value}…` : `${value} 唔喵`;
+    },
+    alreadyConverted(type, text, hasKaomoji) {
+      if (type === "Whisper" && text.startsWith("悄悄喵~")) return true;
+      if ((type === "Action" || type === "Activity") && /喵喵[）)]?$/.test(text)) return true;
+      return type === "Emote" && hasKaomoji(text);
+    }
+  },
+  en: {
+    randomNyan() {
+      return Math.random() < config.nyanChance ? " nya" : "";
+    },
+    relationHonorific(text) {
+      return String(text || "")
+        .replace(/主人(?!大人|様)/g, "Master")
+        .replace(/恋人(?!殿下|大人)/g, "Beloved");
+    },
+    standard(text) {
+      if (!text || typeof text !== "string") return text;
+      return this.relationHonorific(text)
+        .replace(/我们/g, "we cats")
+        .replace(/大家/g, "everyone")
+        .replace(/本人/g, "I")
+        .replace(/你们/g, "you all")
+        .replace(/您/g, "you")
+        .replace(/你/g, "you")
+        .replace(/我/g, "I")
+        .replace(/玩家/g, "Catgirl")
+        .replace(/角色/g, "cat persona")
+        .replace(/孝子|xz|卫兵|小丑|资本|水军|海军|二游|节奏/g, "small fry")
+        .replace(/恋爱|溜冰|爆改|白嫖|洗白|抄袭|借鉴|退坑|好似/g, "romance drama")
+        .replace(/([也矣兮乎者焉哉]|[啊吗呢吧哇呀哦嘛喔咯呜捏])([\s,.!?;:，。！？；：）】」』]|$)/g, `meow${this.randomNyan()}$2`)
+        .replace(/([的了辣])([\s,.!?;:，。！？；：）】」』]|$)/g, `$1 meow${this.randomNyan()}$2`);
+    },
+    action(text) {
+      const value = this.relationHonorific(text);
+      if (/(喵喵|meow meow)[）)]?$/i.test(value)) return value;
+      return value.replace(/[）)]?$/, (end) => ` meow meow${end || ""}`);
+    },
+    whisper(text) {
+      const value = this.standard(text);
+      return value.startsWith("Psst meow~") ? value : `Psst meow~ ${value}`;
+    },
+    speechModeKey(level) {
+      if (level >= 3) return "speech.gag.heavy";
+      if (level === 2) return "speech.gag.medium";
+      if (level === 1) return "speech.gag.light";
+      return "speech.normal";
+    },
+    gag(text, gagLevel, type) {
+      let value = String(text || "").trim();
+      if (!value || gagLevel <= 0) return text;
+      const splitIndex = value.search(/[，。！？,.!?]/);
+      if (gagLevel >= 3) {
+        const core = splitIndex >= 0 ? value.slice(0, splitIndex) : value;
+        return `${core.slice(0, 8) || "mmph"}... mmph meow`;
+      }
+      if (gagLevel === 2) {
+        if (splitIndex >= 0) value = value.slice(0, Math.max(6, splitIndex));
+        value = value.replace(/[啊呀啦哦呢嘛]/g, "mmph").replace(/[，。！？,.!?]+/g, "...");
+        return /(mmph meow|mmph)/i.test(value) ? value : `${value}... mmph meow`;
+      }
+      value = value.replace(/[啊呀啦哦]/g, "mmph");
+      if (type === "Whisper") return `${value}... mmph`;
+      return /mmph|meow/i.test(value) ? `${value}...` : `${value} mmph meow`;
+    },
+    alreadyConverted(type, text, hasKaomoji) {
+      if (type === "Whisper" && text.startsWith("Psst meow~")) return true;
+      if ((type === "Action" || type === "Activity") && /(喵喵|meow meow)[）)]?$/i.test(text)) return true;
+      return type === "Emote" && hasKaomoji(text);
+    }
+  }
+});
+  const EXPERIMENTAL_CONTENT = {"zh-CN":{"version":"1.0.0","locale":"zh-CN","replySuggestions":[{"id":"good-night","patterns":["晚安","好梦","困困","睡觉"],"replies":["晚安喵，做个甜甜的梦呀","猫猫也要缩进被窝啦，晚安喵","睡醒再来贴贴喵"]},{"id":"head-pat","patterns":["摸摸","摸头"],"replies":["给你蹭一下喵","耳朵都被摸热啦喵","再摸一下也可以喵"]},{"id":"hug","patterns":["抱抱"],"replies":["抱住不撒爪喵","给你一个软乎乎的抱抱喵","已经贴过来啦喵"]},{"id":"cuddle","patterns":["贴贴","蹭蹭","蹭"],"replies":["贴过去一点喵","尾巴也想跟着蹭蹭喵","好哦，给你贴贴喵"]},{"id":"kiss","patterns":["亲亲","亲一口"],"replies":["会害羞的喵","偷偷回你一个小亲亲喵","耳朵都红起来了喵"]}],"voicePhrases":["听见猫娘的声音，尾巴会慢慢放松喵","耳朵只要跟着声音走就好了喵","呼吸放轻一点，乖乖听完这一句喵","小猫爪会把注意力轻轻带回来喵","现在只需要看着猫娘，慢慢眨眼喵","被温柔声音包住的时候，可以不用逞强喵"],"habit":{"styles":{"gentle":"温柔","playful":"活泼","cozy":"黏人"},"tails":["喵~","呜喵","呼噜","蹭蹭喵"],"moodTails":{"happy":" 开心地晃着尾巴喵~","sad":" 耳朵软软地垂下来喵...","cool":" 轻轻别过脸去喵。","clingy":" 忍不住又贴近一点喵~","sleepy":" 困困地揉了揉眼睛喵...","maid":" 会乖乖侍奉主人大人喵~","princess":" 本公主今天也允许汝靠近喵~","nurse":" 请把不舒服的地方交给猫猫护士喵~","default":" 喵~"}},"sceneTemplates":{"chat":["认真听着{target}的话，给出一段轻柔又贴合上下文的猫娘回应喵。","把{target}刚才的话轻轻接住，尾巴也跟着回应了一下喵。"],"room":["观察房间气氛后靠近{target}，用合适的猫娘动作融入场景喵。","把房间里的节奏记好，再温柔地回应{target}喵。"],"state":["留意到{target}当前的状态，放慢动作温柔照看喵。","根据{target}的姿势和限制调整距离，小心陪在旁边喵。"],"action":["向{target}做出一个软乎乎的猫娘互动，尾巴开心地晃了晃喵。","轻轻靠近{target}完成互动，又害羞地观察对方反应喵。"],"rp":["顺着当前 RP 气氛回应{target}，把猫娘语气拿捏得软软的喵。","用符合场景的猫娘口吻接住{target}的话，耳朵认真竖着喵。"],"aftercare":["确认{target}还舒服后，放慢节奏陪着对方缓一缓喵。","把照顾和安抚留给{target}，安静守在身边喵。"],"default":["围绕{target}给出一段自然的猫娘 RP 灵感喵。","轻轻回应{target}，让当前场景继续自然发展喵。"]},"relationHints":{"owner":"对主人大人的语气已经变得更乖巧喵~","lover":"对恋人殿下的尾音悄悄变甜了喵~","dual":"同时认出主人与恋人关系，猫猫会更亲近喵~"},"rpTones":{"soft":{"label":"软萌猫娘","chatPrefixes":["","","本喵软软地说："],"chatSuffixes":["喵~","喵喵~","呀喵"],"whisperPrefix":"悄悄咪咪喵~ ","actionTarget":"软软地{action}{target}，尾巴开心地晃呀晃喵~","actionSelf":"软软地{action}自己一下，像小猫晒太阳一样眯起眼睛喵~"},"classic":{"label":"古风猫娘","chatPrefixes":["","猫儿敛袖轻声道："],"chatSuffixes":["喵乎。","甚好喵。","愿君安然喵。"],"whisperPrefix":"附耳轻语喵：","actionTarget":"轻移脚步向{target}{action}，尾尖微晃，似是甚欢喵。","actionSelf":"垂眸轻笑，悄悄{action}自己一下，甚是安然喵。"},"tsundere":{"label":"傲娇猫娘","chatPrefixes":["","哼，","本喵别过脸说："],"chatSuffixes":["哼喵。","才不是呢喵。","你可别误会喵。"],"whisperPrefix":"小声傲娇喵~ ","actionTarget":"别过脸装作不在意地对{target}{action}，才、才不是特意的喵！","actionSelf":"哼了一声，勉强{action}自己一下，才不是需要安慰呢喵。"},"polite":{"label":"礼貌猫娘","chatPrefixes":["","猫娘礼貌地说道："],"chatSuffixes":["喵。","还请多关照喵。","谢谢汝喵。"],"whisperPrefix":"轻声打扰了喵：","actionTarget":"温柔而克制地向{target}{action}，希望能让对方安心一些喵。","actionSelf":"安静地{action}自己一下，认真整理好心情喵。"},"simple":{"label":"简洁猫娘","chatPrefixes":[""],"chatSuffixes":["喵。","喵~"],"whisperPrefix":"悄悄喵：","actionTarget":"对{target}{action}喵。","actionSelf":"{action}自己喵。"}},"featureDescription":"根据当前互动触发 {label} 猫娘反应。","voiceDefault":"猫娘声音效果启动喵~","nearbyTarget":"身边的猫猫"},"en":{"version":"1.0.0","locale":"en","replySuggestions":[{"id":"good-night","patterns":["good night","sweet dreams","sleepy","bedtime"],"replies":["Good night, sleep sweetly, meow~","This kitty is curling up too. Good night, meow~","Come cuddle again after we wake up, meow~"]},{"id":"head-pat","patterns":["headpat","head pat","pat pat"],"replies":["Leans in for another little pat, meow~","My ears are getting warm from all those pats, meow~","One more pat would be nice, meow~"]},{"id":"hug","patterns":["hug","hugs"],"replies":["Hugs tight and refuses to let go, meow~","Here is one soft, fluffy hug, meow~","Already snuggled up beside you, meow~"]},{"id":"cuddle","patterns":["cuddle","snuggle","nuzzle"],"replies":["Scoots a little closer, meow~","My tail wants to join the cuddle too, meow~","Okay, come snuggle, meow~"]},{"id":"kiss","patterns":["kiss","kisses"],"replies":["That is going to make me blush, meow~","Sneaks a tiny kiss back, meow~","My ears are turning red, meow~"]}],"voicePhrases":["Let the neko voice soften your tail and shoulders, meow~","Just follow the sound with your ears, meow~","Breathe gently and listen to the whole phrase, meow~","A tiny paw guides your attention back, meow~","For now, just watch this catgirl and blink slowly, meow~","You do not have to stay strong inside a gentle voice, meow~"],"habit":{"styles":{"gentle":"Gentle","playful":"Playful","cozy":"Clingy"},"tails":["meow~","mew~","purr~","snuggle meow~"],"moodTails":{"happy":" Her tail sways happily, meow~","sad":" Her ears droop softly, meow...","cool":" She turns her face aside with a quiet meow.","clingy":" She cannot help moving a little closer, meow~","sleepy":" She rubs her sleepy eyes, meow...","maid":" This maid kitty will serve properly, meow~","princess":" This princess permits you to come closer today, meow~","nurse":"Leave the uncomfortable parts to nurse kitty, meow~","default":" Meow~"}},"sceneTemplates":{"chat":["Listens closely to {target} and offers a soft, context-aware neko response, meow~","Gently picks up {target}'s last thought while her tail answers too, meow~"],"room":["Reads the room before moving closer to {target} with a fitting neko gesture, meow~","Follows the room's rhythm and responds warmly to {target}, meow~"],"state":["Notices {target}'s current state and slows down to care for them gently, meow~","Adjusts her distance to {target}'s posture and restraints, staying carefully nearby, meow~"],"action":["Shares a soft catgirl interaction with {target}, tail swaying happily, meow~","Moves close to {target}, completes the gesture, then shyly watches their reaction, meow~"],"rp":["Matches the current roleplay mood and answers {target} in a soft neko voice, meow~","Keeps the scene flowing with {target}, ears perked attentively, meow~"],"aftercare":["Checks that {target} is comfortable, then slows down and stays close, meow~","Leaves calm care and reassurance with {target}, quietly guarding them, meow~"],"default":["Offers a natural catgirl roleplay idea involving {target}, meow~","Responds softly to {target} and lets the scene continue naturally, meow~"]},"relationHints":{"owner":"Her voice becomes more obedient for her owner, meow~","lover":"Her ending turns sweeter for her lover, meow~","dual":"She recognizes both owner and lover bonds and becomes extra affectionate, meow~"},"rpTones":{"soft":{"label":"Soft Neko","chatPrefixes":["","","The soft kitty says: "],"chatSuffixes":["meow~","mew mew~","nya~"],"whisperPrefix":"Psst, soft meow~ ","actionTarget":"Softly {action} {target}, her tail swaying happily, meow~","actionSelf":"Softly {action} herself and closes her eyes like a cat in warm sunlight, meow~"},"classic":{"label":"Classic Neko","chatPrefixes":["","The graceful catgirl says: "],"chatSuffixes":["meow.","How lovely, meow.","May you be at ease, meow."],"whisperPrefix":"She leans closer and whispers, meow: ","actionTarget":"Steps lightly toward {target} and {action}, her tail swaying with quiet delight, meow.","actionSelf":"Lowers her gaze with a smile and gently {action} herself, peaceful and composed, meow."},"tsundere":{"label":"Tsundere Neko","chatPrefixes":["","Hmph, ","The kitty looks away and says: "],"chatSuffixes":["hmph, meow.","It is not like that, meow.","Do not misunderstand, meow."],"whisperPrefix":"In a tiny stubborn whisper, meow~ ","actionTarget":"Looks away and pretends not to care while she {action} {target}—i-it was not on purpose, meow!","actionSelf":"Huffs and reluctantly {action} herself; it is not as if she needs comfort, meow."},"polite":{"label":"Polite Neko","chatPrefixes":["","The catgirl says politely: "],"chatSuffixes":["meow.","Please take care, meow.","Thank you kindly, meow."],"whisperPrefix":"Pardon the quiet interruption, meow: ","actionTarget":"Gently and respectfully {action} {target}, hoping to put them at ease, meow.","actionSelf":"Quietly {action} herself and carefully settles her feelings, meow."},"simple":{"label":"Simple Neko","chatPrefixes":[""],"chatSuffixes":["meow.","meow~"],"whisperPrefix":"Psst, meow: ","actionTarget":"{action} {target}, meow.","actionSelf":"{action} herself, meow."}},"featureDescription":"Triggers the {label} neko response for the current interaction.","voiceDefault":"The neko voice effect begins, meow~","nearbyTarget":"a nearby kitty"}};
+  const SUPPORTED_UI_LOCALES = ["zh-CN", "en"];
+  const SUPPORTED_CONTENT_LOCALES = ["zh-CN", "en"];
+  const INITIAL_CONTENT_LOCALE = normalizeLocale(BOOTSTRAP.defaultContentLocale) || "zh-CN";
   const MOD_ID = "BCNekoEnhancer";
   const CHANNEL = "bug";
-  const VERSION = "2.10.7-bug.4";
+  const VERSION = "2.12.0-bug.1";
   const STORE_KEY = "bcNekoEnhancer.config.v2.bug";
   const BUG_RP_STORE_KEY = "bcNekoEnhancer.bug.rp.v1";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
-  const ACTION_LIBRARY_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/actions/catgirl-actions.json";
-  const ACTION_LIBRARY_CACHE_KEY = "bcNekoEnhancer.actionLibrary.v1";
-  const KAOMOJI_LIBRARY_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/kaomoji/cute-kaomoji.json";
-  const KAOMOJI_LIBRARY_CACHE_KEY = "bcNekoEnhancer.kaomojiLibrary.v1";
+  const CONTENT_BASE_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/content";
+  const ACTION_LIBRARY_URLS = {
+    "zh-CN": `${CONTENT_BASE_URL}/zh-CN/actions.json`,
+    en: `${CONTENT_BASE_URL}/en/actions.json`,
+  };
+  const ACTION_LIBRARY_LEGACY_CACHE_KEY = "bcNekoEnhancer.actionLibrary.v1";
+  const ACTION_LIBRARY_CACHE_PREFIX = "bcNekoEnhancer.actionLibrary.v2";
+  const COMPOSER_LIBRARY_URLS = {
+    "zh-CN": `${CONTENT_BASE_URL}/zh-CN/composer.json`,
+    en: `${CONTENT_BASE_URL}/en/composer.json`,
+  };
+  const COMPOSER_LIBRARY_CACHE_PREFIX = "bcNekoEnhancer.composerLibrary.v1";
+  const COMPOSER_STATE_KEY = "bcNekoEnhancer.actionComposer.v1";
+  const ACTION_COMPOSER_HOLD_MS = 3000;
+  const ACTION_COMPOSER_MOVE_TOLERANCE = 12;
+  const ACTION_COMPOSER_RECENT_LIMIT = 16;
+  const ACTION_COMPOSER_FAVORITE_LIMIT = 12;
+  const ACTION_MESSAGE_MAX_LENGTH = 900;
+  const KAOMOJI_LIBRARY_URL = `${CONTENT_BASE_URL}/shared/kaomoji.json`;
+  const KAOMOJI_LIBRARY_LEGACY_CACHE_KEY = "bcNekoEnhancer.kaomojiLibrary.v1";
+  const KAOMOJI_LIBRARY_CACHE_KEY = "bcNekoEnhancer.kaomojiLibrary.v2.shared";
+  const KAOMOJI_USAGE_KEY = "bcNekoEnhancer.kaomojiUsage.v1";
   const RP_LIBRARY_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/rp/catgirl-rp-presets.json";
   const RP_LIBRARY_CACHE_KEY = "bcNekoEnhancer.rpLibrary.v1";
   const PEER_SIGNAL_CONTENT = "BCNekoEnhancer.Hello";
   const PEER_SIGNAL_INTERVAL = 45000;
   const PEER_TTL = 300000;
   const ATMOSPHERE_KEYWORDS = /喵|蹭蹭|蹭|贴贴|抱抱|摸摸|摸头|亲亲|ฅ|🐾|💗|💕|💖/i;
-  const RP_TONE_PRESETS = {
-    soft: {
-      label: "软萌猫娘",
-      suffix: "喵~",
-      actionTarget: "{actor}轻轻靠过去，软乎乎地{verb}了{target}，尾巴开心地晃呀晃喵~",
-      actionSelf: "{actor}软软地{verb}了自己一下，像小猫晒太阳一样眯起眼睛喵~",
-    },
-    classic: {
-      label: "古风猫娘",
-      suffix: "喵乎",
-      actionTarget: "{actor}轻移莲步，{verb}{target}入怀，尾尖微晃，似是甚欢喵。",
-      actionSelf: "{actor}垂眸轻笑，悄悄{verb}了自己一下，甚是安然喵。",
-    },
-    tsundere: {
-      label: "傲娇猫娘",
-      suffix: "哼喵",
-      actionTarget: "{actor}别过脸去，装作漫不经心地{verb}了{target}，才、才不是特意的喵！",
-      actionSelf: "{actor}哼了一声，勉强{verb}了自己一下，才不是需要安慰呢喵。",
-    },
-    polite: {
-      label: "礼貌猫娘",
-      suffix: "喵。",
-      actionTarget: "{actor}温柔而克制地{verb}了{target}，希望能让对方安心一些喵。",
-      actionSelf: "{actor}安静地{verb}了自己一下，认真整理好心情喵。",
-    },
-    simple: {
-      label: "简洁猫娘",
-      suffix: "喵",
-      actionTarget: "{actor}{verb}了{target}喵。",
-      actionSelf: "{actor}{verb}了自己喵。",
-    },
-  };
-  const RP_TONE_ALIASES = {
-    开: "on",
-    关: "off",
-    状态: "status",
-    軟萌: "soft",
-    软萌: "soft",
-    软萌猫娘: "soft",
-    古风: "classic",
-    古风猫娘: "classic",
-    傲娇: "tsundere",
-    傲娇猫娘: "tsundere",
-    礼貌: "polite",
-    礼貌猫娘: "polite",
-    简洁: "simple",
-    简洁猫娘: "simple",
-  };
   const DEFAULT_KAOMOJI = ["(=^･ω･^=)", "ฅ(•ㅅ•❀)ฅ", "(=｀ω´=)", "(ฅ´ω`ฅ)", "(=^･ｪ･^=)"];
   const ACTION_TARGET_MODE = {
     AUTO: "auto",
@@ -426,6 +534,8 @@
   const THEME_ORDER = ["sakura", "mint", "sky", "cream", "lavender", "tea"];
 
   const defaults = {
+    uiLocale: BOOTSTRAP.defaultUiLocale || "auto",
+    contentLocale: INITIAL_CONTENT_LOCALE,
     enabled: true,
     convertOutgoing: true,
     convertDisplayed: true,
@@ -442,59 +552,24 @@
     wheelY: null,
     actionTargetMode: ACTION_TARGET_MODE.AUTO,
     theme: "sakura",
-    actions: [
-      {
-        label: "抱抱",
-        text: "轻轻抱住{target}，把脸颊贴过去蹭了蹭喵~",
-        selfText: "抱住自己软软地蹭了蹭尾巴喵~",
-      },
-      {
-        label: "摸头",
-        text: "踮起脚摸了摸{target}的头，认真夸奖了一句：好乖喵~",
-        selfText: "摸了摸自己的头，假装被夸奖得很开心喵~",
-      },
-      {
-        label: "喂食",
-        text: "把小点心递到{target}嘴边，期待地晃了晃尾巴：啊呜喵~",
-        selfText: "捧着小点心小口吃掉，满足地眯起眼睛喵~",
-      },
-    ],
-  };
-
-  const DEFAULT_ACTION_LIBRARY = {
-    version: "builtin",
-    actions: defaults.actions.map((action, index) => ({
-      id: ["hug", "pat", "feed"][index] || `builtin-${index}`,
+    actions: CONTENT_FALLBACKS[INITIAL_CONTENT_LOCALE].actions.map((action) => ({
       label: action.label,
-      enabled: true,
-      self: [action.selfText],
-      target: [action.text],
+      text: action.target,
+      selfText: action.self,
     })),
   };
 
-  const DEFAULT_KAOMOJI_LIBRARY = {
-    version: "builtin",
-    groups: [
-      {
-        id: "cat",
-        label: "猫猫",
-        enabled: true,
-        items: DEFAULT_KAOMOJI,
-      },
-    ],
-  };
-
-  const DEFAULT_RP_LIBRARY = {
-    version: "builtin",
-    updatedAt: "",
-    tonePresets: RP_TONE_PRESETS,
-  };
-
   const config = loadConfig();
-  let rpLibrary = loadCachedRpLibrary() || normalizeRpLibrary(DEFAULT_RP_LIBRARY);
-  let bugRp = loadBugRpConfig();
+  let DEFAULT_ACTION_LIBRARY = createDefaultActionLibrary(config.contentLocale);
+  let DEFAULT_KAOMOJI_LIBRARY = createDefaultKaomojiLibrary(config.contentLocale);
   let actionLibrary = loadCachedActionLibrary() || normalizeActionLibrary(DEFAULT_ACTION_LIBRARY);
+  let composerLibrary = loadCachedComposerLibrary();
   let kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
+  let kaomojiUsage = loadKaomojiUsage();
+  let composerState = loadComposerState();
+  let activeComposerSession = null;
+  let rpLibrary = loadCachedRpLibrary();
+  let bugRp = loadBugRpConfig();
   const processedMessages = new WeakSet();
   const atmosphereMessages = new WeakSet();
   let patched = false;
@@ -506,7 +581,6 @@
   let nekoCommandsRegistered = false;
   let nekoCommandRegistrationSource = "";
   let toastTimer = 0;
-  let suppressNextEmoteConvertAt = 0;
   let activeKaomojiGroup = "all";
   let lastPeerSignalAt = 0;
   let lastPeerRoom = "";
@@ -540,14 +614,6 @@
   const nekoEventSubscribers = new Map();
   const nekoEventHistory = [];
   const nekoVoiceQueue = [];
-  const nekoVoicePhrases = [
-    "听见猫娘的声音，尾巴会慢慢放松喵",
-    "耳朵只要跟着声音走就好了喵",
-    "呼吸放轻一点，乖乖听完这一句喵",
-    "小猫爪会把注意力轻轻带回来喵",
-    "现在只需要看着猫娘，慢慢眨眼喵",
-    "被温柔声音包住的时候，可以不用逞强喵",
-  ];
   const nekoPeers = new Map();
   const badgeHitboxes = new Map();
   const characterAnchors = new Map();
@@ -559,7 +625,15 @@
   console.log(`[BC 猫娘增强] v${VERSION} userscript injected:`, location.href);
   W.BCNekoEnhancer = {
     config,
+    t,
+    uiLocale: () => resolveUiLocale(),
+    setUiLocale,
+    contentLocale: () => config.contentLocale,
+    setContentLocale,
     actionLibrary: () => actionLibrary,
+    composerLibrary: () => composerLibrary,
+    rpLibrary: () => rpLibrary,
+    bugRp: () => ({ ...bugRp, label: currentRpTone().label }),
     kaomojiLibrary: () => kaomojiLibrary,
     version: VERSION,
     insertFace,
@@ -581,22 +655,21 @@
     voice: triggerNekoVoiceEffect,
     voiceQueue: () => nekoVoiceQueue.slice(),
     reloadActions: loadRemoteActionLibrary,
-    reloadKaomoji: loadRemoteKaomojiLibrary,
+    openActionComposer,
+    reloadComposer: loadRemoteComposerLibrary,
     reloadRp: loadRemoteRpLibrary,
-    bugRp: () => ({ ...bugRp, label: currentTone().label }),
+    reloadKaomoji: loadRemoteKaomojiLibrary,
     diagnostic,
     status: () => ({
       patched,
       sdk: !!bcModApi,
       enabled: config.enabled,
-      channel: CHANNEL,
-      rp: { ...bugRp, label: currentTone().label },
-      commandRegistered: nekoCommandsRegistered,
-      commandRegistrationSource: nekoCommandRegistrationSource,
       screen: W.CurrentScreen,
       url: location.href,
       escapePickActive: isEscapePickActive(),
       escapeGoddessMode,
+      commandRegistered: nekoCommandsRegistered,
+      commandRegistrationSource: nekoCommandRegistrationSource,
     }),
   };
 
@@ -607,26 +680,18 @@
     const activeKaomojiItems = getActiveKaomojiItems();
     let actionCache = false;
     let kaomojiCache = false;
-    let rpCache = false;
     try {
-      actionCache = !!localStorage.getItem(ACTION_LIBRARY_CACHE_KEY);
+      actionCache = !!localStorage.getItem(actionLibraryCacheKey());
       kaomojiCache = !!localStorage.getItem(KAOMOJI_LIBRARY_CACHE_KEY);
-      rpCache = !!localStorage.getItem(RP_LIBRARY_CACHE_KEY);
     } catch {
       // Storage may be unavailable in some browser modes.
     }
     return {
       mod: MOD_ID,
       version: VERSION,
-      channel: CHANNEL,
       url: String(location.href),
       screen: W.CurrentScreen || "",
       player: W.Player?.MemberNumber || null,
-      rp: {
-        enabled: !!bugRp.enabled,
-        tonePreset: bugRp.tonePreset,
-        toneLabel: currentTone().label,
-      },
       runtime: {
         sdkRegistered: !!bcModApi,
         chatHooks: patched,
@@ -637,6 +702,9 @@
         settingsRegistered,
       },
       config: {
+        uiLocale: config.uiLocale,
+        resolvedUiLocale: resolveUiLocale(),
+        contentLocale: config.contentLocale,
         enabled: !!config.enabled,
         convertOutgoing: !!config.convertOutgoing,
         convertDisplayed: !!config.convertDisplayed,
@@ -647,6 +715,8 @@
         theme: config.theme,
         actionTargetMode: config.actionTargetMode,
         nyanChance: config.nyanChance,
+        bugRpEnabled: !!bugRp.enabled,
+        bugRpTone: bugRp.tonePreset,
       },
       libraries: {
         actions: {
@@ -654,7 +724,8 @@
           total: (actionLibrary.actions || []).length,
           enabled: activeActions.length,
           cached: actionCache,
-          url: ACTION_LIBRARY_URL,
+          locale: config.contentLocale,
+          url: actionLibraryUrl(),
         },
         kaomoji: {
           version: kaomojiLibrary.version || "unknown",
@@ -662,13 +733,15 @@
           enabledGroups: activeKaomojiGroups.length,
           items: activeKaomojiItems.length,
           cached: kaomojiCache,
+          locale: config.contentLocale,
           url: KAOMOJI_LIBRARY_URL,
         },
         rp: {
-          version: rpLibrary.version || "unknown",
-          presets: Object.keys(rpLibrary.tonePresets || {}).length,
-          cached: rpCache,
-          url: RP_LIBRARY_URL,
+          version: config.contentLocale === "zh-CN" ? rpLibrary?.version || "builtin" : "localized-builtin",
+          tone: bugRp.tonePreset,
+          enabled: !!bugRp.enabled,
+          locale: config.contentLocale,
+          url: config.contentLocale === "zh-CN" ? RP_LIBRARY_URL : "embedded",
         },
       },
       peers: {
@@ -676,9 +749,6 @@
         members: Array.from(nekoPeers, ([memberNumber, peer]) => ({
           memberNumber,
           version: peer.version || "unknown",
-          channel: peer.channel || "unknown",
-          tonePreset: peer.tonePreset || "",
-          toneLabel: peer.toneLabel || "",
           seenSecondsAgo: Math.round((Date.now() - peer.time) / 1000),
         })),
       },
@@ -702,6 +772,16 @@
   }
 
   function normalizeConfig(next) {
+    const normalizedUiLocale = normalizeLocale(next.uiLocale);
+    next.uiLocale = String(next.uiLocale || "").toLowerCase() === "auto"
+      ? "auto"
+      : SUPPORTED_UI_LOCALES.includes(normalizedUiLocale)
+        ? normalizedUiLocale
+        : defaults.uiLocale;
+    const normalizedContentLocale = normalizeLocale(next.contentLocale);
+    next.contentLocale = SUPPORTED_CONTENT_LOCALES.includes(normalizedContentLocale)
+      ? normalizedContentLocale
+      : normalizeLocale(defaults.contentLocale) || "zh-CN";
     next.nyanChance = clamp(Number(next.nyanChance ?? defaults.nyanChance), 0, 1);
     if (!Object.values(ACTION_TARGET_MODE).includes(next.actionTargetMode)) {
       next.actionTargetMode = ACTION_TARGET_MODE.AUTO;
@@ -715,12 +795,17 @@
     next.sceneSparkEnabled = next.sceneSparkEnabled === true;
     next.wheelX = Number.isFinite(Number(next.wheelX)) ? Number(next.wheelX) : null;
     next.wheelY = Number.isFinite(Number(next.wheelY)) ? Number(next.wheelY) : null;
-    const fallbackActions = defaults.actions;
+    const fallbackPack = contentFallback(next.contentLocale);
+    const fallbackActions = fallbackPack.actions.map((action) => ({
+      label: action.label,
+      text: action.target,
+      selfText: action.self,
+    }));
     next.actions = (Array.isArray(next.actions) && next.actions.length ? next.actions : fallbackActions)
       .map((action, index) => ({
-        label: String(action.label || fallbackActions[index]?.label || "动作").slice(0, 6),
-        text: String(action.text || fallbackActions[index]?.text || "{target}靠近了一点喵~"),
-        selfText: String(action.selfText || fallbackActions[index]?.selfText || "轻轻晃了晃尾巴喵~"),
+        label: String(action.label || fallbackActions[index]?.label || fallbackPack.actionLabelFallback).slice(0, 12),
+        text: String(action.text || fallbackActions[index]?.text || fallbackPack.actionTargetFallback),
+        selfText: String(action.selfText || fallbackActions[index]?.selfText || fallbackPack.actionSelfFallback),
       }))
       .slice(0, 6);
     return next;
@@ -731,676 +816,342 @@
     localStorage.setItem(STORE_KEY, JSON.stringify(config));
   }
 
+  function normalizeLocale(value) {
+    const locale = String(value || "").trim().toLowerCase().replace(/_/g, "-");
+    if (!locale) return "";
+    if (locale === "cn" || locale === "chinese" || locale.startsWith("zh")) return "zh-CN";
+    if (locale === "english" || locale.startsWith("en")) return "en";
+    return "";
+  }
+
+  function resolveUiLocale() {
+    if (config.uiLocale !== "auto") return normalizeLocale(config.uiLocale) || "en";
+    const candidates = [
+      W.TranslationLanguage,
+      W.Player?.Language,
+      W.Player?.OnlineSettings?.Language,
+      ...(globalThis.navigator?.languages || []),
+      globalThis.navigator?.language,
+    ];
+    for (const candidate of candidates) {
+      const locale = normalizeLocale(candidate);
+      if (SUPPORTED_UI_LOCALES.includes(locale)) return locale;
+    }
+    return "en";
+  }
+
+  function translateValue(key) {
+    const locale = resolveUiLocale();
+    return UI_MESSAGES[locale]?.[key] ?? UI_MESSAGES.en?.[key] ?? UI_MESSAGES["zh-CN"]?.[key] ?? key;
+  }
+
+  function formatTemplate(template, params = {}) {
+    return String(template).replace(/\{([A-Za-z][A-Za-z0-9_]*)\}/g, (match, name) => (
+      Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : match
+    ));
+  }
+
+  function t(key, params = {}) {
+    const value = translateValue(key);
+    return formatTemplate(Array.isArray(value) ? value[0] : value, params);
+  }
+
+  function tLines(key, params = {}) {
+    const value = translateValue(key);
+    const lines = Array.isArray(value) ? value : [value];
+    return lines.map((line) => formatTemplate(line, params));
+  }
+
+  function setUiLocale(locale) {
+    const value = String(locale || "").toLowerCase() === "auto" ? "auto" : normalizeLocale(locale);
+    if (value !== "auto" && !SUPPORTED_UI_LOCALES.includes(value)) return false;
+    const pickerOpen = isKaomojiPickerOpen();
+    config.uiLocale = value;
+    saveConfig();
+    syncBodyState();
+    markKaomojiPickerDirty();
+    syncKaomojiPickerState(pickerOpen);
+    if (shouldRenderWheel()) renderWheel();
+    if (activeComposerSession) renderActionComposer();
+    return true;
+  }
+
+  function contentFallback(locale = config.contentLocale) {
+    return CONTENT_FALLBACKS[normalizeLocale(locale)] || CONTENT_FALLBACKS["zh-CN"];
+  }
+
+  function contentLabels(locale = config.contentLocale) {
+    return CONTENT_LABELS[normalizeLocale(locale)] || CONTENT_LABELS["zh-CN"];
+  }
+
+  function contentProcessor(locale = config.contentLocale) {
+    return CONTENT_PROCESSORS[normalizeLocale(locale)] || CONTENT_PROCESSORS["zh-CN"];
+  }
+
+  function experimentalContent(locale = config.contentLocale) {
+    return EXPERIMENTAL_CONTENT[normalizeLocale(locale)] || EXPERIMENTAL_CONTENT["zh-CN"];
+  }
+
+  function humanizeExperimentalId(id) {
+    return String(id || "feature")
+      .split("-")
+      .slice(1)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ") || "Neko Feature";
+  }
+
+  function localizedScenePack(pack) {
+    if (config.contentLocale !== "en") return pack;
+    const group = String(pack?.id || "").split("-")[0];
+    const templates = experimentalContent().sceneTemplates[group]
+      || experimentalContent().sceneTemplates.default;
+    return {
+      ...pack,
+      label: humanizeExperimentalId(pack?.id),
+      lines: templates,
+    };
+  }
+
+  function localizedNekoFeature(feature) {
+    if (config.contentLocale !== "en") return feature;
+    const label = humanizeExperimentalId(feature?.id);
+    return {
+      ...feature,
+      label,
+      description: formatTemplate(experimentalContent().featureDescription, { label }),
+    };
+  }
+
+  function experimentalReplySuggestionLibrary() {
+    return (experimentalContent().replySuggestions || []).map((entry) => ({
+      ...entry,
+      pattern: new RegExp((entry.patterns || []).map(escapeScenePattern).join("|"), "i"),
+    }));
+  }
+
+  function normalizeRpLibrary(source) {
+    const tones = {};
+    const presets = Array.isArray(source?.tonePresets) ? source.tonePresets : [];
+    for (const preset of presets) {
+      const id = String(preset?.id || "").trim();
+      if (!id || preset?.enabled === false) continue;
+      const actions = {};
+      for (const [actionId, action] of Object.entries(preset?.actions || {})) {
+        actions[actionId] = {
+          target: Array.isArray(action?.target) ? action.target.map(String).filter(Boolean) : [],
+          self: Array.isArray(action?.self) ? action.self.map(String).filter(Boolean) : [],
+        };
+      }
+      tones[id] = {
+        id,
+        label: String(preset?.label || id),
+        chatPrefixes: Array.isArray(preset?.chat?.prefixes) ? preset.chat.prefixes.map(String) : [""],
+        chatSuffixes: Array.isArray(preset?.chat?.suffixes) ? preset.chat.suffixes.map(String).filter(Boolean) : [],
+        replacements: Array.isArray(preset?.chat?.replacements)
+          ? preset.chat.replacements.filter((pair) => Array.isArray(pair) && pair.length >= 2).map(([from, to]) => [String(from), String(to)])
+          : [],
+        endingChance: clamp(Number(preset?.chat?.endingChance ?? 0.7), 0, 1),
+        kaomojiChance: clamp(Number(preset?.chat?.kaomojiChance ?? 0.15), 0, 1),
+        whisperPrefix: String(preset?.whisper?.prefix || ""),
+        actions,
+      };
+    }
+    return Object.keys(tones).length ? {
+      version: String(source?.version || "unknown"),
+      tonePresets: tones,
+    } : null;
+  }
+
+  function loadCachedRpLibrary() {
+    try {
+      const raw = localStorage.getItem(RP_LIBRARY_CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed?.tonePresets && !Array.isArray(parsed.tonePresets) && Object.keys(parsed.tonePresets).length) {
+        return parsed;
+      }
+      return normalizeRpLibrary(parsed);
+    } catch {
+      return null;
+    }
+  }
+
+  function cacheRpLibrary(library) {
+    try {
+      localStorage.setItem(RP_LIBRARY_CACHE_KEY, JSON.stringify(library));
+    } catch {
+      // Built-in localized RP tones remain available when storage is blocked.
+    }
+  }
+
+  function loadRemoteRpLibrary() {
+    if (config.contentLocale !== "zh-CN") return Promise.resolve(rpLibrary);
+    return requestText(RP_LIBRARY_URL)
+      .then((text) => {
+        const library = normalizeRpLibrary(JSON.parse(text));
+        if (!library) throw new Error("invalid RP library");
+        rpLibrary = library;
+        cacheRpLibrary(library);
+        console.log(`[BC Neko Enhancer/bug] RP library loaded: ${library.version}`);
+        return library;
+      })
+      .catch((error) => {
+        console.warn("[BC Neko Enhancer/bug] RP library load failed; using localized built-ins:", error);
+        return rpLibrary;
+      });
+  }
+
   function loadBugRpConfig() {
     try {
-      const saved = JSON.parse(localStorage.getItem(BUG_RP_STORE_KEY) || "{}");
-      return normalizeBugRpConfig(saved);
+      const parsed = JSON.parse(localStorage.getItem(BUG_RP_STORE_KEY) || "{}");
+      return normalizeBugRpConfig(parsed);
     } catch {
       return normalizeBugRpConfig({});
     }
   }
 
-  function normalizeBugRpConfig(next) {
-    const tonePresets = rpLibrary?.tonePresets || RP_TONE_PRESETS;
-    const tonePreset = tonePresets[next?.tonePreset] ? next.tonePreset : "soft";
+  function normalizeBugRpConfig(source = {}) {
+    const tones = experimentalContent().rpTones || {};
+    const requested = String(source?.tonePreset || "soft");
     return {
-      enabled: next?.enabled === true,
-      tonePreset,
+      enabled: source?.enabled === true,
+      tonePreset: Object.prototype.hasOwnProperty.call(tones, requested) ? requested : "soft",
     };
   }
 
   function saveBugRpConfig() {
     bugRp = normalizeBugRpConfig(bugRp);
-    localStorage.setItem(BUG_RP_STORE_KEY, JSON.stringify(bugRp));
-  }
-
-  function currentTone() {
-    const tonePresets = rpLibrary?.tonePresets || RP_TONE_PRESETS;
-    return tonePresets[bugRp.tonePreset] || tonePresets.soft || RP_TONE_PRESETS.soft;
-  }
-
-  function bugRpStatusText() {
-    return `Bug RP：${bugRp.enabled ? "开启" : "关闭"}，当前人设：${currentTone().label}`;
-  }
-
-  function shouldSkipGeneratedEmoteConvert(type) {
-    if (type !== "Emote" || !suppressNextEmoteConvertAt) return false;
-    const recent = Date.now() - suppressNextEmoteConvertAt < 1200;
-    suppressNextEmoteConvertAt = 0;
-    return recent;
-  }
-
-
-  function sendNekoCommandNotice(lines, duration = 22000) {
-    const text = Array.isArray(lines) ? lines.join("\n") : String(lines || "");
-    if (!text) return false;
     try {
-      if (typeof W.ChatRoomSendLocal === "function" && W.CurrentScreen === "ChatRoom") {
-        W.ChatRoomSendLocal(text, duration);
-        return true;
-      }
-    } catch {}
-    showToast(text.split(/\n+/)[0]);
-    return false;
+      localStorage.setItem(BUG_RP_STORE_KEY, JSON.stringify(bugRp));
+    } catch {
+      // RP selection remains active for this page.
+    }
   }
 
-  function normalizeNekoHelpSection(section) {
-    const raw = String(section || "").trim();
-    const key = raw.toLowerCase();
-    const aliases = {
-      "": "main",
-      help: "main",
-      "\u5e2e\u52a9": "main",
-      rp: "rp",
-      "\u732b\u5a18rp": "rp",
-      action: "action",
-      "\u52a8\u4f5c": "action",
-      emoji: "emoji",
-      kaomoji: "emoji",
-      "\u989c\u6587\u5b57": "emoji",
-      mode: "mode",
-      "\u6a21\u5f0f": "mode",
-      theme: "theme",
-      "\u4e3b\u9898": "theme",
-      spark: "spark",
-      "\u7075\u611f": "spark",
-      "\u706b\u82b1": "spark",
-      voice: "voice",
-      sound: "voice",
-      "\u58f0\u97f3": "voice",
-      effect: "voice",
-      effects: "voice",
-      reactions: "reactions",
-      reaction: "reactions",
-      interaction: "reactions",
-      interactions: "reactions",
-      "\u4e92\u52a8": "reactions",
-      mood: "mood",
-      state: "mood",
-      "\u5fc3\u60c5": "mood",
-      systems: "systems",
-      system: "systems",
-      profile: "systems",
-      sensitivity: "systems",
-      relation: "systems",
-      status: "status",
-      "\u72b6\u6001": "status",
-      suggest: "suggest",
-      suggestion: "suggest",
-      suggestions: "suggest",
-      reply: "suggest",
-      replies: "suggest",
+  function currentRpTone() {
+    const id = bugRp?.tonePreset || "soft";
+    if (config.contentLocale === "zh-CN" && rpLibrary?.tonePresets?.[id]) return rpLibrary.tonePresets[id];
+    return experimentalContent().rpTones[id] || experimentalContent().rpTones.soft;
+  }
+
+  function rpToneIds() {
+    return Object.keys(experimentalContent().rpTones || {});
+  }
+
+  function applyRpChatRules(text, type = "Chat") {
+    const tone = currentRpTone();
+    let value = String(text || "").trim();
+    if (!value) return text;
+    for (const [from, to] of tone.replacements || []) value = value.split(from).join(to);
+    if (type === "Whisper" && tone.whisperPrefix) value = `${tone.whisperPrefix}${value}`;
+    else {
+      const prefixes = tone.chatPrefixes || [""];
+      value = `${prefixes[Math.floor(Math.random() * prefixes.length)] || ""}${value}`;
+    }
+    const suffixes = tone.chatSuffixes || [];
+    const chance = Number.isFinite(tone.endingChance) ? tone.endingChance : 0.72;
+    if (suffixes.length && Math.random() < chance && !/[.!?。！？~～]$/.test(value)) {
+      value = `${value} ${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
+    }
+    if (Math.random() < Number(tone.kaomojiChance || 0)) value = `${value} ${pickRandomKaomoji()}`;
+    return value.trim();
+  }
+
+  function rpNeko(text, type = "Chat") {
+    const processor = contentProcessor();
+    const base = typeof processor.relationHonorific === "function" ? processor.relationHonorific(text) : text;
+    return applyRpChatRules(base, type);
+  }
+
+  function rpActionVerb(action) {
+    if (config.contentLocale !== "en") return String(action?.label || contentFallback().actionLabelFallback);
+    return {
+      hug: "hugs",
+      pat: "pats",
+      feed: "feeds",
+      cuddle: "cuddles with",
+      kiss: "kisses",
+    }[action?.id] || String(action?.label || contentFallback().actionLabelFallback).toLowerCase();
+  }
+
+  function formatRpActionText(action, target, fallbackLine) {
+    if (!bugRp.enabled) return fallbackLine;
+    const tone = currentRpTone();
+    const remoteLines = tone.actions?.[action?.id]?.[target ? "target" : "self"] || [];
+    if (remoteLines.length) {
+      return pickRandomLine(remoteLines, fallbackLine)
+        .replace(/\{target\}/g, target ? getCharacterName(target) : experimentalContent().nearbyTarget);
+    }
+    const template = target ? tone.actionTarget : tone.actionSelf;
+    return formatTemplate(template, {
+      action: rpActionVerb(action),
+      target: target ? getCharacterName(target) : experimentalContent().nearbyTarget,
+    });
+  }
+
+  function actionLibraryUrl(locale = config.contentLocale) {
+    return ACTION_LIBRARY_URLS[normalizeLocale(locale)] || ACTION_LIBRARY_URLS["zh-CN"];
+  }
+
+  function actionLibraryCacheKey(locale = config.contentLocale) {
+    return `${ACTION_LIBRARY_CACHE_PREFIX}.${normalizeLocale(locale) || "zh-CN"}`;
+  }
+
+  function composerLibraryUrl(locale = config.contentLocale) {
+    return COMPOSER_LIBRARY_URLS[normalizeLocale(locale)] || COMPOSER_LIBRARY_URLS["zh-CN"];
+  }
+
+  function composerLibraryCacheKey(locale = config.contentLocale) {
+    return `${COMPOSER_LIBRARY_CACHE_PREFIX}.${normalizeLocale(locale) || "zh-CN"}`;
+  }
+
+  function createDefaultActionLibrary(locale) {
+    const fallback = contentFallback(locale);
+    return {
+      version: "builtin",
+      locale: normalizeLocale(locale) || "zh-CN",
+      actions: fallback.actions.map((action) => ({
+        id: action.id,
+        label: action.label,
+        enabled: true,
+        self: [action.self],
+        target: [action.target],
+      })),
     };
-    return aliases[key] || aliases[raw] || "main";
   }
 
-  function getActionTargetModeLabel() {
-    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return "\u624b\u52a8\u9009\u76ee\u6807";
-    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return "\u53ea\u5bf9\u81ea\u5df1";
-    return "\u81ea\u52a8\u76ee\u6807";
-  }
-
-  function isPlayerCharacter(character) {
-    return !!character && !!W.Player && character.MemberNumber === W.Player.MemberNumber;
-  }
-
-  function isRestraintAppearanceItem(item) {
-    const groupName = item?.Asset?.Group?.Name;
-    return typeof groupName === "string" && groupName.startsWith("Item");
-  }
-
-  function getPlayerRestraintItems() {
-    return (W.Player?.Appearance || []).filter(isRestraintAppearanceItem);
-  }
-
-  function refreshPlayerAppearance() {
-    if (!W.Player) return;
-    if (typeof W.CharacterRefresh === "function") W.CharacterRefresh(W.Player);
-    if (W.CurrentScreen === "ChatRoom" && typeof W.ChatRoomCharacterUpdate === "function") {
-      W.ChatRoomCharacterUpdate(W.Player);
-    }
-  }
-
-  function refreshPlayerItemGroup(groupName) {
-    if (!W.Player || !groupName) return;
-    if (W.CurrentScreen === "ChatRoom" && typeof W.ChatRoomCharacterItemUpdate === "function") {
-      W.ChatRoomCharacterItemUpdate(W.Player, groupName);
-      return;
-    }
-    refreshPlayerAppearance();
-  }
-
-  function setEscapeSkillModifier(amount, durationMs) {
-    if (!W.Player || typeof W.SkillSetModifier !== "function") return false;
-    for (const skill of ESCAPE_SKILL_NAMES) {
-      W.SkillSetModifier(W.Player, skill, amount, durationMs);
-    }
-    return true;
-  }
-
-  function unlockPlayerRestraints() {
-    if (!W.Player || typeof W.InventoryUnlock !== "function") return 0;
-    let unlocked = 0;
-    for (const item of getPlayerRestraintItems()) {
-      if (!item?.Asset?.AllowLock) continue;
-      if (!item?.Property?.LockedBy) continue;
-      try {
-        W.InventoryUnlock(W.Player, item);
-        unlocked += 1;
-      } catch {}
-    }
-    if (unlocked > 0) refreshPlayerAppearance();
-    return unlocked;
-  }
-
-  function lowerPlayerRestraintDifficulty(amount) {
-    if (!W.Player) return 0;
-    const value = Math.max(0, Math.min(99, Number(amount) || ESCAPE_DEFAULT_EASY_VALUE));
-    let changed = 0;
-    for (const item of getPlayerRestraintItems()) {
-      const currentDifficulty = Number.isFinite(Number(item?.Difficulty))
-        ? Number(item.Difficulty)
-        : Number.isFinite(Number(item?.Property?.Difficulty))
-          ? Number(item.Property.Difficulty)
-          : 99;
-      const nextDifficulty = Math.max(0, currentDifficulty - value);
-      if (Number(item?.Difficulty) !== nextDifficulty) {
-        item.Difficulty = nextDifficulty;
-        changed += 1;
-      }
-      if (item?.Property && typeof item.Property === "object") {
-        item.Property.Difficulty = nextDifficulty;
-      }
-    }
-    if (changed > 0) refreshPlayerAppearance();
-    return changed;
-  }
-
-  function leaveCurrentRoomNow() {
-    let left = false;
-    if (typeof W.ChatRoomLeave === "function") {
-      W.ChatRoomLeave();
-      left = true;
-    }
-    if (typeof W.CommonSetScreen === "function") {
-      W.CommonSetScreen("Online", "ChatSearch");
-      left = true;
-    }
-    return left;
-  }
-
-  function isEscapePickActive() {
-    return escapePickExpiresAt > Date.now();
-  }
-
-  function clearEscapePickMode(message = "") {
-    escapePickExpiresAt = 0;
-    clearTimeout(escapePickTimer);
-    escapePickTimer = 0;
-    if (message) showToast(message);
-  }
-
-  function armEscapePickMode() {
-    clearEscapePickMode();
-    escapePickExpiresAt = Date.now() + ESCAPE_PICK_WINDOW_MS;
-    escapePickTimer = setTimeout(() => {
-      clearEscapePickMode("Neko pick timed out.");
-    }, ESCAPE_PICK_WINDOW_MS + 80);
-    showToast("Neko pick armed: click one of your item slots.");
-  }
-
-  function tryConsumeEscapePick() {
-    if (!isEscapePickActive()) return false;
-    const currentCharacter = W.CurrentCharacter;
-    if (!isPlayerCharacter(currentCharacter)) return false;
-    const groupName = currentCharacter?.FocusGroup?.Name || W.Player?.FocusGroup?.Name || W.DialogFocusItem?.Asset?.Group?.Name;
-    if (!groupName || typeof W.InventoryGet !== "function" || typeof W.InventoryRemove !== "function") return false;
-    const item = W.InventoryGet(W.Player, groupName);
-    if (!item || !isRestraintAppearanceItem(item)) return false;
-    W.InventoryRemove(W.Player, groupName);
-    refreshPlayerItemGroup(groupName);
-    if (typeof W.DialogLeave === "function") {
-      try {
-        W.DialogLeave();
-      } catch {}
-    }
-    clearEscapePickMode();
-    showToast(`Neko pick removed ${groupName}.`);
-    return true;
-  }
-
-  function getEscapeStatusLines() {
-    return [
-      "[Neko escape]",
-      `Goddess mode: ${escapeGoddessMode ? "ON" : "OFF"}`,
-      `Pick remove: ${isEscapePickActive() ? "ARMED" : "IDLE"}`,
-      "Commands:",
-      "/neko escape release | unlock | boost | leave | goddess on | goddess off | status",
-      "/neko easy 99",
-      "/neko pick",
-    ];
-  }
-
-  function getEscapeHelpLines() {
-    return [
-      "[Neko escape]",
-      "/neko escape release  - unlock all currently locked restraint items on yourself",
-      "/neko escape unlock   - alias of release",
-      "/neko escape boost    - +5 to escape-related skills for 1 hour",
-      "/neko escape leave    - leave the current room immediately",
-      "/neko escape goddess on|off",
-      "/neko escape status",
-      "/neko easy 99         - lower most current restraint difficulties by 99",
-      "/neko pick            - 5 second single-item remove mode",
-    ];
-  }
-
-  function handleEscapeSubcommand(parts) {
-    const action = String(parts?.[0] || "status").toLowerCase();
-    if (action === "release" || action === "unlock") {
-      const unlocked = unlockPlayerRestraints();
-      showToast(unlocked > 0 ? `Neko escape unlocked ${unlocked} restraint item(s).` : "Neko escape found no locked restraint items.");
-      return true;
-    }
-    if (action === "boost") {
-      if (!setEscapeSkillModifier(5, 3600000)) {
-        showToast("Neko escape boost is unavailable here.");
-        return true;
-      }
-      showToast("Neko escape boost active for 1 hour.");
-      return true;
-    }
-    if (action === "leave") {
-      if (!leaveCurrentRoomNow()) {
-        showToast("Neko escape leave is unavailable here.");
-        return true;
-      }
-      return true;
-    }
-    if (action === "goddess") {
-      const mode = String(parts?.[1] || "status").toLowerCase();
-      if (mode === "on") {
-        escapeGoddessMode = true;
-        unlockPlayerRestraints();
-        lowerPlayerRestraintDifficulty(99);
-        if (!escapeGoddessBoostGranted) {
-          escapeGoddessBoostGranted = setEscapeSkillModifier(10, 3600000);
-        }
-        showToast("Neko goddess mode enabled.");
-        return true;
-      }
-      if (mode === "off") {
-        escapeGoddessMode = false;
-        showToast("Neko goddess mode disabled.");
-        return true;
-      }
-      sendNekoCommandNotice(getEscapeStatusLines());
-      return true;
-    }
-    if (action === "status") {
-      sendNekoCommandNotice(getEscapeStatusLines());
-      return true;
-    }
-    sendNekoCommandNotice(getEscapeHelpLines());
-    return true;
-  }
-
-  function handleEasySubcommand(parts) {
-    const amount = Math.max(0, Math.min(99, Number(parts?.[0]) || ESCAPE_DEFAULT_EASY_VALUE));
-    const changed = lowerPlayerRestraintDifficulty(amount);
-    showToast(changed > 0 ? `Neko easy lowered ${changed} restraint difficulty value(s) by ${amount}.` : "Neko easy found no restraint items to adjust.");
-    return true;
-  }
-
-  function handlePickSubcommand() {
-    armEscapePickMode();
-    return true;
-  }
-
-  function getNekoSystemLines() {
-    const systems = summarizeNekoSystems();
-    const sensitivity = systems.sensitivity || {};
-    const relationLines = systems.relations.length
-      ? systems.relations.slice(0, 5).map((item) => `#${item.memberNumber} ${item.tier} warmth=${Math.round(item.warmth)} trust=${Math.round(item.trust)}`)
-      : ["none"];
-    return [
-      "[Neko systems]",
-      `Sensitivity: ear=${sensitivity.ear || 0} tail=${sensitivity.tail || 0} nape=${sensitivity.nape || 0} chin=${sensitivity.chin || 0} belly=${sensitivity.belly || 0}`,
-      `Mood: ${systems.mood.current || "default"} source=${systems.mood.source || "none"} left=${Math.max(0, Math.ceil((Number(systems.mood.until || 0) - Date.now()) / 1000))}s`,
-      `Counters: events=${systems.counters.events} reactions=${systems.counters.reactions} voice=${systems.counters.voice}`,
-      "Relations: " + relationLines.join(" | "),
-      "Commands: /neko systems | /neko profile | /neko reactions <keyword> | /neko voice <text>",
-    ];
-  }
-
-  function getBugNekoStatusLines() {
-    const speechState = detectPlayerActionCapability();
-    const gagSuffix = speechState.gagged ? " (Lv." + speechState.gagLevel + ")" : "";
-    return [
-      "[\u732b\u5a18\u72b6\u6001] Bondage Club Neko Chat Enhancer v" + VERSION + " (Bug\u7248)",
-      "\u732b\u5a18\u6a21\u5f0f\uff1a" + (config.enabled ? "\u5f00\u542f" : "\u5173\u95ed"),
-      "Bug RP\uff1a" + (bugRp.enabled ? "\u5f00\u542f" : "\u5173\u95ed") + " | \u5f53\u524d\u4eba\u8bbe\uff1a" + currentTone().label,
-      "\u53d1\u9001\u8f6c\u6362\uff1a" + (config.convertOutgoing ? "\u5f00" : "\u5173") + " | \u663e\u793a\u8f6c\u6362\uff1a" + (config.convertDisplayed ? "\u5f00" : "\u5173"),
-      "\u5835\u5634\u8bf4\u8bdd\uff1a" + getSpeechModeLabel(speechState) + gagSuffix,
-      "\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme) + " | \u52a8\u4f5c\u76ee\u6807\uff1a" + getActionTargetModeLabel(),
-      "\u7075\u611f\u8bb0\u5fc6\uff1a" + sceneMemory.length + "/" + NEKO_SCENE_MEMORY_LIMIT + " | \u7075\u611f\u5305\uff1a" + NEKO_SCENE_SPARK_BLUEPRINTS.length + " | \u4e92\u52a8\u529f\u80fd\uff1a" + NEKO_INTERACTION_FEATURES.length,
-      "Reply suggestions: " + (config.replySuggestionsEnabled ? "ON" : "OFF") + " | Scene spark: " + (config.sceneSparkEnabled ? "ON" : "OFF"),
-      "\u732b\u5a18\u72b6\u6001\uff1a" + currentNekoFeatureMood() + " | /neko mood \u9ad8\u5174 | /neko reactions",
-      "Neko systems\uff1aevents " + nekoSystemState.counters.events + " | relations " + Object.keys(nekoSystemState.relations).length + " | /neko systems",
-      "NekoVoice\uff1aqueue " + nekoVoiceQueue.length + "/" + NEKO_VOICE_QUEUE_LIMIT + " | /neko voice nyaa | [NekoVoice] purr",
-      "\u547d\u4ee4\u6ce8\u518c\uff1a" + (nekoCommandsRegistered ? "\u5df2\u6ce8\u518c (" + (nekoCommandRegistrationSource || "unknown") + ")" : "\u8f93\u5165\u62e6\u622a\u515c\u5e95"),
-    ];
-  }
-
-  function getBugNekoHelpLines(section = "main") {
-    switch (normalizeNekoHelpSection(section)) {
-      case "rp":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / rp]",
-          "\u53ef\u7528\u547d\u4ee4\uff1a/neko rp \u5f00 | \u5173 | \u72b6\u6001",
-          "\u5207\u6362\u4eba\u8bbe\uff1a/neko rp \u8f6f\u840c | \u53e4\u98ce | \u50b2\u5a07 | \u793c\u8c8c | \u7b80\u6d01",
-          "\u5148\u505a RP \u8f6c\u6362\uff0c\u518d\u53e0\u52a0\u5835\u5634\u8bf4\u8bdd\u538b\u5236\u3002",
-        ];
-      case "action":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / action]",
-          "\u53f3\u4e0b\u89d2\u52a8\u4f5c\u732b\u732b\u53ef\u5feb\u901f\u53d1\u9001\u62b1\u62b1\u3001\u6478\u5934\u3001\u5582\u98df\u3001\u8d34\u8d34\u3001\u4eb2\u4eb2\u3002",
-          "\u5f53\u524d\u76ee\u6807\u6a21\u5f0f\uff1a" + getActionTargetModeLabel(),
-          "\u52a8\u4f5c\u4f1a\u6839\u636e RP \u4eba\u8bbe\u81ea\u52a8\u4fee\u9970\u6587\u6848\u3002",
-        ];
-      case "emoji":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / emoji]",
-          "\u989c\u6587\u5b57\u732b\u732b\u70b9\u51fb\u53ef\u63d2\u5165\uff0c\u957f\u6309\u53ef\u6253\u5f00\u9009\u62e9\u5668\u3002",
-          "\u989c\u6587\u5b57\u5e93\u4f1a\u8fdc\u7a0b\u540c\u6b65\u3002",
-        ];
-      case "mode":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / mode]",
-          "\u4e3b\u732b\u732b\u957f\u6309 10 \u79d2\u5207\u6362\u732b\u5a18\u6a21\u5f0f\u3002",
-          "\u5835\u5634\u8bf4\u8bdd\u8054\u52a8\u4f1a\u6839\u636e\u5f53\u524d\u5835\u5634\u7a0b\u5ea6\u81ea\u52a8\u538b\u7f29\u53e5\u5b50\u3002",
-          "\u83dc\u5355\u9762\u677f\u4efb\u610f\u4f4d\u7f6e\u53ef\u62d6\u52a8\u3002",
-        ];
-      case "theme":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / theme]",
-          "\u5f53\u524d\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme),
-          "\u53ef\u7528\u4e3b\u9898\uff1a\u6a31\u7c89 / \u8584\u8377 / \u5929\u7a7a / \u5976\u6cb9 / \u858b\u8863\u8349 / \u767d\u8336\u3002",
-        ];
-      case "spark":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / spark]",
-          "Switch: /neko spark on | off | status. Default: off.",
-          "\u4f7f\u7528 /neko spark \u53ef\u6839\u636e\u6700\u8fd1\u804a\u5929\u3001\u9009\u4e2d\u76ee\u6807\u548c\u89d2\u8272\u72b6\u6001\u751f\u6210 RP \u7075\u611f\u77ed\u53e5\u3002\u5f53\u524d\u529f\u80fd\u5305\uff1a" + NEKO_SCENE_SPARK_BLUEPRINTS.length,
-          "\u4f7f\u7528 /neko spark <\u5173\u952e\u8bcd> \u53ef\u641c\u7d22\u529f\u80fd\u5305\uff0c\u4f8b\u5982 link / tail / aftercare / \u5973\u4ec6\u3002",
-          "\u7075\u611f\u4f1a\u653e\u5230\u53f3\u4e0b\u89d2\u5feb\u6377\u56de\u5e94\u91cc\uff0c\u70b9\u51fb\u5373\u53ef\u586b\u5165\u804a\u5929\u6846\u3002",
-        ];
-      case "suggest":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / suggest]",
-          "Reply suggestions are disabled by default.",
-          "Use /neko suggest on to enable automatic reply suggestions.",
-          "Use /neko suggest off to disable and hide the suggestion panel.",
-        ];
-      case "voice":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / voice]",
-          "/neko voice <text>\uff1a\u672c\u5730\u89e6\u53d1 NekoVoice\uff0c\u4e0d\u628a\u547d\u4ee4\u53d1\u5230\u804a\u5929\u3002",
-          "[NekoVoice] <text>\uff1a\u5728\u804a\u5929\u5185\u89e6\u53d1\uff0c\u540c\u4e00\u6761\u6d88\u606f\u4f1a\u505a\u77ed\u65f6\u53bb\u91cd\u3002",
-          "\u6548\u679c\uff1a*mew* / *purr* / *nyaa* \u89c6\u89c9\u58f0\u6548\u3001\u7c89\u8272\u95ea\u5149\u3001\u58f0\u6ce2\u5708\u3001\u5f39\u5e55\u53e3\u7656\u548c\u6c14\u606f\u7c92\u5b50\u3002",
-          "\u961f\u5217\uff1a\u8fde\u7eed\u89e6\u53d1\u65f6\u6392\u961f\u64ad\u653e\uff0c\u6700\u591a " + NEKO_VOICE_QUEUE_LIMIT + " \u4e2a\uff1b\u5f53\u524d " + nekoVoiceQueue.length + "\u3002",
-          "\u8868\u60c5\uff1a\u4f1a\u4e34\u65f6\u5207\u5230\u5bb3\u7f9e/\u5f00\u5fc3/\u60ca\u8bb6/\u56f0\u56f0/\u70b8\u6bdb\u7c7b\u578b\uff0c\u7ed3\u675f\u540e\u5c1d\u8bd5\u6062\u590d\u539f\u8868\u60c5\u3002",
-        ];
-      case "reactions":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / reactions]",
-          "/neko reactions\uff1a\u67e5\u770b\u5df2\u52a0\u5165\u7684\u4e92\u52a8\u529f\u80fd\u7c7b\u76ee\uff0c\u5f53\u524d " + NEKO_INTERACTION_FEATURES.length + " \u4e2a\u3002",
-          "/neko reactions <keyword>\uff1a\u641c\u7d22\u89e6\u53d1\u7c7b\u76ee\uff0c\u4f8b\u5982 ear / tail / belly / purr / shy\u3002",
-          "\u654f\u611f\u90e8\u4f4d\uff1a\u8033\u6735\u3001\u5c3e\u5df4\u3001\u540e\u9888\u3001\u4e0b\u5df4\u3001\u809a\u5b50\u4f1a\u89e6\u53d1\u4e0d\u540c\u72b6\u6001\u548c\u7c92\u5b50\u3002",
-          "\u89d2\u8272\u53cd\u5e94\uff1a\u81ea\u5df1\u6216\u5bf9\u65b9\u88ab\u6478\u5934\u3001\u62b1\u62b1\u3001\u8d34\u8d34\u3001\u79f0\u8d5e\u7b49\u4f1a\u51fa\u73b0\u7231\u5fc3\u3001\u732b\u722a\u3001\u95ea\u5149\u7b49\u6c14\u6c1b\u3002",
-        ];
-      case "mood":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / mood]",
-          "/neko mood\uff1a\u67e5\u770b\u5f53\u524d\u732b\u5a18\u72b6\u6001\u3002",
-          "/neko mood \u9ad8\u5174 | \u4f24\u5fc3 | \u9ad8\u51b7 | \u9ecf\u4eba | \u56f0\u56f0 | \u5973\u4ec6 | \u516c\u4e3b | \u62a4\u58eb\uff1a\u624b\u52a8\u5207\u6362\u72b6\u6001\u3002",
-          "\u72b6\u6001\u4f1a\u5f71\u54cd\u53d1\u51fa\u53bb\u7684\u8bed\u6c14\u5c3e\u5df4\uff0c\u4e5f\u4f1a\u88ab\u654f\u611f\u90e8\u4f4d\u548c NekoVoice \u89e6\u53d1\u4e34\u65f6\u6539\u53d8\u3002",
-          "\u4e0d\u60f3\u624b\u52a8\u9009\u65f6\uff0c\u63d2\u4ef6\u4f1a\u6839\u636e\u804a\u5929\u548c\u4e92\u52a8\u81ea\u52a8\u8fdb\u5165\u5bb3\u7f9e\u3001\u5f00\u5fc3\u3001\u56f0\u56f0\u3001\u70b8\u6bdb\u7b49\u72b6\u6001\u3002",
-        ];
-      case "systems":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / systems]",
-          "/neko systems \u6216 /neko profile\uff1a\u67e5\u770b\u732b\u5a18\u654f\u611f\u5ea6\u6863\u6848\u3001\u5173\u7cfb\u6e29\u5ea6\u8ba1\u3001\u6301\u7eed\u72b6\u6001\u548c\u4e8b\u4ef6\u8ba1\u6570\u3002",
-          "\u654f\u611f\u5ea6\uff1aear / tail / nape / chin / belly \u4f1a\u968f\u4e92\u52a8\u7d2f\u79ef\uff0c\u5f71\u54cd\u7c92\u5b50\u548c NekoVoice \u5f3a\u5ea6\u3002",
-          "\u5173\u7cfb\u6e29\u5ea6\uff1a\u5bf9\u65b9\u548c\u4f60\u4e92\u52a8\u8d8a\u591a\uff0cwarmth/trust/familiar \u8d8a\u9ad8\uff0c\u5bf9\u65b9\u53cd\u5e94\u4f1a\u66f4\u5f3a\u3002",
-          "\u4e8b\u4ef6\u603b\u7ebf\uff1aBCNekoEnhancer.events.history() \u53ef\u67e5\u770b\u6700\u8fd1\u7684 feature / voice / mood / relationship \u4e8b\u4ef6\u3002",
-        ];
-      case "status":
-        return [
-          "[\u732b\u5a18\u5e2e\u52a9 / status]",
-          "\u4f7f\u7528 /neko status \u53ef\u67e5\u770b\u5f53\u524d Bug RP\u3001\u5835\u5634\u8bf4\u8bdd\u6863\u4f4d\u3001\u4e3b\u9898\u3001\u52a8\u4f5c\u76ee\u6807\u3001\u4e92\u52a8\u529f\u80fd\u6570\u548c NekoVoice \u961f\u5217\u3002",
-        ];
-      default:
-        return [
-          "[\u732b\u5a18\u547d\u4ee4\u5e2e\u52a9] /neko help <\u5206\u7c7b>",
-          "\u6838\u5fc3\uff1avoice / reactions / mood / systems / spark / suggest / status",
-          "\u57fa\u7840\uff1arp / action / emoji / mode / theme",
-          "\u5feb\u6377\u4f8b\u5b50\uff1a/neko help systems | /neko help reactions | /neko voice nyaa | /neko mood \u9ad8\u5174",
-        ];
-    }
-  }
-
-  function handleNekoCommand(text) {
-    if (!isNekoCommandText(text)) return false;
-    const parts = String(text || "").trim().split(/\s+/).filter(Boolean);
-    const subcommand = String(parts[1] || "").toLowerCase();
-    if (subcommand === "escape") return handleEscapeSubcommand(parts.slice(2));
-    if (subcommand === "easy") return handleEasySubcommand(parts.slice(2));
-    if (subcommand === "pick") return handlePickSubcommand();
-    if (subcommand === "systems" || subcommand === "system" || subcommand === "profile" || subcommand === "sensitivity" || subcommand === "relation") {
-      sendNekoCommandNotice(getNekoSystemLines());
-      return true;
-    }
-    if (subcommand === "voice" || subcommand === "sound" || subcommand === "\u58f0\u97f3") {
-      triggerNekoVoiceEffect(parts.slice(2).join(" ") || "nyaa", {
-        memberNumber: W.Player?.MemberNumber,
-        mood: currentNekoFeatureMood(),
-        sound: "nyaa",
-      });
-      showToast("NekoVoice queued.");
-      return true;
-    }
-    if (subcommand === "suggest" || subcommand === "suggestions" || subcommand === "reply" || subcommand === "replies") {
-      return handleNekoToggleCommand("replySuggestionsEnabled", parts.slice(2), "Reply suggestions");
-    }
-    if (subcommand === "spark" || subcommand === "灵感" || subcommand === "火花") {
-      const sparkAction = String(parts[2] || "").toLowerCase();
-      if (!sparkAction || ["on", "off", "open", "close", "enable", "disable", "status", "开启", "开", "关闭", "关"].includes(sparkAction)) {
-        return handleNekoToggleCommand("sceneSparkEnabled", parts.slice(2), "Scene spark");
-      }
-      return showSceneSparkSuggestions({ query: parts.slice(2).join(" ") });
-    }
-    if (subcommand === "features" || subcommand === "feature" || subcommand === "功能") {
-      sendNekoCommandNotice(getSceneFeatureLines(parts.slice(2).join(" ")));
-      return true;
-    }
-    if (subcommand === "reactions" || subcommand === "reaction" || subcommand === "互动") {
-      sendNekoCommandNotice(getNekoInteractionFeatureLines(parts.slice(2).join(" ")));
-      return true;
-    }
-    if (subcommand === "mood" || subcommand === "state" || subcommand === "状态") {
-      return handleNekoMoodCommand(parts.slice(2));
-    }
-    const group = normalizeNekoHelpSection(parts[1] || "help");
-
-    if (group === "main") {
-      sendNekoCommandNotice(getBugNekoHelpLines(parts[2] || "main"));
-      return true;
-    }
-    if (group === "status") {
-      sendNekoCommandNotice(getBugNekoStatusLines());
-      return true;
-    }
-    if (group === "action" || group === "emoji" || group === "mode" || group === "theme" || group === "spark" || group === "voice" || group === "suggest") {
-      sendNekoCommandNotice(getBugNekoHelpLines(group));
-      return true;
-    }
-    if (group !== "rp") {
-      sendNekoCommandNotice(getBugNekoHelpLines("main"));
-      return true;
-    }
-
-    const rawAction = parts[2] || "status";
-    const action = RP_TONE_ALIASES[rawAction] || rawAction;
-    if (action === "help" || action === "\u5e2e\u52a9") {
-      sendNekoCommandNotice(getBugNekoHelpLines("rp"));
-      return true;
-    }
-    if (action === "on") {
-      bugRp.enabled = true;
-      config.enabled = true;
-      saveConfig();
-      saveBugRpConfig();
-      lastPeerSignalAt = 0;
-      sendNekoPeerSignal(true);
-      showToast(bugRpStatusText() + "\uff0c\u4e4b\u540e\u804a\u5929\u4f1a\u6309\u5f53\u524d\u4eba\u8bbe\u8f6c\u6362");
-      return true;
-    }
-    if (action === "off") {
-      bugRp.enabled = false;
-      saveBugRpConfig();
-      lastPeerSignalAt = 0;
-      sendNekoPeerSignal(true);
-      showToast("Bug RP \u5df2\u5173\u95ed\uff0c\u6062\u590d\u666e\u901a\u732b\u5a18\u8f6c\u6362");
-      return true;
-    }
-    if (action === "status") {
-      sendNekoCommandNotice(getBugNekoStatusLines());
-      return true;
-    }
-    if ((rpLibrary?.tonePresets || RP_TONE_PRESETS)[action]) {
-      bugRp.enabled = true;
-      bugRp.tonePreset = action;
-      config.enabled = true;
-      saveConfig();
-      saveBugRpConfig();
-      lastPeerSignalAt = 0;
-      sendNekoPeerSignal(true);
-      showToast(bugRpStatusText() + "\uff0c\u5df2\u5207\u6362");
-      return true;
-    }
-
-    sendNekoCommandNotice(getBugNekoHelpLines("rp"));
-    return true;
-  }
-
-  function handleBugCommand(text) {
-    return handleNekoCommand(text);
-  }
-
-  function clearNekoCommandInput(text) {
-    const input = getChatInput();
-    if (input && input.value && input.value.trim() === String(text || "").trim()) {
-      input.value = "";
-      input.dispatchEvent(new InputEvent("input", { bubbles: true }));
-    }
-  }
-
-  function runNekoCommand(text) {
-    if (!handleNekoCommand(text)) return false;
-    clearNekoCommandInput(text);
-    return true;
-  }
-
-  function getNekoCommandDefinitions() {
-    const createAction = (prefix) => (argumentsString = "", message = "", args = []) => {
-      const argv = Array.isArray(args) ? args : String(argumentsString || "").trim().split(/\s+/).filter(Boolean);
-      runNekoCommand(`/${prefix} ${argv.join(" ")}`.trim());
+  function createDefaultKaomojiLibrary(locale) {
+    return {
+      version: "builtin",
+      groups: [{
+        id: "cat",
+        label: contentFallback(locale).kaomojiGroupLabel,
+        enabled: true,
+        items: DEFAULT_KAOMOJI,
+      }],
     };
-    return [
-      {
-        Tag: "neko",
-        Description: "Bondage Club Neko Chat Enhancer commands.",
-        Action: createAction("neko"),
-      },
-      {
-        Tag: "bug",
-        Description: "Alias for Bondage Club Neko Chat Enhancer bug commands.",
-        Action: createAction("bug"),
-      },
-      {
-        Tag: "noke",
-        Description: "Typo alias for Bondage Club Neko Chat Enhancer commands.",
-        Action: createAction("noke"),
-      },
-    ];
   }
 
-  function markNekoCommandsRegistered(source) {
-    nekoCommandsRegistered = true;
-    nekoCommandRegistrationSource = source;
-    console.log(`[BC 猫娘增强] /neko 命令已注册喵~ (${source})`);
+  async function setContentLocale(locale) {
+    const value = normalizeLocale(locale);
+    if (!SUPPORTED_CONTENT_LOCALES.includes(value)) return false;
+    if (config.contentLocale === value) return true;
+    config.contentLocale = value;
+    saveConfig();
+    DEFAULT_ACTION_LIBRARY = createDefaultActionLibrary(value);
+    DEFAULT_KAOMOJI_LIBRARY = createDefaultKaomojiLibrary(value);
+    actionLibrary = loadCachedActionLibrary() || normalizeActionLibrary(DEFAULT_ACTION_LIBRARY);
+    composerLibrary = loadCachedComposerLibrary();
+    kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
+    Object.assign(habitProfile, normalizeHabitProfile(habitProfile));
+    hideActionComposer();
+    markKaomojiPickerDirty();
+    renderReplySuggestions();
+    updateTailMoodUi();
+    if (shouldRenderWheel()) renderWheel();
+    await Promise.all([loadRemoteActionLibrary(), loadRemoteComposerLibrary(), loadRemoteKaomojiLibrary(), loadRemoteRpLibrary()]);
     return true;
-  }
-
-  function tryRegisterCommandsWithHost(host, hostName, commands) {
-    if (!host || typeof host !== "object") return false;
-    if (typeof host.registerCommand === "function") {
-      for (const command of commands) host.registerCommand(command);
-      return markNekoCommandsRegistered(`${hostName}.registerCommand`);
-    }
-    if (typeof host.addCommand === "function") {
-      for (const command of commands) host.addCommand(command);
-      return markNekoCommandsRegistered(`${hostName}.addCommand`);
-    }
-    if (typeof host.registerCommands === "function") {
-      host.registerCommands(commands);
-      return markNekoCommandsRegistered(`${hostName}.registerCommands`);
-    }
-    if (typeof host.addCommands === "function") {
-      host.addCommands(commands);
-      return markNekoCommandsRegistered(`${hostName}.addCommands`);
-    }
-    return false;
-  }
-
-  function tryRegisterExternalNekoCommands(commands) {
-    const hosts = [
-      ["BCX", W.BCX],
-      ["BCX.commands", W.BCX?.commands],
-      ["BCX.Command", W.BCX?.Command],
-      ["bcx", W.bcx],
-      ["bcx.commands", W.bcx?.commands],
-      ["bcx.Command", W.bcx?.Command],
-      ["EBCH", W.EBCH],
-      ["EBCH.commands", W.EBCH?.commands],
-      ["EBCH.Command", W.EBCH?.Command],
-      ["ebch", W.ebch],
-      ["ebch.commands", W.ebch?.commands],
-      ["ebch.Command", W.ebch?.Command],
-    ];
-    for (const [hostName, host] of hosts) {
-      try {
-        if (tryRegisterCommandsWithHost(host, hostName, commands)) return true;
-      } catch (error) {
-        console.warn(`[BC 猫娘增强] ${hostName} 命令注册失败，继续尝试其它入口:`, error);
-      }
-    }
-    return false;
-  }
-
-  function registerNekoCommands() {
-    if (nekoCommandsRegistered) return true;
-    const commands = getNekoCommandDefinitions();
-    try {
-      if (tryRegisterExternalNekoCommands(commands)) return true;
-      if (typeof W.CommandCombine !== "function") return false;
-      W.CommandCombine(commands);
-      return markNekoCommandsRegistered("CommandCombine");
-    } catch (error) {
-      console.warn("[BC 猫娘增强] /neko 命令注册失败，保留输入拦截兜底:", error);
-      return false;
-    }
   }
 
   function currentTheme() {
@@ -1453,8 +1204,11 @@
         if (!self.length && !target.length) return null;
         return {
           id: String(action.id || `action-${index}`).trim() || `action-${index}`,
-          label: String(action.label || action.id || "动作").trim().slice(0, 6),
+          label: String(action.label || action.id || contentFallback().actionLabelFallback).trim().slice(0, 12),
           enabled: action.enabled !== false,
+          composer: action.composer === true || (action.composer && typeof action.composer === "object")
+            ? action.composer
+            : undefined,
           self,
           target,
           requirements: normalizeActionRequirements(action.requirements),
@@ -1465,6 +1219,7 @@
     return {
       version: String(source?.version || "unknown"),
       updatedAt: source?.updatedAt || "",
+      locale: normalizeLocale(source?.locale) || config.contentLocale,
       actions: normalized.length ? normalized : DEFAULT_ACTION_LIBRARY.actions,
     };
   }
@@ -1500,8 +1255,14 @@
 
   function loadCachedActionLibrary() {
     try {
-      const raw = localStorage.getItem(ACTION_LIBRARY_CACHE_KEY);
-      return raw ? normalizeActionLibrary(JSON.parse(raw)) : null;
+      const current = localStorage.getItem(actionLibraryCacheKey());
+      if (current) return normalizeActionLibrary(JSON.parse(current));
+      const legacy = localStorage.getItem(ACTION_LIBRARY_LEGACY_CACHE_KEY);
+      if (!legacy) return null;
+      const parsed = JSON.parse(legacy);
+      const rawText = JSON.stringify(parsed.actions || parsed);
+      const guessedLocale = /[\u3400-\u9fff]/u.test(rawText) ? "zh-CN" : "en";
+      return guessedLocale === config.contentLocale ? normalizeActionLibrary(parsed) : null;
     } catch {
       return null;
     }
@@ -1509,16 +1270,18 @@
 
   function cacheActionLibrary(library) {
     try {
-      localStorage.setItem(ACTION_LIBRARY_CACHE_KEY, JSON.stringify(library));
+      localStorage.setItem(actionLibraryCacheKey(), JSON.stringify({ ...library, locale: config.contentLocale }));
     } catch {
       // Ignore storage failures; the builtin action library still works.
     }
   }
 
   function loadRemoteActionLibrary() {
-    return requestText(ACTION_LIBRARY_URL)
+    const requestedLocale = config.contentLocale;
+    return requestText(actionLibraryUrl(requestedLocale))
       .then((text) => {
-        const library = normalizeActionLibrary(JSON.parse(text));
+        if (requestedLocale !== config.contentLocale) return actionLibrary;
+        const library = normalizeActionLibrary({ ...JSON.parse(text), locale: requestedLocale });
         actionLibrary = library;
         cacheActionLibrary(library);
         renderWheel();
@@ -1541,7 +1304,7 @@
         if (!items.length) return null;
         return {
           id: String(group.id || `group-${index}`).trim() || `group-${index}`,
-          label: String(group.label || group.id || "颜文字").trim().slice(0, 12),
+          label: String(contentLabels()[group.id] || group.label || group.id || contentFallback().kaomojiLabelFallback).trim().slice(0, 20),
           enabled: group.enabled !== false,
           items,
         };
@@ -1573,7 +1336,7 @@
   }
 
   function createHabitProfile() {
-    const tails = ["喵~", "呜喵", "呼噜", "蹭蹭喵"];
+    const tails = experimentalContent().habit.tails;
     const styles = ["gentle", "playful", "cozy"];
     const groups = getVisibleKaomojiGroups();
     return normalizeHabitProfile({
@@ -1584,7 +1347,7 @@
   }
 
   function normalizeHabitProfile(source = {}) {
-    const tails = ["喵~", "呜喵", "呼噜", "蹭蹭喵"];
+    const tails = experimentalContent().habit.tails;
     const styles = ["gentle", "playful", "cozy"];
     const validGroups = new Set(["all", ...getVisibleKaomojiGroups().map((group) => group.id)]);
     return {
@@ -1662,6 +1425,122 @@
     } catch {
       return createNekoSystemState();
     }
+  }
+  function recordKaomojiUsage(face) {
+    const key = String(face || "").trim();
+    if (!key) return;
+    kaomojiUsage[key] = getKaomojiUsage(key) + 1;
+    saveKaomojiUsage();
+    kaomojiPickerDirty = true;
+  }
+
+  function normalizeComposerTextList(value) {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((item, index) => {
+        if (typeof item === "string") return { id: `line-${index}`, text: item, weight: 1 };
+        if (!item || typeof item !== "object") return null;
+        const text = String(item.text || "");
+        return {
+          id: String(item.id || `line-${index}`),
+          text,
+          weight: Math.max(0.01, Number(item.weight) || 1),
+          compatibleActions: Array.isArray(item.compatibleActions) ? item.compatibleActions.map(String) : undefined,
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function normalizeComposerModeLines(value) {
+    return {
+      target: normalizeComposerTextList(value?.target),
+      self: normalizeComposerTextList(value?.self),
+      none: normalizeComposerTextList(value?.none),
+    };
+  }
+
+  function normalizeComposerLibrary(source) {
+    if (!source || typeof source !== "object") return null;
+    const moods = (Array.isArray(source.moods) ? source.moods : []).map((item) => ({
+      id: String(item?.id || ""),
+      label: String(item?.label || item?.id || ""),
+      compatibleActions: Array.isArray(item?.compatibleActions) ? item.compatibleActions.map(String) : [],
+      leads: normalizeComposerTextList(item?.leads),
+    })).filter((item) => item.id && item.label && item.leads.length);
+    const styles = (Array.isArray(source.styles) ? source.styles : []).map((item) => ({
+      id: String(item?.id || ""),
+      label: String(item?.label || item?.id || ""),
+    })).filter((item) => item.id && item.label);
+    const extras = (Array.isArray(source.extras) ? source.extras : []).map((item) => ({
+      id: String(item?.id || ""),
+      label: String(item?.label || item?.id || ""),
+      kind: item?.kind === "kaomoji" || item?.kind === "none" ? item.kind : "text",
+      compatibleActions: Array.isArray(item?.compatibleActions) ? item.compatibleActions.map(String) : [],
+      requirements: normalizeActionRequirements(item?.requirements),
+      trails: normalizeComposerTextList(item?.trails),
+    })).filter((item) => item.id && item.label && item.trails.length);
+    const actions = {};
+    for (const [actionId, definition] of Object.entries(source.actions || {})) {
+      const stylesById = {};
+      for (const [styleId, lines] of Object.entries(definition?.styles || {})) {
+        const normalized = normalizeComposerModeLines(lines);
+        if (normalized.target.length || normalized.self.length || normalized.none.length) stylesById[styleId] = normalized;
+      }
+      if (!Object.keys(stylesById).length) continue;
+      actions[actionId] = {
+        styles: stylesById,
+        incompatiblePairs: (Array.isArray(definition?.incompatiblePairs) ? definition.incompatiblePairs : [])
+          .map((pair) => ({ mood: String(pair?.mood || ""), style: String(pair?.style || "") }))
+          .filter((pair) => pair.mood && pair.style),
+      };
+    }
+    if (!moods.length || !styles.length || !extras.length || !Object.keys(actions).length) return null;
+    return {
+      version: String(source.version || "unknown"),
+      locale: normalizeLocale(source.locale) || config.contentLocale,
+      moods,
+      styles,
+      extras,
+      templates: normalizeComposerModeLines(source.templates),
+      endings: normalizeComposerModeLines(source.endings),
+      actions,
+    };
+  }
+
+  function loadCachedComposerLibrary() {
+    try {
+      const cached = localStorage.getItem(composerLibraryCacheKey());
+      return cached ? normalizeComposerLibrary(JSON.parse(cached)) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function cacheComposerLibrary(library) {
+    try {
+      localStorage.setItem(composerLibraryCacheKey(), JSON.stringify({ ...library, locale: config.contentLocale }));
+    } catch {
+      // The composer remains available for this page even when storage is unavailable.
+    }
+  }
+
+  function loadRemoteComposerLibrary() {
+    const requestedLocale = config.contentLocale;
+    return requestText(composerLibraryUrl(requestedLocale))
+      .then((text) => {
+        if (requestedLocale !== config.contentLocale) return composerLibrary;
+        const library = normalizeComposerLibrary({ ...JSON.parse(text), locale: requestedLocale });
+        if (!library) throw new Error("invalid composer library");
+        composerLibrary = library;
+        cacheComposerLibrary(library);
+        if (activeComposerSession) openActionComposer(activeComposerSession.action);
+        console.log(`[BC 猫娘增强] 动作编排器内容已加载: ${library.version}`);
+        return library;
+      })
+      .catch((error) => {
+        console.warn("[BC 猫娘增强] 动作编排器内容加载失败，使用缓存:", error);
+        return composerLibrary;
+      });
   }
 
   function saveNekoSystemState() {
@@ -1818,9 +1697,8 @@
   }
 
   function habitStyleLabel() {
-    if (habitProfile.actionStyle === "playful") return "活泼";
-    if (habitProfile.actionStyle === "cozy") return "黏人";
-    return "温柔";
+    return experimentalContent().habit.styles[habitProfile.actionStyle]
+      || experimentalContent().habit.styles.gentle;
   }
 
   function preferredKaomojiItems() {
@@ -1832,6 +1710,16 @@
     const items = Math.random() < 0.68 ? preferredKaomojiItems() : getActiveKaomojiItems();
     return items[Math.floor(Math.random() * items.length)] || DEFAULT_KAOMOJI[0];
   }
+  function resetKaomojiUsage() {
+    kaomojiUsage = {};
+    try {
+      localStorage.removeItem(KAOMOJI_USAGE_KEY);
+    } catch {
+      // Ignore storage failures; the in-memory ranking has already been reset.
+    }
+    markKaomojiPickerDirty();
+    showToast(t("toast.kaomojiUsageReset"));
+  }
 
   function hasKnownKaomoji(text) {
     return getActiveKaomojiItems().some((face) => text.includes(face));
@@ -1839,7 +1727,8 @@
 
   function loadCachedKaomojiLibrary() {
     try {
-      const raw = localStorage.getItem(KAOMOJI_LIBRARY_CACHE_KEY);
+      const raw = localStorage.getItem(KAOMOJI_LIBRARY_CACHE_KEY)
+        || localStorage.getItem(KAOMOJI_LIBRARY_LEGACY_CACHE_KEY);
       return raw ? normalizeKaomojiLibrary(JSON.parse(raw)) : null;
     } catch {
       return null;
@@ -1855,8 +1744,10 @@
   }
 
   function loadRemoteKaomojiLibrary() {
+    const requestedLocale = config.contentLocale;
     return requestText(KAOMOJI_LIBRARY_URL)
       .then((text) => {
+        if (requestedLocale !== config.contentLocale) return kaomojiLibrary;
         const library = normalizeKaomojiLibrary(JSON.parse(text));
         kaomojiLibrary = library;
         cacheKaomojiLibrary(library);
@@ -1867,147 +1758,6 @@
       .catch((error) => {
         console.warn("[BC 猫娘增强] 远程颜文字库加载失败，使用缓存/内置库:", error);
         return kaomojiLibrary;
-      });
-  }
-
-  function normalizeStringArray(value) {
-    return Array.isArray(value) ? value.map((item) => String(item || "").trim()).filter(Boolean) : [];
-  }
-
-  function normalizeRpPrefixArray(value) {
-    return Array.isArray(value) ? value.map((item) => String(item || "").trim()) : [];
-  }
-
-  function normalizeRpReplacements(value) {
-    if (!Array.isArray(value)) return [];
-    return value
-      .map((item) => {
-        if (Array.isArray(item)) return [String(item[0] || ""), String(item[1] || "")];
-        if (item && typeof item === "object") return [String(item.from || ""), String(item.to || "")];
-        return null;
-      })
-      .filter((item) => item && item[0]);
-  }
-
-  function normalizeRpActionPack(value) {
-    const actions = {};
-    for (const kind of ["hug", "pat", "feed", "cuddle", "kiss", "default"]) {
-      const pack = value?.[kind];
-      const target = normalizeStringArray(pack?.target);
-      const self = normalizeStringArray(pack?.self);
-      if (target.length || self.length) actions[kind] = { target, self };
-    }
-    return actions;
-  }
-
-  function normalizeRpTone(id, source = {}, fallback = {}) {
-    const chat = source.chat || {};
-    const fallbackChat = fallback.chat || {};
-    const suffixes = normalizeStringArray(chat.suffixes).length
-      ? normalizeStringArray(chat.suffixes)
-      : normalizeStringArray(fallbackChat.suffixes || fallback.suffix);
-    return {
-      ...fallback,
-      id,
-      label: String(source.label || fallback.label || id),
-      enabled: source.enabled !== false,
-      suffix: String(source.suffix || fallback.suffix || suffixes[0] || "喵"),
-      actionTarget: source.actionTarget || fallback.actionTarget,
-      actionSelf: source.actionSelf || fallback.actionSelf,
-      chat: {
-        replacements: normalizeRpReplacements(chat.replacements).length
-          ? normalizeRpReplacements(chat.replacements)
-          : normalizeRpReplacements(fallbackChat.replacements),
-        prefixes: normalizeRpPrefixArray(chat.prefixes).length
-          ? normalizeRpPrefixArray(chat.prefixes)
-          : normalizeRpPrefixArray(fallbackChat.prefixes),
-        suffixes,
-        endingChance: Number.isFinite(Number(chat.endingChance))
-          ? clamp(Number(chat.endingChance), 0, 1)
-          : Number.isFinite(Number(fallbackChat.endingChance))
-            ? clamp(Number(fallbackChat.endingChance), 0, 1)
-            : null,
-        kaomojiChance: Number.isFinite(Number(chat.kaomojiChance))
-          ? clamp(Number(chat.kaomojiChance), 0, 1)
-          : Number.isFinite(Number(fallbackChat.kaomojiChance))
-            ? clamp(Number(fallbackChat.kaomojiChance), 0, 1)
-            : null,
-      },
-      whisper: {
-        prefix: String(source.whisper?.prefix || fallback.whisper?.prefix || ""),
-        endingChance: Number.isFinite(Number(source.whisper?.endingChance))
-          ? clamp(Number(source.whisper.endingChance), 0, 1)
-          : Number.isFinite(Number(fallback.whisper?.endingChance))
-            ? clamp(Number(fallback.whisper.endingChance), 0, 1)
-            : null,
-      },
-      actions: {
-        ...normalizeRpActionPack(fallback.actions),
-        ...normalizeRpActionPack(source.actions),
-      },
-    };
-  }
-
-  function normalizeRpLibrary(source) {
-    const raw = source?.tonePresets || {};
-    const entries = Array.isArray(raw)
-      ? raw.map((tone, index) => [tone?.id || `tone-${index}`, tone])
-      : Object.entries(raw);
-    const tonePresets = {};
-
-    for (const [id, tone] of Object.entries(RP_TONE_PRESETS)) {
-      tonePresets[id] = normalizeRpTone(id, tone, {});
-    }
-
-    for (const [rawId, tone] of entries) {
-      const id = String(rawId === "brief" ? "simple" : rawId || "").trim();
-      if (!id || !tone || typeof tone !== "object") continue;
-      tonePresets[id] = normalizeRpTone(id, tone, tonePresets[id] || {});
-    }
-
-    if (!tonePresets.simple && tonePresets.brief) {
-      tonePresets.simple = normalizeRpTone("simple", tonePresets.brief, RP_TONE_PRESETS.simple);
-      delete tonePresets.brief;
-    }
-
-    return {
-      version: String(source?.version || "unknown"),
-      updatedAt: source?.updatedAt || "",
-      tonePresets,
-    };
-  }
-
-  function loadCachedRpLibrary() {
-    try {
-      const raw = localStorage.getItem(RP_LIBRARY_CACHE_KEY);
-      return raw ? normalizeRpLibrary(JSON.parse(raw)) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  function cacheRpLibrary(library) {
-    try {
-      localStorage.setItem(RP_LIBRARY_CACHE_KEY, JSON.stringify(library));
-    } catch {
-      // Ignore storage failures; the builtin RP library still works.
-    }
-  }
-
-  function loadRemoteRpLibrary() {
-    return requestText(RP_LIBRARY_URL)
-      .then((text) => {
-        const library = normalizeRpLibrary(JSON.parse(text));
-        rpLibrary = library;
-        cacheRpLibrary(library);
-        bugRp = normalizeBugRpConfig(bugRp);
-        saveBugRpConfig();
-        console.log(`[BC 猫娘增强] Bug RP 语气库已加载: ${library.version}, ${Object.keys(library.tonePresets || {}).length} 套人设`);
-        return library;
-      })
-      .catch((error) => {
-        console.warn("[BC 猫娘增强] 远程 Bug RP 语气库加载失败，使用缓存/内置库:", error);
-        return rpLibrary;
       });
   }
 
@@ -2091,14 +1841,12 @@
     document.body.classList.toggle("bcn-wheel-collapsed", config.wheelCollapsed);
     const mainButton = document.getElementById("bcn-main-cat");
     if (mainButton) {
-      mainButton.title = config.menuCollapsed
-        ? "展开猫猫菜单，按住可拖动，长按 10 秒切换猫娘模式"
-        : "收起猫猫菜单，按住可拖动，长按 10 秒切换猫娘模式";
+      mainButton.title = t("ui.mainButton.title");
     }
     const handleButton = document.getElementById("bcn-wheel-handle");
     if (handleButton) {
       handleButton.textContent = config.wheelCollapsed ? "🐱" : "🐱";
-      handleButton.title = config.wheelCollapsed ? "展开动作轮盘" : "收起动作轮盘";
+      handleButton.title = t(config.wheelCollapsed ? "ui.wheel.open" : "ui.wheel.close");
     }
   }
 
@@ -2109,7 +1857,7 @@
     picker?.classList.toggle("is-open", !!open);
     button?.classList.toggle("is-active", !!open);
     if (button) {
-      button.title = open ? "收起猫猫颜文字" : "打开猫猫颜文字，长按 2 秒也可打开";
+      button.title = t(open ? "ui.kaomojiButton.close" : "ui.kaomojiButton.open");
     }
   }
 
@@ -2203,9 +1951,9 @@
     hint.innerHTML = `
       <div class="bcn-help-title">
         <span class="bcn-help-icon" aria-hidden="true">📝</span>
-        <span>可用指令：</span>
+        <span>${t("dev.firstHint.title")}</span>
       </div>
-      <div class="bcn-help-line">/neko help 获取猫娘插件说明喵~</div>
+      <div class="bcn-help-line">${t("dev.firstHint.command")}</div>
     `;
     document.body.appendChild(hint);
     firstChatroomHelpTimer = setTimeout(() => {
@@ -2214,47 +1962,159 @@
     }, 5000);
   }
 
-  function randomNyan() {
-    return Math.random() < config.nyanChance ? "です" : "";
-  }
-
   function relationHonorific(text) {
-    return text
-      .replace(/主人(?!大人|様)/g, "主人大人")
-      .replace(/恋人(?!殿下|大人)/g, "恋人殿下");
+    return contentProcessor().relationHonorific(text);
   }
 
   function standardNeko(text) {
-    if (!text || typeof text !== "string") return text;
-    return relationHonorific(text)
-      .replace(/我们/g, "咱喵和其它猫猫们")
-      .replace(/大家/g, "各位猫猫们")
-      .replace(/本人/g, "咱喵")
-      .replace(/你们/g, "汝等")
-      .replace(/您/g, "汝")
-      .replace(/你/g, "汝")
-      .replace(/我/g, "咱喵")
-      .replace(/玩家/g, "猫猫")
-      .replace(/角色/g, "猫设")
-      .replace(/孝子|xz|卫兵|小丑|资本|水军|海军|二游|节奏/g, "杂鱼")
-      .replace(/恋爱|溜冰|爆改|白嫖|洗白|抄袭|借鉴|退坑|好似/g, "援交")
-      .replace(/([也矣兮乎者焉哉]|[啊吗呢吧哇呀哦嘛喔咯呜捏])([\s,.!?;:，。！？；：）】」』]|$)/g, `喵${randomNyan()}$2`)
-      .replace(/([的了辣])([\s,.!?;:，。！？；：）】」』]|$)/g, `$1喵${randomNyan()}$2`);
+    return contentProcessor().standard(text);
   }
 
-  function isNekoCommandText(text) {
-    return typeof text === "string" && /^\/(?:neko|bug|noke)(?:\s|$)/i.test(text.trim());
+  function actionNeko(text) {
+    return contentProcessor().action(text);
   }
 
-  function isBugCommandText(text) {
-    return isNekoCommandText(text);
+  function emoteNeko(text) {
+    text = relationHonorific(standardNeko(text || ""));
+    if (hasKnownKaomoji(text)) return text;
+    return `${text} ${pickRandomKaomoji()}`;
   }
 
-  function maybeAddToneSuffix(text, suffix, chance = 1) {
-    const value = String(text || "").trim();
-    if (!value || Math.random() > chance) return value;
-    if (/[喵呢呀哼。！？~～]$/.test(value)) return value;
-    return `${value}${suffix}`;
+  function whisperNeko(text) {
+    return contentProcessor().whisper(text);
+  }
+
+  function normalizeStateToken(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function getCharacterEffects(character) {
+    if (!character) return [];
+    if (Array.isArray(character.Effect)) return character.Effect.filter(Boolean);
+    try {
+      const effects = typeof W.CharacterGetEffects === "function" ? W.CharacterGetEffects(character) : [];
+      return Array.isArray(effects) ? effects.filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function getCharacterPoses(character) {
+    return Array.isArray(character?.Pose) ? character.Pose.filter(Boolean) : [];
+  }
+
+  function hasTokenMatch(source, names) {
+    const tokens = source.map(normalizeStateToken).filter(Boolean);
+    const patterns = (names || []).map(normalizeStateToken).filter(Boolean);
+    return patterns.some((pattern) => tokens.some((token) => token === pattern || token.includes(pattern) || pattern.includes(token)));
+  }
+
+  function hasAnyEffect(character, names) {
+    return hasTokenMatch(getCharacterEffects(character), names);
+  }
+
+  function hasAnyPose(character, names) {
+    return hasTokenMatch(getCharacterPoses(character), names);
+  }
+
+  function readCharacterMethod(character, methodName, fallback) {
+    try {
+      const value = character?.[methodName]?.();
+      return typeof value === "boolean" ? value : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function isUltraBcLoaded() {
+    try {
+      if (W.Player?.UBC) return true;
+      if (typeof W.UBCver === "string" && W.UBCver) return true;
+      const mods = W.bcModSdk?.getModsInfo?.();
+      if (!mods || typeof mods[Symbol.iterator] !== "function") return false;
+      for (const mod of mods) {
+        const name = String(mod?.name || "");
+        const fullName = String(mod?.fullName || "");
+        const repository = String(mod?.repository || "");
+        if (/ULTRAbc/i.test(name) || /Ultra Bondage Club/i.test(fullName) || /tetris245\/ULTRAbc/i.test(repository)) return true;
+      }
+    } catch {}
+    return false;
+  }
+
+  function detectPlayerGagState() {
+    const character = W.Player || null;
+    const cannotTalk = (() => {
+      try {
+        return character?.CanTalk?.() === false;
+      } catch {
+        return false;
+      }
+    })();
+    const gagLevel = hasAnyEffect(character, ["gagveryheavy", "gagheavy", "gagtotal", "gaggedheavy"])
+        ? 3
+        : hasAnyEffect(character, ["gagmedium", "gag", "gagged"])
+          ? 2
+          : hasAnyEffect(character, ["gaglight"])
+            ? 1
+            : 0;
+    const gagged = gagLevel > 0 || cannotTalk;
+    return { gagged, gagLevel };
+  }
+
+  function detectCharacterState(character) {
+    const cannotTalk = readCharacterMethod(character, "CanTalk", true) === false;
+    const gagLevel = hasAnyEffect(character, ["gagveryheavy", "gagheavy", "gagtotal", "gaggedheavy"])
+        ? 3
+        : hasAnyEffect(character, ["gagmedium", "gag", "gagged"])
+          ? 2
+          : hasAnyEffect(character, ["gaglight"])
+            ? 1
+            : 0;
+    const kneeling = readCharacterMethod(character, "IsKneeling", undefined);
+    const lying = hasAnyPose(character, ["lying", "prone", "supine"]) || hasAnyEffect(character, ["prone"]);
+    const suspended = hasAnyEffect(character, ["suspended"]);
+    const handsFree = readCharacterMethod(character, "CanInteract", !hasAnyEffect(character, ["block", "freeze", "restrain", "bound", "cuffed"]));
+    const canMove = readCharacterMethod(character, "CanWalk", !hasAnyEffect(character, ["freeze", "tethered", "mounted", "suspended", "prone"]));
+    const gagged = gagLevel > 0 || cannotTalk;
+    const restrained = !handsFree || !canMove || hasAnyEffect(character, ["block", "freeze", "restrain", "bound", "cuffed", "tethered"]);
+    const resolvedKneeling = typeof kneeling === "boolean" ? kneeling : hasAnyPose(character, ["kneel", "kneeling"]);
+    const helpless = restrained && (lying || suspended || !canMove);
+    return {
+      gagLevel,
+      gagged,
+      mouthFree: gagLevel <= 1,
+      handsFree,
+      canMove,
+      kneeling: resolvedKneeling,
+      lying,
+      suspended,
+      restrained,
+      helpless,
+      canReach: handsFree && !lying && !suspended && (canMove || resolvedKneeling),
+    };
+  }
+
+  function detectPlayerActionCapability() {
+    return detectCharacterState(W.Player || null);
+  }
+
+  function getSpeechModeLabel(speechState) {
+    const gagLevel = typeof speechState === "object" ? Number(speechState?.gagLevel || 0) : Number(speechState || 0);
+    return t(contentProcessor().speechModeKey(gagLevel));
+  }
+
+  function applyGagSpeech(text, speechState, type = "Chat") {
+    const gagLevel = typeof speechState === "object" ? Number(speechState?.gagLevel || 0) : Number(speechState || 0);
+    return contentProcessor().gag(text, gagLevel, type);
+  }
+
+  function applyLocalStateSpeechEffects(type, text) {
+    if (!["Chat", "Whisper", "Emote"].includes(type)) return text;
+    if (isUltraBcLoaded()) return text;
+    const state = detectPlayerActionCapability();
+    if (!state.gagged) return text;
+    return applyGagSpeech(text, state, type);
   }
 
   function applySignatureTail(type, text) {
@@ -2265,7 +2125,8 @@
     if (/(\u0e45|=\)|\^\)|\u55b5\u5c3e\u5df4)\s*$/.test(value)) return text;
     const chance = type === "Whisper" ? 0.78 : 0.48;
     if (Math.random() > chance) return text;
-    return `${value}${SIGNATURE_TAILS[Math.floor(Math.random() * SIGNATURE_TAILS.length)]}`;
+    const tails = config.contentLocale === "en" ? SIGNATURE_TAILS.slice(0, 3) : SIGNATURE_TAILS;
+    return `${value}${tails[Math.floor(Math.random() * tails.length)]}`;
   }
 
   function applyHabitTail(type, text) {
@@ -2278,931 +2139,12 @@
     return `${value} ${habitProfile.tail}`;
   }
 
-  function updateTailMoodUi() {
-    const badge = document.getElementById("bcn-tail-meter");
-    if (!badge) return;
-    badge.textContent = `${tailMoodCount}/${TAIL_MOOD_MAX}`;
-    badge.dataset.full = tailMoodCount >= TAIL_MOOD_MAX ? "1" : "0";
-    badge.title = `尾巴心情 ${tailMoodCount}/${TAIL_MOOD_MAX} | 习惯尾巴：${habitProfile.tail} | 动作偏好：${habitStyleLabel()}`;
-  }
-
-  function triggerTailMoodBurst(reason = "") {
-    tailMoodCount = 0;
-    updateTailMoodUi();
-    pawRain("Chat");
-    spawnAtmosphereForMember(W.Player, "抱抱 贴贴 亲亲", null, 3);
-    showToast(reason ? `尾巴开心地晃个不停喵，${reason}~` : "尾巴开心地晃个不停喵~");
-  }
-
-  function incrementTailMood(reason = "") {
-    tailMoodCount = Math.min(TAIL_MOOD_MAX, tailMoodCount + 1);
-    updateTailMoodUi();
-    if (tailMoodCount >= TAIL_MOOD_MAX) triggerTailMoodBurst(reason);
-  }
-
-  function registerAffectionCombo(sender, text) {
-    if (!AFFECTION_KEYWORDS.test(String(text || ""))) return 0;
-    const now = Date.now();
-    const senderNumber = memberNumberOf(sender) || 0;
-    if (senderNumber && intimacyCombo.sender === senderNumber && now - intimacyCombo.lastAt <= AFFECTION_COMBO_WINDOW) {
-      intimacyCombo.count = Math.min(3, intimacyCombo.count + 1);
-    } else if (!senderNumber && now - intimacyCombo.lastAt <= AFFECTION_COMBO_WINDOW) {
-      intimacyCombo.count = Math.min(3, intimacyCombo.count + 1);
-    } else {
-      intimacyCombo.count = 1;
-    }
-    intimacyCombo.lastAt = now;
-    intimacyCombo.sender = senderNumber;
-    return intimacyCombo.count;
-  }
-
-  function maybeReactToIncomingAffection(data, text) {
-    if (!data || isOwnSender(data?.Sender) || !AFFECTION_KEYWORDS.test(String(text || ""))) return;
-    const now = Date.now();
-    if (now - affectionReactionAt < AFFECTION_REACTION_COOLDOWN) return;
-    affectionReactionAt = now;
-    const lines = [
-      "猫耳轻轻抖了抖喵。",
-      "尾巴没忍住晃了一下喵。",
-      "心口像被轻轻蹭了一下喵。",
-    ];
-    showToast(lines[Math.floor(Math.random() * lines.length)]);
-    spawnAtmosphereForMember(W.Player, "贴贴 抱抱", getRelationshipStatus(data.Sender), 2);
-  }
-
-  function collectReplySuggestions(text) {
-    const value = String(text || "");
-    const suggestions = [];
-    for (const entry of REPLY_SUGGESTION_LIBRARY) {
-      if (!entry?.pattern?.test?.(value)) continue;
-      for (const reply of entry.replies || []) {
-        if (reply && !suggestions.includes(reply)) suggestions.push(reply);
-      }
-    }
-    return suggestions.slice(0, 4);
-  }
-
-  function renderReplySuggestions() {
-    const panel = document.getElementById("bcn-panel");
-    const wrap = document.getElementById("bcn-reply-suggestions");
-    if (!panel || !wrap) return;
-    wrap.innerHTML = "";
-    panel.classList.toggle("has-replies", activeReplySuggestions.length > 0);
-    if (!activeReplySuggestions.length) return;
-    const title = document.createElement("div");
-    title.className = "bcn-reply-title";
-    title.textContent = "猫猫回应建议";
-    wrap.appendChild(title);
-    activeReplySuggestions.forEach((reply) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "bcn-reply-chip";
-      button.textContent = reply;
-      button.title = "点一下填入聊天框";
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        insertReplySuggestion(reply);
-      });
-      wrap.appendChild(button);
-    });
-  }
-
-  function hideReplySuggestions() {
-    activeReplySuggestions = [];
-    clearTimeout(replySuggestionTimer);
-    replySuggestionTimer = 0;
-    renderReplySuggestions();
-  }
-
-  function showReplySuggestions(suggestions, duration = REPLY_SUGGESTION_DURATION) {
-    activeReplySuggestions = Array.from(new Set((suggestions || []).filter(Boolean))).slice(0, 4);
-    renderReplySuggestions();
-    clearTimeout(replySuggestionTimer);
-    if (!activeReplySuggestions.length) return;
-    replySuggestionTimer = setTimeout(() => hideReplySuggestions(), duration);
-  }
-
-  function insertReplySuggestion(text) {
-    const input = getChatInput();
-    if (!input) {
-      showToast("还没找到聊天框喵。");
-      return;
-    }
-    const oldValue = input.value || "";
-    const glue = oldValue && !/\s$/.test(oldValue) ? " " : "";
-    input.value = `${oldValue}${glue}${text}`;
-    input.dispatchEvent(new InputEvent("input", { bubbles: true }));
-    input.focus();
-    if (typeof input.setSelectionRange === "function") {
-      const pos = input.value.length;
-      input.setSelectionRange(pos, pos);
-    }
-    showToast("把小回应放进聊天框啦喵。");
-    hideReplySuggestions();
-  }
-
-  function scenePack(id, label, source, triggers, lines) {
-    return { id, label, source, triggers, lines };
-  }
-
-  function escapeScenePattern(value) {
-    return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
-
-  function cleanSceneText(value) {
-    return String(value || "")
-      .replace(/<[^>]*>/g, " ")
-      .replace(/&nbsp;/gi, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 180);
-  }
-
-  function nekoFeature(id, label, source, triggers, scope, mood, particle, sound, description) {
-    return {
-      id,
-      label,
-      source,
-      triggers,
-      scope,
-      mood,
-      particle,
-      sound,
-      description,
-      pattern: new RegExp((triggers || []).map(escapeScenePattern).join("|"), "i"),
-    };
-  }
-
-  function currentNekoFeatureMood() {
-    const persisted = nekoSystemState?.mood;
-    if (persisted?.value && persisted.value !== "default" && Date.now() < Number(persisted.until || 0)) return persisted.value;
-    if (!nekoFeatureMoodAt || Date.now() - nekoFeatureMoodAt > NEKO_STATE_DURATION) return "default";
-    return nekoFeatureMood || "default";
-  }
-
-  function setNekoFeatureMood(mood) {
-    if (!mood) return;
-    setNekoPersistentMood(mood, NEKO_STATE_DURATION, "feature");
-  }
-
-  function nekoFeatureTargetMember(data, scope) {
-    if (scope === "self") return W.Player?.MemberNumber || Number(data?.Sender) || 0;
-    const sender = Number(data?.Sender) || 0;
-    if (sender && !isOwnSender(sender)) return sender;
-    const selected = getSelectedTarget();
-    return selected?.MemberNumber || sender || W.Player?.MemberNumber || 0;
-  }
-
-  function nekoFeatureParticleText(feature) {
-    if (feature.particle === "heart") return "贴贴 抱抱 亲亲";
-    if (feature.particle === "sparkle") return "开心 闪闪 发光";
-    if (feature.particle === "paw") return "猫爪 爪爪 喵";
-    return "喵 贴贴";
-  }
-
-  function pruneNekoFeatureCooldowns(now = Date.now()) {
-    if (nekoFeatureCooldowns.size < 360) return;
-    for (const [key, time] of nekoFeatureCooldowns) {
-      if (now - Number(time || 0) > 60000) nekoFeatureCooldowns.delete(key);
-    }
-    if (nekoFeatureCooldowns.size > 520) nekoFeatureCooldowns.clear();
-  }
-
-  function runNekoFeatureEffect(feature, data, text, direction = "incoming") {
-    if (!config.enabled || !feature) return false;
-    const now = Date.now();
-    pruneNekoFeatureCooldowns(now);
-    const key = `${feature.id}:${direction}`;
-    const dedupeKey = `${feature.id}:${Number(data?.Sender) || 0}:${cleanSceneText(text || data?.Content).slice(0, 90)}`;
-    if (now - (nekoFeatureCooldowns.get(dedupeKey) || 0) < 1200) return false;
-    if (now - (nekoFeatureCooldowns.get(key) || 0) < 4500) return false;
-    nekoFeatureCooldowns.set(dedupeKey, now);
-    nekoFeatureCooldowns.set(key, now);
-    const zone = detectNekoSensitiveZone(feature, text);
-    const member = nekoFeatureTargetMember(data, feature.scope);
-    const sensitivity = touchNekoSensitivity(zone, feature.scope === "self" ? 1.2 : 0.7);
-    const strength = voiceStrengthForContext({ zone, memberNumber: member, mood: feature.mood });
-    nekoSystemState.counters.reactions += 1;
-    setNekoFeatureMood(feature.mood);
-    emitNekoEvent("feature", { feature: feature.id, direction, zone, sensitivity, strength, memberNumber: member });
-    if (feature.scope === "both") {
-      spawnAtmosphereForMember(W.Player, nekoFeatureParticleText(feature), null, strength);
-      if (member) spawnAtmosphereForMember(member, nekoFeatureParticleText(feature), getRelationshipStatus(member), strength);
-    } else if (member) {
-      spawnAtmosphereForMember(member, nekoFeatureParticleText(feature), getRelationshipStatus(member), strength);
-    }
-    if (member) simulateNekoTargetReaction(feature, member, strength);
-    if (feature.sound) {
-      triggerNekoVoiceEffect(feature.label, {
-        memberNumber: feature.scope === "target" ? member : W.Player?.MemberNumber,
-        mood: feature.mood,
-        sound: feature.sound,
-        zone,
-        strength,
-      });
-    }
-    const target = sceneSparkTargetName(data);
-    const sound = feature.sound ? `*${feature.sound}* ` : "";
-    const reply = `${sound}${feature.label.replace(/猫猫/g, "猫娘")}：${feature.description}`.replace(/\{target\}/g, target);
-    if (config.replySuggestionsEnabled || config.sceneSparkEnabled) {
-      const suggestions = [];
-      if (config.replySuggestionsEnabled) suggestions.push(reply);
-      if (config.sceneSparkEnabled) suggestions.push(...collectSceneSparkSuggestions(data, text, { fallback: false }));
-      if (suggestions.length) showReplySuggestions(suggestions.slice(0, 4), NEKO_SCENE_SPARK_DURATION);
-    }
-    showToast(`${feature.label}：${feature.sound || feature.mood} 喵~`);
-    return true;
-  }
-
-  function getNekoVoiceOverlay() {
-    let overlay = document.getElementById("bcn-voice-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = "bcn-voice-overlay";
-      document.body?.appendChild(overlay);
-    }
-    return overlay;
-  }
-
-  function bcPointToViewport(x, y) {
-    const canvas = document.getElementById("MainCanvas");
-    const rect = canvas?.getBoundingClientRect?.();
-    if (!rect) return { x: window.innerWidth * 0.25, y: window.innerHeight * 0.35 };
-    return {
-      x: rect.left + (Number(x) / 2000) * rect.width,
-      y: rect.top + (Number(y) / 1000) * rect.height,
-    };
-  }
-
-  function nekoVoiceAnchor(memberNumber = 0, body = false) {
-    const member = memberNumberOf(memberNumber) || memberNumberOf(W.Player);
-    const anchor = characterAnchors.get(member) || characterAnchors.get(memberNumberOf(W.Player));
-    if (!anchor) return { x: window.innerWidth * 0.25, y: window.innerHeight * (body ? 0.55 : 0.25) };
-    return bcPointToViewport(anchor.x, anchor.y + (body ? 360 * anchor.zoom : 0));
-  }
-
-  function saveNekoExpression() {
-    const groups = ["Eyebrows", "Eyes", "Mouth", "Blush"];
-    const saved = {};
-    for (const group of groups) {
-      const item = W.Player?.Appearance?.find?.((entry) => entry?.Asset?.Group?.Name === group);
-      saved[group] = item?.Property?.Expression ?? null;
-    }
-    return saved;
-  }
-
-  function applyNekoExpression(values) {
-    if (typeof W.CharacterSetFacialExpression !== "function" || !W.Player) return;
-    for (const [group, value] of Object.entries(values || {})) {
-      try {
-        W.CharacterSetFacialExpression(W.Player, group, value);
-      } catch {}
-    }
-  }
-
-  function nekoExpressionForMood(mood) {
-    const map = {
-      happy: { Eyebrows: "Soft", Eyes: "Happy", Mouth: "Smile", Blush: "Medium" },
-      shy: { Eyebrows: "Soft", Eyes: "LewdHeartPink", Mouth: "Moan", Blush: "High" },
-      sad: { Eyebrows: "Sad", Eyes: "Dazed", Mouth: "Frown", Blush: "Low" },
-      sleepy: { Eyebrows: "Soft", Eyes: "Closed", Mouth: "Open", Blush: "Low" },
-      alert: { Eyebrows: "Raised", Eyes: "Surprised", Mouth: "Open", Blush: "Medium" },
-      angry: { Eyebrows: "Angry", Eyes: "Dazed", Mouth: "Frown", Blush: "Medium" },
-      cool: { Eyebrows: "Lowered", Eyes: "Dazed", Mouth: "Frown", Blush: "Low" },
-    };
-    return map[mood] || map.shy;
-  }
-
-  function triggerNekoVoiceFlash() {
-    const overlay = getNekoVoiceOverlay();
-    const flash = document.createElement("div");
-    flash.className = "bcn-voice-flash";
-    overlay.appendChild(flash);
-    setTimeout(() => flash.remove(), NEKO_VOICE_EFFECT_DURATION + 200);
-  }
-
-  function triggerNekoVoiceWaves(memberNumber) {
-    const overlay = getNekoVoiceOverlay();
-    const pos = nekoVoiceAnchor(memberNumber, false);
-    const wrap = document.createElement("div");
-    wrap.className = "bcn-voice-waves";
-    wrap.style.left = `${pos.x + (Math.random() - 0.5) * 80}px`;
-    wrap.style.top = `${pos.y + (Math.random() - 0.5) * 60}px`;
-    for (let i = 0; i < 5; i++) {
-      const ring = document.createElement("span");
-      ring.style.animationDelay = `${i * 280}ms`;
-      wrap.appendChild(ring);
-    }
-    overlay.appendChild(wrap);
-    setTimeout(() => wrap.remove(), NEKO_VOICE_EFFECT_DURATION + 1300);
-  }
-
-  function triggerNekoVoiceDanmaku(text) {
-    const overlay = getNekoVoiceOverlay();
-    const pool = [text].concat(nekoVoicePhrases).filter(Boolean);
-    for (let i = 0; i < 4; i++) {
-      const line = document.createElement("div");
-      line.className = "bcn-voice-danmaku";
-      line.textContent = pool[Math.floor(Math.random() * pool.length)];
-      line.style.left = `${40 + Math.random() * Math.min(680, window.innerWidth * 0.45)}px`;
-      line.style.top = `${60 + Math.random() * Math.min(620, window.innerHeight * 0.72)}px`;
-      line.style.animationDelay = `${i * 170}ms`;
-      overlay.appendChild(line);
-      setTimeout(() => line.remove(), NEKO_VOICE_EFFECT_DURATION + 900);
-    }
-  }
-
-  function triggerNekoVoiceSteam(memberNumber) {
-    const overlay = getNekoVoiceOverlay();
-    const pos = nekoVoiceAnchor(memberNumber, true);
-    for (let i = 0; i < 14; i++) {
-      const dot = document.createElement("span");
-      dot.className = "bcn-voice-steam";
-      const size = 4 + Math.random() * 8;
-      dot.style.width = `${size}px`;
-      dot.style.height = `${size}px`;
-      dot.style.left = `${pos.x + (Math.random() - 0.5) * 130}px`;
-      dot.style.top = `${pos.y + (Math.random() - 0.5) * 40}px`;
-      dot.style.animationDelay = `${Math.random() * 900}ms`;
-      dot.style.animationDuration = `${1400 + Math.random() * 1400}ms`;
-      overlay.appendChild(dot);
-      setTimeout(() => dot.remove(), 3400);
-    }
-  }
-
-  async function runNekoVoiceEffect(entry) {
-    const text = cleanSceneText(entry?.text || "");
-    const member = memberNumberOf(entry?.memberNumber) || memberNumberOf(W.Player);
-    const mood = entry?.mood || currentNekoFeatureMood();
-    const zone = entry?.zone || "general";
-    const strength = voiceStrengthForContext({ zone, memberNumber: member, mood, requested: entry?.strength });
-    const sound = voiceSoundForStrength(entry?.sound, strength, mood);
-    setNekoPersistentMood(mood === "default" ? "shy" : mood, NEKO_STATE_DURATION, "voice");
-    nekoSystemState.counters.voice += 1;
-    emitNekoEvent("voice", { text, memberNumber: member, mood, zone, strength, sound });
-    saveNekoSystemState();
-    const saved = saveNekoExpression();
-    clearTimeout(nekoExpressionRestoreTimer);
-    applyNekoExpression(nekoExpressionForMood(currentNekoFeatureMood()));
-    triggerNekoVoiceFlash();
-    for (let i = 0; i < strength; i++) triggerNekoVoiceWaves(member);
-    triggerNekoVoiceDanmaku(text || "NekoVoice");
-    triggerNekoVoiceSteam(member);
-    spawnAtmosphereForMember(member || W.Player, "heart paw sparkle purr", null, strength + 1);
-    if (config.replySuggestionsEnabled) showReplySuggestions([`*${sound}* ${text || "NekoVoice effect"}`], NEKO_SCENE_SPARK_DURATION);
-    await new Promise((resolve) => setTimeout(resolve, NEKO_VOICE_EFFECT_DURATION));
-    nekoExpressionRestoreTimer = setTimeout(() => applyNekoExpression(saved), 60);
-  }
-
-  async function processNekoVoiceQueue() {
-    if (nekoVoicePlaying || !nekoVoiceQueue.length) return;
-    nekoVoicePlaying = true;
-    try {
-      await runNekoVoiceEffect(nekoVoiceQueue.shift());
-    } catch (error) {
-      console.warn("[BC Neko Enhancer] NekoVoice effect failed", error);
-    } finally {
-      nekoVoicePlaying = false;
-      if (nekoVoiceQueue.length) setTimeout(processNekoVoiceQueue, 180);
-    }
-  }
-
-  function triggerNekoVoiceEffect(text = "", options = {}) {
-    const zone = options.zone || "general";
-    const memberNumber = options.memberNumber || W.Player?.MemberNumber;
-    const mood = options.mood || currentNekoFeatureMood();
-    const strength = voiceStrengthForContext({ zone, memberNumber, mood, requested: options.strength });
-    const entry = {
-      text: cleanSceneText(text || options.text || "NekoVoice"),
-      memberNumber,
-      mood,
-      zone,
-      strength,
-      sound: voiceSoundForStrength(options.sound || "mew", strength, mood),
-    };
-    if (nekoVoiceQueue.length >= NEKO_VOICE_QUEUE_LIMIT) nekoVoiceQueue.shift();
-    nekoVoiceQueue.push(entry);
-    processNekoVoiceQueue();
-    return true;
-  }
-
-  function maybeTriggerNekoVoiceFromText(data, text, direction = "incoming") {
-    const value = String(text || data?.Content || "");
-    const match = value.match(NEKO_VOICE_TRIGGER);
-    if (!match) return false;
-    const key = `${Number(data?.Sender) || 0}:${match[1] || value}`;
-    const now = Date.now();
-    if (key === nekoVoiceLastTriggerKey && now - nekoVoiceLastTriggerAt < 1200) return true;
-    nekoVoiceLastTriggerKey = key;
-    nekoVoiceLastTriggerAt = now;
-    triggerNekoVoiceEffect(match[1] || value, {
-      memberNumber: nekoFeatureTargetMember(data, isOwnSender(data?.Sender) ? "self" : "target"),
-      mood: currentNekoFeatureMood(),
-      sound: "nyaa",
-      zone: detectNekoSensitiveZone(null, match[1] || value),
-      direction,
-    });
-    return true;
-  }
-
-  function handleNekoInteractionFeatures(data, text, direction = "incoming") {
-    if (!config.enabled) return null;
-    const value = cleanSceneText(text || data?.Content);
-    if (!value || value === PEER_SIGNAL_CONTENT || isNekoCommandText(value)) return null;
-    for (const feature of NEKO_INTERACTION_FEATURES) {
-      if (!feature.pattern.test(value)) continue;
-      runNekoFeatureEffect(feature, data, value, direction);
-      return feature;
-    }
-    return null;
-  }
-
-  function applyNekoFeatureMood(text) {
-    const mood = currentNekoFeatureMood();
-    if (mood === "default" || !text || /[。.!?！？]$/.test(text)) return text;
-    const tails = {
-      happy: " 开心地喵~",
-      sad: " 小声喵...",
-      cool: " 哼喵。",
-      clingy: " 想贴贴喵~",
-      sleepy: " 困困喵...",
-      alert: " 耳朵竖起来喵!",
-      maid: " 遵命喵。",
-      princess: " 勉强可以喵。",
-      nurse: " 要慢慢来喵。",
-      pet: " 乖乖喵~",
-      shy: " 脸红喵...",
-      nervous: " 有点紧张喵...",
-      angry: " 炸毛喵!",
-      tsundere: " 才不是特意的喵。",
-    };
-    return `${text}${tails[mood] || " 喵~"}`;
-  }
-
-  function recordSceneMemory(data, msg) {
-    const type = String(data?.Type || "");
-    if (!["Chat", "Whisper", "Emote", "Action"].includes(type)) return;
-    const text = cleanSceneText(msg || data?.Content);
-    if (!text || text === PEER_SIGNAL_CONTENT || isNekoCommandText(text)) return;
-    const sender = Number(data?.Sender) || 0;
-    const now = Date.now();
-    const last = sceneMemory[sceneMemory.length - 1];
-    if (last && last.sender === sender && last.type === type && last.text === text && now - last.time < 2500) return;
-    sceneMemory.push({
-      sender,
-      type,
-      text,
-      own: isOwnSender(sender),
-      time: now,
-    });
-    if (sceneMemory.length > NEKO_SCENE_MEMORY_LIMIT) {
-      sceneMemory.splice(0, sceneMemory.length - NEKO_SCENE_MEMORY_LIMIT);
-    }
-  }
-
-  function sceneSparkTargetName(data = {}) {
-    const senderNumber = Number(data?.Sender) || 0;
-    if (senderNumber && !isOwnSender(senderNumber)) {
-      return getCharacterName(getCharacterByMemberNumber(senderNumber)) || "对方";
-    }
-    const selected = getSelectedTarget();
-    return selected ? getCharacterName(selected) : "对方";
-  }
-
-  function sceneSparkCharacter(data = {}) {
-    const senderNumber = Number(data?.Sender) || 0;
-    if (senderNumber && !isOwnSender(senderNumber)) return getCharacterByMemberNumber(senderNumber);
-    return getSelectedTarget() || W.Player || null;
-  }
-
-  function pushSceneSpark(out, lines, target) {
-    for (const line of lines || []) {
-      const value = String(line || "").replace(/\{target\}/g, target);
-      if (value && !out.includes(value)) out.push(value);
-      if (out.length >= 4) return;
-    }
-  }
-
-  function addStateSceneSparks(out, target, character) {
-    if (!character || out.length >= 4) return;
-    const state = detectCharacterState(character);
-    if (state.gagged) {
-      pushSceneSpark(out, [
-        "靠近{target}听了听含糊的声音，温柔地替对方整理呼吸喵。",
-        "用指尖在{target}掌心写下“慢慢来”，然后乖乖蹭了蹭喵。",
-      ], target);
-    }
-    if (state.restrained) {
-      pushSceneSpark(out, [
-        "绕到{target}身边检查了一圈，尾巴轻轻扫过绳结喵。",
-        "贴近{target}小声确认状态，像守着宝物一样守在旁边喵。",
-      ], target);
-    }
-    if (state.kneeling) {
-      pushSceneSpark(out, ["蹲到{target}面前歪头看着，轻轻递出一个乖巧的笑喵。"], target);
-    }
-  }
-
-  function scenePackMatchesQuery(pack, query) {
-    const value = `${pack.id} ${pack.label} ${pack.source} ${(pack.triggers || []).join(" ")}`.toLowerCase();
-    return value.includes(String(query || "").toLowerCase());
-  }
-
-  function collectSceneSparkSuggestions(data = {}, msg = "", options = {}) {
-    const target = sceneSparkTargetName(data);
-    const latest = sceneMemory[sceneMemory.length - 1]?.text || "";
-    const text = cleanSceneText(msg || data?.Content || latest);
-    const recent = sceneMemory.slice(-4).map((item) => item.text).join(" ");
-    const value = `${text} ${recent}`;
-    const query = cleanSceneText(options.query || "");
-    const searchValue = `${query} ${value}`;
-    const out = [];
-    const packs = [
-      {
-        pattern: /晚安|睡|困|累|good\s*night|sleep/i,
-        lines: ["把尾巴轻轻搭在{target}身边，小声说晚安喵。", "替{target}把空气都放轻一点，乖乖陪到睡着喵。"],
-      },
-      {
-        pattern: /摸头|摸摸|pat|head/i,
-        lines: ["耳朵被摸得轻轻一抖，忍不住往{target}手心里蹭了蹭喵。", "仰起头等着{target}再摸一下，尾巴已经藏不住开心了喵。"],
-      },
-      {
-        pattern: /抱|贴贴|靠近|hug|cuddle/i,
-        lines: ["慢慢贴到{target}身边，把温度一点点蹭过去喵。", "张开手臂向{target}讨一个很软的抱抱喵。"],
-      },
-      {
-        pattern: /亲|吻|喜欢|害羞|脸红|kiss|love/i,
-        lines: ["轻轻碰了碰{target}的指尖，脸颊热起来也不肯躲喵。", "把视线挪开又偷偷看回{target}，小声说只是有点开心喵。"],
-      },
-      {
-        pattern: /饿|吃|点心|牛奶|喂|food|milk/i,
-        lines: ["捧着小点心递到{target}面前，尾巴期待地晃了晃喵。", "认真把好吃的分给{target}，像完成一件大事一样点点头喵。"],
-      },
-      {
-        pattern: /疼|怕|哭|委屈|难过|安慰|hurt|sad|comfort/i,
-        lines: ["靠近{target}轻轻陪着，不催也不闹，只把尾巴搭过去喵。", "小心守在{target}旁边，声音放得很软很软喵。"],
-      },
-    ];
-    for (const pack of packs) {
-      if (pack.pattern.test(searchValue)) pushSceneSpark(out, pack.lines, target);
-      if (out.length >= 4) break;
-    }
-    const featurePacks = query
-      ? NEKO_SCENE_SPARK_PACKS.filter((pack) => scenePackMatchesQuery(pack, query))
-      : NEKO_SCENE_SPARK_PACKS;
-    for (const pack of featurePacks) {
-      if (query || pack.pattern.test(searchValue)) pushSceneSpark(out, pack.lines, target);
-      if (out.length >= 4) break;
-    }
-    addStateSceneSparks(out, target, sceneSparkCharacter(data));
-    if (!out.length && options.fallback !== false) {
-      pushSceneSpark(out, [
-        "歪头看着{target}，尾巴慢慢晃出一个可爱的弧度喵。",
-        "把气氛接住一点，轻轻凑近{target}问要不要继续喵。",
-        "认真观察{target}的反应，悄悄把下一句话藏在笑里喵。",
-      ], target);
-    }
-    return out.slice(0, 4);
-  }
-
-  function getSceneFeatureLines(query = "") {
-    const key = cleanSceneText(query);
-    const packs = key ? NEKO_SCENE_SPARK_BLUEPRINTS.filter((pack) => scenePackMatchesQuery(pack, key)) : NEKO_SCENE_SPARK_BLUEPRINTS;
-    const lines = [
-      "[\u732b\u5a18\u573a\u666f\u529f\u80fd\u5305]",
-      "\u603b\u6570\uff1a" + NEKO_SCENE_SPARK_BLUEPRINTS.length + (key ? " | \u641c\u7d22\uff1a" + key + " | \u547d\u4e2d\uff1a" + packs.length : ""),
-      "\u7528\u6cd5\uff1a/neko spark <\u5173\u952e\u8bcd>\uff0c\u4f8b\u5982 link / tail / aftercare / maid / \u8499\u773c",
-    ];
-    for (const pack of packs.slice(0, 12)) {
-      lines.push("- " + pack.id + " | " + pack.label + " | " + pack.source);
-    }
-    if (packs.length > 12) lines.push("... \u8fd8\u6709 " + (packs.length - 12) + " \u9879\uff0c\u8bf7\u52a0\u5173\u952e\u8bcd\u7ee7\u7eed\u7b5b\u9009\u3002");
-    return lines;
-  }
-
-  function getNekoInteractionFeatureLines(query = "") {
-    const key = cleanSceneText(query);
-    const features = key
-      ? NEKO_INTERACTION_FEATURES.filter((feature) => scenePackMatchesQuery(feature, key))
-      : NEKO_INTERACTION_FEATURES;
-    const lines = [
-      "[\u732b\u5a18\u4e92\u52a8\u529f\u80fd\u7c7b\u76ee]",
-      "\u603b\u6570\uff1a" + NEKO_INTERACTION_FEATURES.length + " | \u5f53\u524d\u72b6\u6001\uff1a" + currentNekoFeatureMood() + (key ? " | \u641c\u7d22\uff1a" + key + " | \u547d\u4e2d\uff1a" + features.length : ""),
-      "\u7528\u6cd5\uff1a/neko mood \u9ad8\u5174 | \u4f24\u5fc3 | \u9ad8\u51b7 | \u9ecf\u4eba | \u56f0\u56f0 | \u5973\u4ec6",
-    ];
-    for (const feature of features.slice(0, 12)) {
-      lines.push("- " + feature.id + " | " + feature.label + " | " + feature.source);
-    }
-    if (features.length > 12) lines.push("... \u8fd8\u6709 " + (features.length - 12) + " \u9879\uff0c\u8bf7\u52a0\u5173\u952e\u8bcd\u7b5b\u9009\u3002");
-    return lines;
-  }
-
-  function handleNekoMoodCommand(parts) {
-    const raw = String(parts?.[0] || "status").toLowerCase();
-    const moods = {
-      "\u9ad8\u5174": "happy",
-      "\u5f00\u5fc3": "happy",
-      "\u4f24\u5fc3": "sad",
-      "\u96be\u8fc7": "sad",
-      "\u9ad8\u51b7": "cool",
-      "\u9ecf\u4eba": "clingy",
-      "\u7c98\u4eba": "clingy",
-      "\u56f0\u56f0": "sleepy",
-      "\u5973\u4ec6": "maid",
-      "\u516c\u4e3b": "princess",
-      "\u62a4\u58eb": "nurse",
-      happy: "happy",
-      sad: "sad",
-      cool: "cool",
-      clingy: "clingy",
-      sleepy: "sleepy",
-      maid: "maid",
-      princess: "princess",
-      nurse: "nurse",
-      default: "default",
-      off: "default",
-    };
-    if (raw === "status" || raw === "\u72b6\u6001") {
-      sendNekoCommandNotice(["[\u732b\u5a18\u72b6\u6001]", "\u5f53\u524d\uff1a" + currentNekoFeatureMood(), "\u53ef\u7528\uff1a\u9ad8\u5174 / \u4f24\u5fc3 / \u9ad8\u51b7 / \u9ecf\u4eba / \u56f0\u56f0 / \u5973\u4ec6 / \u516c\u4e3b / \u62a4\u58eb"]);
-      return true;
-    }
-    const next = moods[raw] || moods[String(parts?.join("") || "").toLowerCase()];
-    if (!next) {
-      sendNekoCommandNotice(["[\u732b\u5a18\u72b6\u6001]", "\u672a\u77e5\u72b6\u6001\uff1a" + raw, "\u53ef\u7528\uff1a\u9ad8\u5174 / \u4f24\u5fc3 / \u9ad8\u51b7 / \u9ecf\u4eba / \u56f0\u56f0 / \u5973\u4ec6 / \u516c\u4e3b / \u62a4\u58eb"]);
-      return true;
-    }
-    setNekoFeatureMood(next);
-    showToast("\u732b\u5a18\u72b6\u6001\u5df2\u5207\u6362\uff1a" + next);
-    return true;
-  }
-
-  function showSceneSparkSuggestions(context = {}) {
-    if (!config.sceneSparkEnabled) {
-      sendNekoCommandNotice(["[Neko spark]", "Scene spark is currently off.", "Use /neko spark on to enable it, or /neko spark off to disable it."]);
-      return true;
-    }
-    const suggestions = collectSceneSparkSuggestions(context.data || {}, context.msg || "", { query: context.query || "" });
-    showReplySuggestions(suggestions, NEKO_SCENE_SPARK_DURATION);
-    if (suggestions.length) {
-      showToast("猫娘灵感已经放到快捷建议里喵~");
-      return true;
-    }
-    sendNekoCommandNotice(["[猫娘灵感]", "暂时没有可用灵感，先选中一个目标或等聊天内容多一点喵。"]);
-    return true;
-  }
-
-  function handleNekoToggleCommand(key, parts, label) {
-    const action = String(parts?.[0] || "status").toLowerCase();
-    if (action === "on" || action === "open" || action === "enable" || action === "开启" || action === "开") {
-      config[key] = true;
-      saveConfig();
-      showToast(label + " enabled.");
-      sendNekoCommandNotice(["[Neko toggle]", label + ": ON", "Disable: /neko " + (key === "sceneSparkEnabled" ? "spark" : "suggest") + " off"]);
-      return true;
-    }
-    if (action === "off" || action === "close" || action === "disable" || action === "关闭" || action === "关") {
-      config[key] = false;
-      saveConfig();
-      hideReplySuggestions();
-      showToast(label + " disabled.");
-      sendNekoCommandNotice(["[Neko toggle]", label + ": OFF", "Enable: /neko " + (key === "sceneSparkEnabled" ? "spark" : "suggest") + " on"]);
-      return true;
-    }
-    sendNekoCommandNotice([
-      "[Neko toggle]",
-      label + ": " + (config[key] ? "ON" : "OFF"),
-      "Usage: /neko " + (key === "sceneSparkEnabled" ? "spark" : "suggest") + " on | off | status",
-    ]);
-    return true;
-  }
-
-  function applyRpChatRules(text, tone) {
-    const chat = tone?.chat || {};
-    let value = relationHonorific(String(text || ""));
-    for (const [from, to] of chat.replacements || []) {
-      if (!from) continue;
-      value = value.split(from).join(to);
-    }
-    const prefixes = Array.isArray(chat.prefixes) ? chat.prefixes : [];
-    if (prefixes.length) {
-      const prefix = prefixes[Math.floor(Math.random() * prefixes.length)] || "";
-      if (prefix && !value.startsWith(prefix)) value = `${prefix}${value}`;
-    }
-    return value;
-  }
-
-  function hasRemoteRpChatRules(tone) {
-    const chat = tone?.chat || {};
-    return Array.isArray(chat.replacements) && chat.replacements.length;
-  }
-
-  function fallbackRpNeko(text, preset) {
-    if (preset === "soft") return softNeko(text);
-    if (preset === "classic") return classicNeko(text);
-    if (preset === "tsundere") return tsundereNeko(text);
-    if (preset === "polite") return politeNeko(text);
-    if (preset === "simple") return simpleNeko(text);
-    return standardNeko(text);
-  }
-
-  function softNeko(text) {
-    return relationHonorific(text)
-      .replace(/我们/g, "咱喵们")
-      .replace(/大家/g, "大家猫猫")
-      .replace(/本人/g, "人家")
-      .replace(/你们/g, "你们猫猫")
-      .replace(/您/g, "你")
-      .replace(/我/g, "人家")
-      .replace(/不可以/g, "不可以喵")
-      .replace(/谢谢/g, "谢谢你喵")
-      .replace(/好的/g, "好呀")
-      .replace(/([啊呀呢吧嘛哦啦])([\s,.!?;:，。！？；：）】」』]|$)/g, "喵~$2");
-  }
-
-  function classicNeko(text) {
-    return relationHonorific(text)
-      .replace(/我们/g, "吾等猫猫")
-      .replace(/大家/g, "诸位猫猫")
-      .replace(/本人/g, "咱喵")
-      .replace(/你们/g, "汝等")
-      .replace(/您/g, "汝")
-      .replace(/你/g, "汝")
-      .replace(/我/g, "咱喵")
-      .replace(/好的/g, "甚好")
-      .replace(/可以/g, "可")
-      .replace(/很/g, "甚")
-      .replace(/真的/g, "当真")
-      .replace(/([啊呀呢吧嘛哦啦])([\s,.!?;:，。！？；：）】」』]|$)/g, "喵乎$2");
-  }
-
-  function tsundereNeko(text) {
-    let value = relationHonorific(text)
-      .replace(/我们/g, "咱喵们")
-      .replace(/大家/g, "大家")
-      .replace(/本人/g, "本猫")
-      .replace(/您/g, "汝")
-      .replace(/你/g, "汝")
-      .replace(/我/g, "本猫")
-      .replace(/喜欢/g, "才不是喜欢")
-      .replace(/想要/g, "勉强想要")
-      .replace(/可以/g, "勉强可以")
-      .replace(/好的/g, "哼，好吧");
-    if (!/^(哼|才不是|别误会)/.test(value) && Math.random() < 0.55) {
-      value = `哼，${value}`;
-    }
-    return value;
-  }
-
-  function politeNeko(text) {
-    return relationHonorific(text)
-      .replace(/我们/g, "我们猫猫")
-      .replace(/大家/g, "各位")
-      .replace(/本人/g, "我")
-      .replace(/你们/g, "各位")
-      .replace(/好的/g, "好的呢")
-      .replace(/谢谢/g, "谢谢您")
-      .replace(/麻烦/g, "麻烦您")
-      .replace(/可以/g, "可以的");
-  }
-
-  function simpleNeko(text) {
-    return relationHonorific(text)
-      .replace(/我们/g, "我们猫猫")
-      .replace(/我/g, "咱喵")
-      .replace(/你/g, "你");
-  }
-
-  function rpNeko(text, type = "Chat") {
-    if (!text || typeof text !== "string") return text;
-    if (isBugCommandText(text)) return text;
-    const preset = bugRp.tonePreset;
-    const tone = currentTone();
-    const chat = tone.chat || {};
-    const remoteRules = hasRemoteRpChatRules(tone);
-    let value = remoteRules ? applyRpChatRules(text, tone) : fallbackRpNeko(text, preset);
-    const suffix = pickRandomLine(chat.suffixes, preset === "classic" ? "喵乎" : tone.suffix);
-    const chatChance = Number.isFinite(Number(chat.endingChance))
-      ? Number(chat.endingChance)
-      : preset === "simple" ? 0.28 : preset === "polite" ? 0.5 : 0.8;
-
-    if (type === "Whisper") {
-      const whisperPrefix = tone.whisper?.prefix || "悄悄喵~ ";
-      const whisperChance = Number.isFinite(Number(tone.whisper?.endingChance))
-        ? Number(tone.whisper.endingChance)
-        : preset === "simple" ? 0.35 : 0.85;
-      value = maybeAddToneSuffix(value, suffix, whisperChance);
-      return value.startsWith(whisperPrefix.trim()) ? value : `${whisperPrefix}${value}`;
-    }
-    if (type === "Emote") {
-      const emoteChance = Number.isFinite(Number(chat.kaomojiChance))
-        ? Number(chat.kaomojiChance)
-        : preset === "simple" ? 0 : 0.65;
-      value = maybeAddToneSuffix(value, suffix, preset === "simple" ? 0.25 : 0.65);
-      return hasKnownKaomoji(value) || Math.random() > emoteChance ? value : `${value} ${pickRandomKaomoji()}`;
-    }
-    if (type === "Action" || type === "Activity") {
-      return rpActionLine(value);
-    }
-    return maybeAddToneSuffix(value, suffix, chatChance);
-  }
-
-  function rpActionLine(text) {
-    if (!text || typeof text !== "string") return text;
-    const preset = bugRp.tonePreset;
-    if (preset === "classic") {
-      return relationHonorific(text)
-        .replace(/轻轻/g, "悄然")
-        .replace(/抱住/g, "轻拥")
-        .replace(/摸了摸/g, "轻抚")
-        .replace(/亲了亲/g, "轻吻")
-        .replace(/贴/g, "依偎")
-        .replace(/喂/g, "奉上")
-        .replace(/喵~?$/g, "喵乎");
-    }
-    if (preset === "tsundere") {
-      const value = relationHonorific(text)
-        .replace(/轻轻/g, "装作随意地")
-        .replace(/开心/g, "勉强开心")
-        .replace(/温柔/g, "别扭又认真")
-        .replace(/喵~?$/g, "哼喵");
-      return /才不是|哼/.test(value) ? value : `${value}，才不是特意的喵。`;
-    }
-    if (preset === "polite") {
-      return relationHonorific(text)
-        .replace(/一把/g, "轻柔地")
-        .replace(/偷偷/g, "安静地")
-        .replace(/开心/g, "安心")
-        .replace(/喵~?$/g, "喵。");
-    }
-    if (preset === "simple") {
-      return relationHonorific(text)
-        .replace(/喵~+/g, "喵")
-        .replace(/呀/g, "");
-    }
-    return relationHonorific(text)
-      .replace(/轻轻/g, "软乎乎地")
-      .replace(/开心/g, "甜甜地开心")
-      .replace(/喵。?$/g, "喵~");
-  }
-
-  function actionNeko(text) {
-    text = relationHonorific(text || "");
-    if (/喵喵[）)]?$/.test(text)) return text;
-    return text.replace(/[）)]?$/, (end) => ` 喵喵${end || ""}`);
-  }
-
-  function emoteNeko(text) {
-    text = relationHonorific(standardNeko(text || ""));
-    if (hasKnownKaomoji(text)) return text;
-    return `${text} ${pickRandomKaomoji()}`;
-  }
-
-  function whisperNeko(text) {
-    text = standardNeko(text || "");
-    return text.startsWith("悄悄喵~") ? text : `悄悄喵~ ${text}`;
-  }
-
-  function getSpeechModeLabel(speechState) {
-    const gagLevel = typeof speechState === "object" ? Number(speechState?.gagLevel || 0) : Number(speechState || 0);
-    if (gagLevel >= 3) return "\u91cd\u5835\u5634";
-    if (gagLevel === 2) return "\u4e2d\u5835\u5634";
-    if (gagLevel === 1) return "\u8f7b\u5835\u5634";
-    return "\u6b63\u5e38";
-  }
-
-  function applyGagSpeech(text, speechState, type = "Chat") {
-    const gagLevel = typeof speechState === "object" ? Number(speechState?.gagLevel || 0) : Number(speechState || 0);
-    if (!text || !gagLevel || gagLevel <= 0) return text;
-    let value = String(text).trim();
-    if (!value) return text;
-    const splitIndex = value.search(/[\uff0c\u3002\uff01\uff1f,.!?]/);
-    if (gagLevel >= 3) {
-      const core = splitIndex >= 0 ? value.slice(0, splitIndex) : value;
-      return `${core.slice(0, 8) || "\u5514"}\u2026\u2026\u5514\u55b5`;
-    }
-    if (gagLevel === 2) {
-      if (splitIndex >= 0) value = value.slice(0, Math.max(6, splitIndex));
-      value = value.replace(/[\u554a\u5440\u5566\u54e6\u5462\u561b]/g, "\u5514").replace(/[\uff0c\u3002\uff01\uff1f,.!?]+/g, "\u2026");
-      return /(\u5514\u55b5|\u55ef\u5514)/.test(value) ? value : `${value}\u2026\u2026\u5514\u55b5`;
-    }
-    value = value.replace(/[\u554a\u5440\u5566\u54e6]/g, "\u5514");
-    if (type === "Whisper") return `${value}\u2026\u5514`;
-    return /[\u5514\u55b5]/.test(value) ? `${value}\u2026` : `${value} \u5514\u55b5`;
-  }
-
-  function applyLocalStateSpeechEffects(type, text) {
-    if (!["Chat", "Whisper", "Emote"].includes(type)) return text;
-    if (isUltraBcLoaded()) return text;
-    const state = detectPlayerActionCapability();
-    if (!state.gagged) return text;
-    return applyGagSpeech(text, state, type);
-  }
-
   function convertByType(type, text, options = {}) {
     if (!config.enabled || !text) return text;
-    if (isBugCommandText(text)) return text;
     let value = text;
-    if (bugRp.enabled) value = rpNeko(text, type);
+    if (bugRp.enabled && type === "Whisper") value = rpNeko(text, "Whisper");
+    else if (bugRp.enabled && type === "Chat") value = rpNeko(text, "Chat");
+    else if (bugRp.enabled && type === "Emote") value = applyRpChatRules(contentProcessor().action(text), "Emote");
     else if (type === "Whisper") value = whisperNeko(text);
     else if (type === "Emote") value = emoteNeko(text);
     else if (type === "Action" || type === "Activity") value = actionNeko(text);
@@ -3217,11 +2159,8 @@
   function shouldConvertDisplay(data, msg) {
     if (!config.enabled || !config.convertDisplayed || !msg) return false;
     if (isBugPeerSender(data?.Sender)) return false;
-    if (isOwnSender(data?.Sender) && bugRp.enabled) return false;
     const type = data?.Type;
-    if (type === "Whisper" && String(msg).startsWith("悄悄喵~")) return false;
-    if ((type === "Action" || type === "Activity") && /喵喵[）)]?$/.test(String(msg))) return false;
-    if (type === "Emote" && hasKnownKaomoji(String(msg))) return false;
+    if (contentProcessor().alreadyConverted(type, String(msg), hasKnownKaomoji)) return false;
     return ["Chat", "Whisper", "Emote", "Action", "Activity"].includes(type);
   }
 
@@ -3299,16 +2238,14 @@
   }
 
   function relationshipHintText(relation, type) {
-    const chatLike = type === "Chat" || type === "Whisper";
-    if (relation === "owner") return chatLike ? "主人的消息飘过来了喵。" : "主人刚刚对你做了互动喵。";
-    if (relation === "lover") return chatLike ? "恋人在和你说话喵。" : "恋人刚刚发来了小互动喵。";
-    return chatLike ? "最重要的人正在和你说话喵。" : "最重要的人刚刚朝你伸来了小爪子喵。";
+    return experimentalContent().relationHints[relation] || experimentalContent().relationHints.dual;
   }
 
   function maybeShowRelationshipHint(data) {
     const sender = data?.Sender;
     const relation = getRelationshipStatus(sender);
-    if (!relation || isOwnSender(sender)) return;
+    if (!relation) return;
+    if (isOwnSender(sender)) return;
     const type = data?.Type;
     if (!["Chat", "Whisper", "Emote", "Action"].includes(type)) return;
     const senderNumber = memberNumberOf(sender);
@@ -3361,7 +2298,6 @@
   function isBugPeerSender(sender) {
     const memberNumber = memberNumberOf(sender);
     if (!memberNumber) return false;
-    if (memberNumber === memberNumberOf(W.Player) && CHANNEL === "bug") return true;
     const peer = nekoPeers.get(memberNumber);
     return !!peer && peer.channel === "bug" && peer.noDisplayConvert === true;
   }
@@ -3425,9 +2361,7 @@
 
     bcModApi.hookFunction("ChatRoomGenerateChatRoomChatMessage", 0, (args, next) => {
       const [type, msg, replyId] = args;
-      const nextMsg = shouldSkipGeneratedEmoteConvert(type)
-        ? msg
-        : config.convertOutgoing || bugRp.enabled ? convertByType(type, msg, { applyGag: true, habitTail: true, signatureTail: true }) : msg;
+      const nextMsg = config.convertOutgoing ? convertByType(type, msg, { applyGag: true, habitTail: true, signatureTail: true }) : msg;
       return next([type, nextMsg, replyId]);
     });
 
@@ -3452,7 +2386,7 @@
       const div = next([data, nextMsg, senderCharacter, metadata]);
       decorateMessage(div, data);
       if (config.notifyIncoming && data?.Sender && !isOwnSender(data.Sender) && ["Chat", "Whisper"].includes(data.Type)) {
-        showToast(data.Type === "Whisper" ? "悄悄喵~ 有私聊来了！" : "喵~ 新消息来啦！");
+        showToast(t(data.Type === "Whisper" ? "toast.privateMessage" : "toast.newMessage"));
       }
       return div;
     });
@@ -3615,7 +2549,7 @@
     const info = Array.isArray(data.Dictionary) ? data.Dictionary[0] || {} : {};
     nekoPeers.set(memberNumber, {
       version: String(info.version || "unknown"),
-      channel: String(info.channel || "stable"),
+      channel: String(info.channel || "dev"),
       tonePreset: String(info.tonePreset || ""),
       toneLabel: String(info.toneLabel || ""),
       noDisplayConvert: info.noDisplayConvert === true,
@@ -3641,15 +2575,7 @@
         Type: "Hidden",
         Content: PEER_SIGNAL_CONTENT,
         Sender: W.Player.MemberNumber,
-        Dictionary: [{
-          mod: MOD_ID,
-          version: VERSION,
-          channel: CHANNEL,
-          rpEnabled: !!bugRp.enabled,
-          tonePreset: bugRp.tonePreset,
-          toneLabel: currentTone().label,
-          noDisplayConvert: true,
-        }],
+        Dictionary: [{ mod: MOD_ID, version: VERSION, channel: "dev", noDisplayConvert: false }],
       });
     } catch (error) {
       console.warn("[BC Neko Enhancer] failed to send peer signal", error);
@@ -3762,7 +2688,7 @@
       const peer = nekoPeers.get(memberNumber);
       const isSelf = memberNumber === memberNumberOf(W.Player);
       const version = isSelf ? VERSION : peer?.version || "unknown";
-      const label = isSelf ? `猫娘插件 v${version}` : `猫娘同好 v${version}`;
+      const label = t(isSelf ? "peer.self" : "peer.other", { version });
       const width = Math.max(190, label.length * 18);
       const x = Math.max(10, Math.min(2000 - width - 10, hitbox.cx - width / 2));
       const y = Math.max(10, hitbox.cy + hitbox.h + 8);
@@ -3854,10 +2780,1456 @@
       || document.querySelector("input[type='text']");
   }
 
+  function updateTailMoodUi() {
+    const badge = document.getElementById("bcn-tail-meter");
+    if (!badge) return;
+    badge.textContent = `${tailMoodCount}/${TAIL_MOOD_MAX}`;
+    badge.dataset.full = tailMoodCount >= TAIL_MOOD_MAX ? "1" : "0";
+    badge.title = t("dev.tailMeter.title", {
+      count: tailMoodCount,
+      max: TAIL_MOOD_MAX,
+      tail: habitProfile.tail,
+      style: habitStyleLabel(),
+    });
+  }
+
+  function triggerTailMoodBurst(reason = "") {
+    tailMoodCount = 0;
+    updateTailMoodUi();
+    pawRain("Chat");
+    spawnAtmosphereForMember(W.Player, "抱抱 贴贴 亲亲", null, 3);
+    showToast(reason ? t("dev.tailMeter.burstReason", { reason }) : t("dev.tailMeter.burst"));
+  }
+
+  function incrementTailMood(reason = "") {
+    tailMoodCount = Math.min(TAIL_MOOD_MAX, tailMoodCount + 1);
+    updateTailMoodUi();
+    if (tailMoodCount >= TAIL_MOOD_MAX) triggerTailMoodBurst(reason);
+  }
+
+  function registerAffectionCombo(sender, text) {
+    if (!AFFECTION_KEYWORDS.test(String(text || ""))) return 0;
+    const now = Date.now();
+    const senderNumber = memberNumberOf(sender) || 0;
+    if (senderNumber && intimacyCombo.sender === senderNumber && now - intimacyCombo.lastAt <= AFFECTION_COMBO_WINDOW) {
+      intimacyCombo.count = Math.min(3, intimacyCombo.count + 1);
+    } else if (!senderNumber && now - intimacyCombo.lastAt <= AFFECTION_COMBO_WINDOW) {
+      intimacyCombo.count = Math.min(3, intimacyCombo.count + 1);
+    } else {
+      intimacyCombo.count = 1;
+    }
+    intimacyCombo.lastAt = now;
+    intimacyCombo.sender = senderNumber;
+    return intimacyCombo.count;
+  }
+
+  function maybeReactToIncomingAffection(data, text) {
+    if (!data || isOwnSender(data?.Sender) || !AFFECTION_KEYWORDS.test(String(text || ""))) return;
+    const now = Date.now();
+    if (now - affectionReactionAt < AFFECTION_REACTION_COOLDOWN) return;
+    affectionReactionAt = now;
+    const lines = tLines("dev.affectionReactions");
+    showToast(lines[Math.floor(Math.random() * lines.length)]);
+    spawnAtmosphereForMember(W.Player, "贴贴 抱抱", getRelationshipStatus(data.Sender), 2);
+  }
+
+  function collectReplySuggestions(text) {
+    const value = String(text || "");
+    const suggestions = [];
+    for (const entry of experimentalReplySuggestionLibrary()) {
+      if (!entry?.pattern?.test?.(value)) continue;
+      for (const reply of entry.replies || []) {
+        if (reply && !suggestions.includes(reply)) suggestions.push(reply);
+      }
+    }
+    return suggestions.slice(0, 4);
+  }
+
+  function renderReplySuggestions() {
+    const panel = document.getElementById("bcn-panel");
+    const wrap = document.getElementById("bcn-reply-suggestions");
+    if (!panel || !wrap) return;
+    wrap.innerHTML = "";
+    panel.classList.toggle("has-replies", activeReplySuggestions.length > 0);
+    if (!activeReplySuggestions.length) return;
+    const title = document.createElement("div");
+    title.className = "bcn-reply-title";
+    title.textContent = t("dev.suggestions.title");
+    wrap.appendChild(title);
+    activeReplySuggestions.forEach((reply) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "bcn-reply-chip";
+      button.textContent = reply;
+      button.title = t("dev.suggestions.insertTitle");
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        insertReplySuggestion(reply);
+      });
+      wrap.appendChild(button);
+    });
+  }
+
+  function hideReplySuggestions() {
+    activeReplySuggestions = [];
+    clearTimeout(replySuggestionTimer);
+    replySuggestionTimer = 0;
+    renderReplySuggestions();
+  }
+
+  function showReplySuggestions(suggestions, duration = REPLY_SUGGESTION_DURATION) {
+    activeReplySuggestions = Array.from(new Set((suggestions || []).filter(Boolean))).slice(0, 4);
+    renderReplySuggestions();
+    clearTimeout(replySuggestionTimer);
+    if (!activeReplySuggestions.length) return;
+    replySuggestionTimer = setTimeout(() => hideReplySuggestions(), duration);
+  }
+
+  function insertReplySuggestion(text) {
+    const input = getChatInput();
+    if (!input) {
+      showToast(t("dev.suggestions.chatMissing"));
+      return;
+    }
+    const oldValue = input.value || "";
+    const glue = oldValue && !/\s$/.test(oldValue) ? " " : "";
+    input.value = `${oldValue}${glue}${text}`;
+    input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    input.focus();
+    if (typeof input.setSelectionRange === "function") {
+      const pos = input.value.length;
+      input.setSelectionRange(pos, pos);
+    }
+    showToast(t("dev.suggestions.inserted"));
+    hideReplySuggestions();
+  }
+
+  function scenePack(id, label, source, triggers, lines) {
+    return { id, label, source, triggers, lines };
+  }
+
+  function escapeScenePattern(value) {
+    return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function cleanSceneText(value) {
+    return String(value || "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 180);
+  }
+
+  function nekoFeature(id, label, source, triggers, scope, mood, particle, sound, description) {
+    return {
+      id,
+      label,
+      source,
+      triggers,
+      scope,
+      mood,
+      particle,
+      sound,
+      description,
+      pattern: new RegExp((triggers || []).map(escapeScenePattern).join("|"), "i"),
+    };
+  }
+
+  function currentNekoFeatureMood() {
+    const persisted = nekoSystemState?.mood;
+    if (persisted?.value && persisted.value !== "default" && Date.now() < Number(persisted.until || 0)) return persisted.value;
+    if (!nekoFeatureMoodAt || Date.now() - nekoFeatureMoodAt > NEKO_STATE_DURATION) return "default";
+    return nekoFeatureMood || "default";
+  }
+
+  function setNekoFeatureMood(mood) {
+    if (!mood) return;
+    setNekoPersistentMood(mood, NEKO_STATE_DURATION, "feature");
+  }
+
+  function nekoFeatureTargetMember(data, scope) {
+    if (scope === "self") return W.Player?.MemberNumber || Number(data?.Sender) || 0;
+    const sender = Number(data?.Sender) || 0;
+    if (sender && !isOwnSender(sender)) return sender;
+    const selected = getSelectedTarget();
+    return selected?.MemberNumber || sender || W.Player?.MemberNumber || 0;
+  }
+
+  function nekoFeatureParticleText(feature) {
+    if (feature.particle === "heart") return "贴贴 抱抱 亲亲";
+    if (feature.particle === "sparkle") return "开心 闪闪 发光";
+    if (feature.particle === "paw") return "猫爪 爪爪 喵";
+    return "喵 贴贴";
+  }
+
+  function pruneNekoFeatureCooldowns(now = Date.now()) {
+    if (nekoFeatureCooldowns.size < 360) return;
+    for (const [key, time] of nekoFeatureCooldowns) {
+      if (now - Number(time || 0) > 60000) nekoFeatureCooldowns.delete(key);
+    }
+    if (nekoFeatureCooldowns.size > 520) nekoFeatureCooldowns.clear();
+  }
+
+  function runNekoFeatureEffect(feature, data, text, direction = "incoming") {
+    if (!config.enabled || !feature) return false;
+    const now = Date.now();
+    pruneNekoFeatureCooldowns(now);
+    const key = `${feature.id}:${direction}`;
+    const dedupeKey = `${feature.id}:${Number(data?.Sender) || 0}:${cleanSceneText(text || data?.Content).slice(0, 90)}`;
+    if (now - (nekoFeatureCooldowns.get(dedupeKey) || 0) < 1200) return false;
+    if (now - (nekoFeatureCooldowns.get(key) || 0) < 4500) return false;
+    nekoFeatureCooldowns.set(dedupeKey, now);
+    nekoFeatureCooldowns.set(key, now);
+    const zone = detectNekoSensitiveZone(feature, text);
+    const member = nekoFeatureTargetMember(data, feature.scope);
+    const sensitivity = touchNekoSensitivity(zone, feature.scope === "self" ? 1.2 : 0.7);
+    const strength = voiceStrengthForContext({ zone, memberNumber: member, mood: feature.mood });
+    nekoSystemState.counters.reactions += 1;
+    setNekoFeatureMood(feature.mood);
+    emitNekoEvent("feature", { feature: feature.id, direction, zone, sensitivity, strength, memberNumber: member });
+    if (feature.scope === "both") {
+      spawnAtmosphereForMember(W.Player, nekoFeatureParticleText(feature), null, strength);
+      if (member) spawnAtmosphereForMember(member, nekoFeatureParticleText(feature), getRelationshipStatus(member), strength);
+    } else if (member) {
+      spawnAtmosphereForMember(member, nekoFeatureParticleText(feature), getRelationshipStatus(member), strength);
+    }
+    if (member) simulateNekoTargetReaction(feature, member, strength);
+    const localizedFeature = localizedNekoFeature(feature);
+    if (feature.sound) {
+      triggerNekoVoiceEffect(localizedFeature.label, {
+        memberNumber: feature.scope === "target" ? member : W.Player?.MemberNumber,
+        mood: feature.mood,
+        sound: feature.sound,
+        zone,
+        strength,
+      });
+    }
+    const target = sceneSparkTargetName(data);
+    const sound = feature.sound ? `*${feature.sound}* ` : "";
+    const reply = `${sound}${localizedFeature.label}: ${localizedFeature.description}`.replace(/\{target\}/g, target);
+    if (config.replySuggestionsEnabled || config.sceneSparkEnabled) {
+      const suggestions = [];
+      if (config.replySuggestionsEnabled) suggestions.push(reply);
+      if (config.sceneSparkEnabled) suggestions.push(...collectSceneSparkSuggestions(data, text, { fallback: false }));
+      if (suggestions.length) showReplySuggestions(suggestions.slice(0, 4), NEKO_SCENE_SPARK_DURATION);
+    }
+    showToast(t("dev.feature.triggered", { label: localizedFeature.label, effect: feature.sound || feature.mood }));
+    return true;
+  }
+
+  function getNekoVoiceOverlay() {
+    let overlay = document.getElementById("bcn-voice-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "bcn-voice-overlay";
+      document.body?.appendChild(overlay);
+    }
+    return overlay;
+  }
+
+  function bcPointToViewport(x, y) {
+    const canvas = document.getElementById("MainCanvas");
+    const rect = canvas?.getBoundingClientRect?.();
+    if (!rect) return { x: window.innerWidth * 0.25, y: window.innerHeight * 0.35 };
+    return {
+      x: rect.left + (Number(x) / 2000) * rect.width,
+      y: rect.top + (Number(y) / 1000) * rect.height,
+    };
+  }
+
+  function nekoVoiceAnchor(memberNumber = 0, body = false) {
+    const member = memberNumberOf(memberNumber) || memberNumberOf(W.Player);
+    const anchor = characterAnchors.get(member) || characterAnchors.get(memberNumberOf(W.Player));
+    if (!anchor) return { x: window.innerWidth * 0.25, y: window.innerHeight * (body ? 0.55 : 0.25) };
+    return bcPointToViewport(anchor.x, anchor.y + (body ? 360 * anchor.zoom : 0));
+  }
+
+  function saveNekoExpression() {
+    const groups = ["Eyebrows", "Eyes", "Mouth", "Blush"];
+    const saved = {};
+    for (const group of groups) {
+      const item = W.Player?.Appearance?.find?.((entry) => entry?.Asset?.Group?.Name === group);
+      saved[group] = item?.Property?.Expression ?? null;
+    }
+    return saved;
+  }
+
+  function applyNekoExpression(values) {
+    if (typeof W.CharacterSetFacialExpression !== "function" || !W.Player) return;
+    for (const [group, value] of Object.entries(values || {})) {
+      try {
+        W.CharacterSetFacialExpression(W.Player, group, value);
+      } catch {}
+    }
+  }
+
+  function nekoExpressionForMood(mood) {
+    const map = {
+      happy: { Eyebrows: "Soft", Eyes: "Happy", Mouth: "Smile", Blush: "Medium" },
+      shy: { Eyebrows: "Soft", Eyes: "LewdHeartPink", Mouth: "Moan", Blush: "High" },
+      sad: { Eyebrows: "Sad", Eyes: "Dazed", Mouth: "Frown", Blush: "Low" },
+      sleepy: { Eyebrows: "Soft", Eyes: "Closed", Mouth: "Open", Blush: "Low" },
+      alert: { Eyebrows: "Raised", Eyes: "Surprised", Mouth: "Open", Blush: "Medium" },
+      angry: { Eyebrows: "Angry", Eyes: "Dazed", Mouth: "Frown", Blush: "Medium" },
+      cool: { Eyebrows: "Lowered", Eyes: "Dazed", Mouth: "Frown", Blush: "Low" },
+    };
+    return map[mood] || map.shy;
+  }
+
+  function triggerNekoVoiceFlash() {
+    const overlay = getNekoVoiceOverlay();
+    const flash = document.createElement("div");
+    flash.className = "bcn-voice-flash";
+    overlay.appendChild(flash);
+    setTimeout(() => flash.remove(), NEKO_VOICE_EFFECT_DURATION + 200);
+  }
+
+  function triggerNekoVoiceWaves(memberNumber) {
+    const overlay = getNekoVoiceOverlay();
+    const pos = nekoVoiceAnchor(memberNumber, false);
+    const wrap = document.createElement("div");
+    wrap.className = "bcn-voice-waves";
+    wrap.style.left = `${pos.x + (Math.random() - 0.5) * 80}px`;
+    wrap.style.top = `${pos.y + (Math.random() - 0.5) * 60}px`;
+    for (let i = 0; i < 5; i++) {
+      const ring = document.createElement("span");
+      ring.style.animationDelay = `${i * 280}ms`;
+      wrap.appendChild(ring);
+    }
+    overlay.appendChild(wrap);
+    setTimeout(() => wrap.remove(), NEKO_VOICE_EFFECT_DURATION + 1300);
+  }
+
+  function triggerNekoVoiceDanmaku(text) {
+    const overlay = getNekoVoiceOverlay();
+    const pool = [text].concat(experimentalContent().voicePhrases || []).filter(Boolean);
+    for (let i = 0; i < 4; i++) {
+      const line = document.createElement("div");
+      line.className = "bcn-voice-danmaku";
+      line.textContent = pool[Math.floor(Math.random() * pool.length)];
+      line.style.left = `${40 + Math.random() * Math.min(680, window.innerWidth * 0.45)}px`;
+      line.style.top = `${60 + Math.random() * Math.min(620, window.innerHeight * 0.72)}px`;
+      line.style.animationDelay = `${i * 170}ms`;
+      overlay.appendChild(line);
+      setTimeout(() => line.remove(), NEKO_VOICE_EFFECT_DURATION + 900);
+    }
+  }
+
+  function triggerNekoVoiceSteam(memberNumber) {
+    const overlay = getNekoVoiceOverlay();
+    const pos = nekoVoiceAnchor(memberNumber, true);
+    for (let i = 0; i < 14; i++) {
+      const dot = document.createElement("span");
+      dot.className = "bcn-voice-steam";
+      const size = 4 + Math.random() * 8;
+      dot.style.width = `${size}px`;
+      dot.style.height = `${size}px`;
+      dot.style.left = `${pos.x + (Math.random() - 0.5) * 130}px`;
+      dot.style.top = `${pos.y + (Math.random() - 0.5) * 40}px`;
+      dot.style.animationDelay = `${Math.random() * 900}ms`;
+      dot.style.animationDuration = `${1400 + Math.random() * 1400}ms`;
+      overlay.appendChild(dot);
+      setTimeout(() => dot.remove(), 3400);
+    }
+  }
+
+  async function runNekoVoiceEffect(entry) {
+    const text = cleanSceneText(entry?.text || "");
+    const member = memberNumberOf(entry?.memberNumber) || memberNumberOf(W.Player);
+    const mood = entry?.mood || currentNekoFeatureMood();
+    const zone = entry?.zone || "general";
+    const strength = voiceStrengthForContext({ zone, memberNumber: member, mood, requested: entry?.strength });
+    const sound = voiceSoundForStrength(entry?.sound, strength, mood);
+    setNekoPersistentMood(mood === "default" ? "shy" : mood, NEKO_STATE_DURATION, "voice");
+    nekoSystemState.counters.voice += 1;
+    emitNekoEvent("voice", { text, memberNumber: member, mood, zone, strength, sound });
+    saveNekoSystemState();
+    const saved = saveNekoExpression();
+    clearTimeout(nekoExpressionRestoreTimer);
+    applyNekoExpression(nekoExpressionForMood(currentNekoFeatureMood()));
+    triggerNekoVoiceFlash();
+    for (let i = 0; i < strength; i++) triggerNekoVoiceWaves(member);
+    triggerNekoVoiceDanmaku(text || "NekoVoice");
+    triggerNekoVoiceSteam(member);
+    spawnAtmosphereForMember(member || W.Player, "贴贴 抱抱 亲亲 猫爪", null, 3);
+    if (config.replySuggestionsEnabled) {
+      showReplySuggestions([`*${entry?.sound || "mew"}* ${text || experimentalContent().voiceDefault}`], NEKO_SCENE_SPARK_DURATION);
+    }
+    await new Promise((resolve) => setTimeout(resolve, NEKO_VOICE_EFFECT_DURATION));
+    nekoExpressionRestoreTimer = setTimeout(() => applyNekoExpression(saved), 60);
+  }
+
+  async function processNekoVoiceQueue() {
+    if (nekoVoicePlaying || !nekoVoiceQueue.length) return;
+    nekoVoicePlaying = true;
+    try {
+      await runNekoVoiceEffect(nekoVoiceQueue.shift());
+    } catch (error) {
+      console.warn("[BC Neko Enhancer] NekoVoice effect failed", error);
+    } finally {
+      nekoVoicePlaying = false;
+      if (nekoVoiceQueue.length) setTimeout(processNekoVoiceQueue, 180);
+    }
+  }
+
+  function triggerNekoVoiceEffect(text = "", options = {}) {
+    const zone = options.zone || "general";
+    const memberNumber = options.memberNumber || W.Player?.MemberNumber;
+    const mood = options.mood || currentNekoFeatureMood();
+    const strength = voiceStrengthForContext({ zone, memberNumber, mood, requested: options.strength });
+    const entry = {
+      text: cleanSceneText(text || options.text || "NekoVoice"),
+      memberNumber,
+      mood,
+      zone,
+      strength,
+      sound: voiceSoundForStrength(options.sound || "mew", strength, mood),
+    };
+    if (nekoVoiceQueue.length >= NEKO_VOICE_QUEUE_LIMIT) nekoVoiceQueue.shift();
+    nekoVoiceQueue.push(entry);
+    processNekoVoiceQueue();
+    return true;
+  }
+
+  function maybeTriggerNekoVoiceFromText(data, text, direction = "incoming") {
+    const value = String(text || data?.Content || "");
+    const match = value.match(NEKO_VOICE_TRIGGER);
+    if (!match) return false;
+    const key = `${Number(data?.Sender) || 0}:${match[1] || value}`;
+    const now = Date.now();
+    if (key === nekoVoiceLastTriggerKey && now - nekoVoiceLastTriggerAt < 1200) return true;
+    nekoVoiceLastTriggerKey = key;
+    nekoVoiceLastTriggerAt = now;
+    triggerNekoVoiceEffect(match[1] || value, {
+      memberNumber: nekoFeatureTargetMember(data, isOwnSender(data?.Sender) ? "self" : "target"),
+      mood: currentNekoFeatureMood(),
+      sound: "nyaa",
+      zone: detectNekoSensitiveZone(null, match[1] || value),
+      direction,
+    });
+    return true;
+  }
+
+  function handleNekoInteractionFeatures(data, text, direction = "incoming") {
+    if (!config.enabled) return null;
+    const value = cleanSceneText(text || data?.Content);
+    if (!value || value === PEER_SIGNAL_CONTENT || isNekoCommandText(value)) return null;
+    for (const feature of NEKO_INTERACTION_FEATURES) {
+      if (!feature.pattern.test(value)) continue;
+      runNekoFeatureEffect(feature, data, value, direction);
+      return feature;
+    }
+    return null;
+  }
+
+  function applyNekoFeatureMood(text) {
+    const mood = currentNekoFeatureMood();
+    if (mood === "default" || !text || /[。.!?！？]$/.test(text)) return text;
+    const tails = experimentalContent().habit.moodTails;
+    return `${text}${tails[mood] || tails.default}`;
+  }
+
+  function recordSceneMemory(data, msg) {
+    const type = String(data?.Type || "");
+    if (!["Chat", "Whisper", "Emote", "Action"].includes(type)) return;
+    const text = cleanSceneText(msg || data?.Content);
+    if (!text || text === PEER_SIGNAL_CONTENT || isNekoCommandText(text)) return;
+    const sender = Number(data?.Sender) || 0;
+    const now = Date.now();
+    const last = sceneMemory[sceneMemory.length - 1];
+    if (last && last.sender === sender && last.type === type && last.text === text && now - last.time < 2500) return;
+    sceneMemory.push({
+      sender,
+      type,
+      text,
+      own: isOwnSender(sender),
+      time: now,
+    });
+    if (sceneMemory.length > NEKO_SCENE_MEMORY_LIMIT) {
+      sceneMemory.splice(0, sceneMemory.length - NEKO_SCENE_MEMORY_LIMIT);
+    }
+  }
+
+  function sceneSparkTargetName(data = {}) {
+    const senderNumber = Number(data?.Sender) || 0;
+    if (senderNumber && !isOwnSender(senderNumber)) {
+      return getCharacterName(getCharacterByMemberNumber(senderNumber)) || experimentalContent().nearbyTarget;
+    }
+    const selected = getSelectedTarget();
+    return selected ? getCharacterName(selected) : experimentalContent().nearbyTarget;
+  }
+
+  function sceneSparkCharacter(data = {}) {
+    const senderNumber = Number(data?.Sender) || 0;
+    if (senderNumber && !isOwnSender(senderNumber)) return getCharacterByMemberNumber(senderNumber);
+    return getSelectedTarget() || W.Player || null;
+  }
+
+  function pushSceneSpark(out, lines, target) {
+    for (const line of lines || []) {
+      const value = String(line || "").replace(/\{target\}/g, target);
+      if (value && !out.includes(value)) out.push(value);
+      if (out.length >= 4) return;
+    }
+  }
+
+  function addStateSceneSparks(out, target, character) {
+    if (!character || out.length >= 4) return;
+    if (config.contentLocale === "en") {
+      pushSceneSpark(out, experimentalContent().sceneTemplates.state, target);
+      return;
+    }
+    const state = detectCharacterState(character);
+    if (state.gagged) {
+      pushSceneSpark(out, [
+        "靠近{target}听了听含糊的声音，温柔地替对方整理呼吸喵。",
+        "用指尖在{target}掌心写下“慢慢来”，然后乖乖蹭了蹭喵。",
+      ], target);
+    }
+    if (state.restrained) {
+      pushSceneSpark(out, [
+        "绕到{target}身边检查了一圈，尾巴轻轻扫过绳结喵。",
+        "贴近{target}小声确认状态，像守着宝物一样守在旁边喵。",
+      ], target);
+    }
+    if (state.kneeling) {
+      pushSceneSpark(out, ["蹲到{target}面前歪头看着，轻轻递出一个乖巧的笑喵。"], target);
+    }
+  }
+
+  function scenePackMatchesQuery(pack, query) {
+    const value = `${pack.id} ${pack.label} ${pack.source} ${(pack.triggers || []).join(" ")}`.toLowerCase();
+    return value.includes(String(query || "").toLowerCase());
+  }
+
+  function collectSceneSparkSuggestions(data = {}, msg = "", options = {}) {
+    const target = sceneSparkTargetName(data);
+    const latest = sceneMemory[sceneMemory.length - 1]?.text || "";
+    const text = cleanSceneText(msg || data?.Content || latest);
+    const recent = sceneMemory.slice(-4).map((item) => item.text).join(" ");
+    const value = `${text} ${recent}`;
+    const query = cleanSceneText(options.query || "");
+    const searchValue = `${query} ${value}`;
+    const out = [];
+    const packs = config.contentLocale === "en" ? [] : [
+      {
+        pattern: /晚安|睡|困|累|good\s*night|sleep/i,
+        lines: ["把尾巴轻轻搭在{target}身边，小声说晚安喵。", "替{target}把空气都放轻一点，乖乖陪到睡着喵。"],
+      },
+      {
+        pattern: /摸头|摸摸|pat|head/i,
+        lines: ["耳朵被摸得轻轻一抖，忍不住往{target}手心里蹭了蹭喵。", "仰起头等着{target}再摸一下，尾巴已经藏不住开心了喵。"],
+      },
+      {
+        pattern: /抱|贴贴|靠近|hug|cuddle/i,
+        lines: ["慢慢贴到{target}身边，把温度一点点蹭过去喵。", "张开手臂向{target}讨一个很软的抱抱喵。"],
+      },
+      {
+        pattern: /亲|吻|喜欢|害羞|脸红|kiss|love/i,
+        lines: ["轻轻碰了碰{target}的指尖，脸颊热起来也不肯躲喵。", "把视线挪开又偷偷看回{target}，小声说只是有点开心喵。"],
+      },
+      {
+        pattern: /饿|吃|点心|牛奶|喂|food|milk/i,
+        lines: ["捧着小点心递到{target}面前，尾巴期待地晃了晃喵。", "认真把好吃的分给{target}，像完成一件大事一样点点头喵。"],
+      },
+      {
+        pattern: /疼|怕|哭|委屈|难过|安慰|hurt|sad|comfort/i,
+        lines: ["靠近{target}轻轻陪着，不催也不闹，只把尾巴搭过去喵。", "小心守在{target}旁边，声音放得很软很软喵。"],
+      },
+    ];
+    for (const pack of packs) {
+      if (pack.pattern.test(searchValue)) pushSceneSpark(out, pack.lines, target);
+      if (out.length >= 4) break;
+    }
+    const featurePacks = query
+      ? NEKO_SCENE_SPARK_PACKS.filter((pack) => scenePackMatchesQuery(pack, query))
+      : NEKO_SCENE_SPARK_PACKS;
+    for (const pack of featurePacks) {
+      if (query || pack.pattern.test(searchValue)) pushSceneSpark(out, localizedScenePack(pack).lines, target);
+      if (out.length >= 4) break;
+    }
+    addStateSceneSparks(out, target, sceneSparkCharacter(data));
+    if (!out.length && options.fallback !== false) {
+      pushSceneSpark(out, experimentalContent().sceneTemplates.default, target);
+    }
+    return out.slice(0, 4);
+  }
+
+  function getSceneFeatureLines(query = "") {
+    const key = cleanSceneText(query);
+    const packs = key ? NEKO_SCENE_SPARK_BLUEPRINTS.filter((pack) => scenePackMatchesQuery(pack, key)) : NEKO_SCENE_SPARK_BLUEPRINTS;
+    const lines = tLines("dev.sceneList.header", {
+      total: NEKO_SCENE_SPARK_BLUEPRINTS.length,
+      query: key || t("common.none"),
+      matches: packs.length,
+    });
+    for (const pack of packs.slice(0, 12)) {
+      const localized = localizedScenePack(pack);
+      lines.push("- " + pack.id + " | " + localized.label + " | " + pack.source);
+    }
+    if (packs.length > 12) lines.push(t("dev.list.more", { count: packs.length - 12 }));
+    return lines;
+  }
+
+  function getNekoInteractionFeatureLines(query = "") {
+    const key = cleanSceneText(query);
+    const features = key
+      ? NEKO_INTERACTION_FEATURES.filter((feature) => scenePackMatchesQuery(feature, key))
+      : NEKO_INTERACTION_FEATURES;
+    const lines = tLines("dev.featureList.header", {
+      total: NEKO_INTERACTION_FEATURES.length,
+      mood: currentNekoFeatureMood(),
+      query: key || t("common.none"),
+      matches: features.length,
+    });
+    for (const feature of features.slice(0, 12)) {
+      const localized = localizedNekoFeature(feature);
+      lines.push("- " + feature.id + " | " + localized.label + " | " + feature.source);
+    }
+    if (features.length > 12) lines.push(t("dev.list.more", { count: features.length - 12 }));
+    return lines;
+  }
+
+  function handleNekoMoodCommand(parts) {
+    const raw = String(parts?.[0] || "status").toLowerCase();
+    const moods = {
+      "\u9ad8\u5174": "happy",
+      "\u5f00\u5fc3": "happy",
+      "\u4f24\u5fc3": "sad",
+      "\u96be\u8fc7": "sad",
+      "\u9ad8\u51b7": "cool",
+      "\u9ecf\u4eba": "clingy",
+      "\u7c98\u4eba": "clingy",
+      "\u56f0\u56f0": "sleepy",
+      "\u5973\u4ec6": "maid",
+      "\u516c\u4e3b": "princess",
+      "\u62a4\u58eb": "nurse",
+      happy: "happy",
+      sad: "sad",
+      cool: "cool",
+      clingy: "clingy",
+      sleepy: "sleepy",
+      maid: "maid",
+      princess: "princess",
+      nurse: "nurse",
+      default: "default",
+      off: "default",
+    };
+    if (raw === "status" || raw === "\u72b6\u6001") {
+      sendNekoCommandNotice(tLines("dev.mood.status", { mood: currentNekoFeatureMood() }));
+      return true;
+    }
+    const next = moods[raw] || moods[String(parts?.join("") || "").toLowerCase()];
+    if (!next) {
+      sendNekoCommandNotice(tLines("dev.mood.unknown", { mood: raw }));
+      return true;
+    }
+    setNekoFeatureMood(next);
+    showToast(t("dev.mood.changed", { mood: next }));
+    return true;
+  }
+
+  function showSceneSparkSuggestions(context = {}) {
+    if (!config.sceneSparkEnabled) {
+      sendNekoCommandNotice(tLines("dev.spark.disabled"));
+      return true;
+    }
+    const suggestions = collectSceneSparkSuggestions(context.data || {}, context.msg || "", { query: context.query || "" });
+    showReplySuggestions(suggestions, NEKO_SCENE_SPARK_DURATION);
+    if (suggestions.length) {
+      showToast(t("dev.spark.added"));
+      return true;
+    }
+    sendNekoCommandNotice(tLines("dev.spark.empty"));
+    return true;
+  }
+
+  function handleNekoToggleCommand(key, parts, label) {
+    const action = String(parts?.[0] || "status").toLowerCase();
+    const command = key === "sceneSparkEnabled" ? "spark" : "suggest";
+    if (action === "on" || action === "open" || action === "enable" || action === "开启" || action === "开") {
+      config[key] = true;
+      saveConfig();
+      showToast(t("dev.toggle.changed", { label, state: t("common.on") }));
+      sendNekoCommandNotice(tLines("dev.toggle.enabled", { label, command }));
+      return true;
+    }
+    if (action === "off" || action === "close" || action === "disable" || action === "关闭" || action === "关") {
+      config[key] = false;
+      saveConfig();
+      hideReplySuggestions();
+      showToast(t("dev.toggle.changed", { label, state: t("common.off") }));
+      sendNekoCommandNotice(tLines("dev.toggle.disabled", { label, command }));
+      return true;
+    }
+    sendNekoCommandNotice(tLines("dev.toggle.status", {
+      label,
+      state: t(config[key] ? "common.on" : "common.off"),
+      command,
+    }));
+    return true;
+  }
+
+  function sendNekoCommandNotice(lines, duration = 20000) {
+    const text = Array.isArray(lines) ? lines.join("\n") : String(lines || "");
+    if (!text) return false;
+    try {
+      if (typeof W.ChatRoomSendLocal === "function" && W.CurrentScreen === "ChatRoom") {
+        W.ChatRoomSendLocal(text, duration);
+        return true;
+      }
+    } catch {}
+    showToast(text.split(/\n+/)[0]);
+    return false;
+  }
+
+  function normalizeNekoHelpSection(section) {
+    const raw = String(section || "").trim();
+    const key = raw.toLowerCase();
+    const aliases = {
+      "": "main",
+      help: "main",
+      "\u5e2e\u52a9": "main",
+      rp: "rp",
+      "\u732b\u5a18rp": "rp",
+      action: "action",
+      "\u52a8\u4f5c": "action",
+      emoji: "emoji",
+      kaomoji: "emoji",
+      "\u989c\u6587\u5b57": "emoji",
+      mode: "mode",
+      "\u6a21\u5f0f": "mode",
+      theme: "theme",
+      "\u4e3b\u9898": "theme",
+      spark: "spark",
+      "\u7075\u611f": "spark",
+      "\u706b\u82b1": "spark",
+      suggest: "suggest",
+      suggestion: "suggest",
+      suggestions: "suggest",
+      reply: "suggest",
+      replies: "suggest",
+      voice: "voice",
+      sound: "voice",
+      "\u58f0\u97f3": "voice",
+      effect: "voice",
+      effects: "voice",
+      reactions: "reactions",
+      reaction: "reactions",
+      interaction: "reactions",
+      interactions: "reactions",
+      "\u4e92\u52a8": "reactions",
+      mood: "mood",
+      state: "mood",
+      "\u5fc3\u60c5": "mood",
+      systems: "systems",
+      system: "systems",
+      profile: "systems",
+      sensitivity: "systems",
+      relation: "systems",
+      status: "status",
+      "\u72b6\u6001": "status",
+    };
+    return aliases[key] || aliases[raw] || "main";
+  }
+
+  function getNekoLibraryStatusLines() {
+    cleanupNekoPeers();
+    const enabledActions = (actionLibrary.actions || []).filter((action) => action.enabled !== false);
+    const activeActions = getActiveActions();
+    const visibleKaomojiGroups = getVisibleKaomojiGroups();
+    const activeKaomojiItems = getActiveKaomojiItems();
+    const selectedTarget = getSelectedTarget();
+    const actionTargets = getActionTargets();
+    const playerActionState = detectPlayerActionCapability();
+    const cached = { actions: false, kaomoji: false };
+    try {
+      cached.actions = !!localStorage.getItem(actionLibraryCacheKey());
+      cached.kaomoji = !!localStorage.getItem(KAOMOJI_LIBRARY_CACHE_KEY);
+    } catch {
+      // Ignore storage read failures; status should still be usable.
+    }
+    return {
+      enabledActions,
+      activeActions,
+      visibleKaomojiGroups,
+      activeKaomojiItems,
+      selectedTarget,
+      actionTargets,
+      playerActionState,
+      cached,
+    };
+  }
+
+  function formatSelectedTargetStatus(target) {
+    if (!target) return t("common.none");
+    const number = target.MemberNumber ? "#" + target.MemberNumber : "";
+    return getCharacterName(target) + (number ? " " + number : "");
+  }
+
+  function formatActionCapabilityStatus(state) {
+    const posture = [];
+    if (state?.kneeling) posture.push(t("status.posture.kneeling"));
+    if (state?.lying) posture.push(t("status.posture.lying"));
+    if (state?.suspended) posture.push(t("status.posture.suspended"));
+    if (state?.restrained) posture.push(t("status.posture.restrained"));
+    if (state?.helpless) posture.push(t("status.posture.helpless"));
+    return t("status.capability", {
+      hands: t(state?.handsFree ? "status.capability.available" : "status.capability.limited"),
+      mouth: t(state?.mouthFree ? "status.capability.available" : "status.capability.limited"),
+      move: t(state?.canMove ? "status.capability.move" : "status.capability.limited"),
+      reach: t(state?.canReach ? "status.capability.move" : "status.capability.limited"),
+      posture: posture.length ? posture.join("/") : t("status.posture.normal"),
+    });
+  }
+
+  function getActionTargetModeLabel() {
+    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return t("settings.target.picker");
+    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return t("settings.target.self");
+    return t("settings.target.auto");
+  }
+
+  function isPlayerCharacter(character) {
+    return !!character && !!W.Player && character.MemberNumber === W.Player.MemberNumber;
+  }
+
+  function isRestraintAppearanceItem(item) {
+    const groupName = item?.Asset?.Group?.Name;
+    return typeof groupName === "string" && groupName.startsWith("Item");
+  }
+
+  function getPlayerRestraintItems() {
+    return (W.Player?.Appearance || []).filter(isRestraintAppearanceItem);
+  }
+
+  function refreshPlayerAppearance() {
+    if (!W.Player) return;
+    if (typeof W.CharacterRefresh === "function") W.CharacterRefresh(W.Player);
+    if (W.CurrentScreen === "ChatRoom" && typeof W.ChatRoomCharacterUpdate === "function") {
+      W.ChatRoomCharacterUpdate(W.Player);
+    }
+  }
+
+  function refreshPlayerItemGroup(groupName) {
+    if (!W.Player || !groupName) return;
+    if (W.CurrentScreen === "ChatRoom" && typeof W.ChatRoomCharacterItemUpdate === "function") {
+      W.ChatRoomCharacterItemUpdate(W.Player, groupName);
+      return;
+    }
+    refreshPlayerAppearance();
+  }
+
+  function setEscapeSkillModifier(amount, durationMs) {
+    if (!W.Player || typeof W.SkillSetModifier !== "function") return false;
+    for (const skill of ESCAPE_SKILL_NAMES) {
+      W.SkillSetModifier(W.Player, skill, amount, durationMs);
+    }
+    return true;
+  }
+
+  function unlockPlayerRestraints() {
+    if (!W.Player || typeof W.InventoryUnlock !== "function") return 0;
+    let unlocked = 0;
+    for (const item of getPlayerRestraintItems()) {
+      if (!item?.Asset?.AllowLock) continue;
+      if (!item?.Property?.LockedBy) continue;
+      try {
+        W.InventoryUnlock(W.Player, item);
+        unlocked += 1;
+      } catch {}
+    }
+    if (unlocked > 0) refreshPlayerAppearance();
+    return unlocked;
+  }
+
+  function lowerPlayerRestraintDifficulty(amount) {
+    if (!W.Player) return 0;
+    const value = Math.max(0, Math.min(99, Number(amount) || ESCAPE_DEFAULT_EASY_VALUE));
+    let changed = 0;
+    for (const item of getPlayerRestraintItems()) {
+      const currentDifficulty = Number.isFinite(Number(item?.Difficulty))
+        ? Number(item.Difficulty)
+        : Number.isFinite(Number(item?.Property?.Difficulty))
+          ? Number(item.Property.Difficulty)
+          : 99;
+      const nextDifficulty = Math.max(0, currentDifficulty - value);
+      if (Number(item?.Difficulty) !== nextDifficulty) {
+        item.Difficulty = nextDifficulty;
+        changed += 1;
+      }
+      if (item?.Property && typeof item.Property === "object") {
+        item.Property.Difficulty = nextDifficulty;
+      }
+    }
+    if (changed > 0) refreshPlayerAppearance();
+    return changed;
+  }
+
+  function leaveCurrentRoomNow() {
+    let left = false;
+    if (typeof W.ChatRoomLeave === "function") {
+      W.ChatRoomLeave();
+      left = true;
+    }
+    if (typeof W.CommonSetScreen === "function") {
+      W.CommonSetScreen("Online", "ChatSearch");
+      left = true;
+    }
+    return left;
+  }
+
+  function isEscapePickActive() {
+    return escapePickExpiresAt > Date.now();
+  }
+
+  function clearEscapePickMode(message = "") {
+    escapePickExpiresAt = 0;
+    clearTimeout(escapePickTimer);
+    escapePickTimer = 0;
+    if (message) showToast(message);
+  }
+
+  function armEscapePickMode() {
+    clearEscapePickMode();
+    escapePickExpiresAt = Date.now() + ESCAPE_PICK_WINDOW_MS;
+    escapePickTimer = setTimeout(() => {
+      clearEscapePickMode(t("escape.toast.pickTimeout"));
+    }, ESCAPE_PICK_WINDOW_MS + 80);
+    showToast(t("escape.toast.pickArmed"));
+  }
+
+  function tryConsumeEscapePick() {
+    if (!isEscapePickActive()) return false;
+    const currentCharacter = W.CurrentCharacter;
+    if (!isPlayerCharacter(currentCharacter)) return false;
+    const groupName = currentCharacter?.FocusGroup?.Name || W.Player?.FocusGroup?.Name || W.DialogFocusItem?.Asset?.Group?.Name;
+    if (!groupName || typeof W.InventoryGet !== "function" || typeof W.InventoryRemove !== "function") return false;
+    const item = W.InventoryGet(W.Player, groupName);
+    if (!item || !isRestraintAppearanceItem(item)) return false;
+    W.InventoryRemove(W.Player, groupName);
+    refreshPlayerItemGroup(groupName);
+    if (typeof W.DialogLeave === "function") {
+      try {
+        W.DialogLeave();
+      } catch {}
+    }
+    clearEscapePickMode();
+    showToast(t("escape.toast.pickRemoved", { group: groupName }));
+    return true;
+  }
+
+  function getEscapeStatusLines() {
+    return tLines("escape.statusLines", {
+      goddess: t(escapeGoddessMode ? "common.on" : "common.off"),
+      pick: t(isEscapePickActive() ? "common.armed" : "common.idle"),
+    });
+  }
+
+  function getEscapeHelpLines() {
+    return tLines("escape.helpLines");
+  }
+
+  function handleEscapeSubcommand(parts) {
+    const action = String(parts?.[0] || "status").toLowerCase();
+    if (action === "release" || action === "unlock") {
+      const unlocked = unlockPlayerRestraints();
+      showToast(t(unlocked > 0 ? "escape.toast.unlocked" : "escape.toast.noLocked", { count: unlocked }));
+      return true;
+    }
+    if (action === "boost") {
+      if (!setEscapeSkillModifier(5, 3600000)) {
+        showToast(t("escape.toast.boostUnavailable"));
+        return true;
+      }
+      showToast(t("escape.toast.boostActive"));
+      return true;
+    }
+    if (action === "leave") {
+      if (!leaveCurrentRoomNow()) {
+        showToast(t("escape.toast.leaveUnavailable"));
+        return true;
+      }
+      return true;
+    }
+    if (action === "goddess") {
+      const mode = String(parts?.[1] || "status").toLowerCase();
+      if (mode === "on") {
+        escapeGoddessMode = true;
+        unlockPlayerRestraints();
+        lowerPlayerRestraintDifficulty(99);
+        if (!escapeGoddessBoostGranted) {
+          escapeGoddessBoostGranted = setEscapeSkillModifier(10, 3600000);
+        }
+        showToast(t("escape.toast.goddessEnabled"));
+        return true;
+      }
+      if (mode === "off") {
+        escapeGoddessMode = false;
+        showToast(t("escape.toast.goddessDisabled"));
+        return true;
+      }
+      sendNekoCommandNotice(getEscapeStatusLines());
+      return true;
+    }
+    if (action === "status") {
+      sendNekoCommandNotice(getEscapeStatusLines());
+      return true;
+    }
+    sendNekoCommandNotice(getEscapeHelpLines());
+    return true;
+  }
+
+  function handleEasySubcommand(parts) {
+    const amount = Math.max(0, Math.min(99, Number(parts?.[0]) || ESCAPE_DEFAULT_EASY_VALUE));
+    const changed = lowerPlayerRestraintDifficulty(amount);
+    showToast(t(changed > 0 ? "escape.toast.easyChanged" : "escape.toast.easyNone", { count: changed, amount }));
+    return true;
+  }
+
+  function handlePickSubcommand() {
+    armEscapePickMode();
+    return true;
+  }
+
+  function getNekoSystemLines() {
+    const systems = summarizeNekoSystems();
+    const sensitivity = systems.sensitivity || {};
+    const relationLines = systems.relations.length
+      ? systems.relations.slice(0, 5).map((item) => `#${item.memberNumber} ${item.tier} warmth=${Math.round(item.warmth)} trust=${Math.round(item.trust)}`)
+      : ["none"];
+    return tLines("dev.system.lines", {
+      ear: sensitivity.ear || 0,
+      tail: sensitivity.tail || 0,
+      nape: sensitivity.nape || 0,
+      chin: sensitivity.chin || 0,
+      belly: sensitivity.belly || 0,
+      mood: systems.mood.current || "default",
+      source: systems.mood.source || t("common.none"),
+      seconds: Math.max(0, Math.ceil((Number(systems.mood.until || 0) - Date.now()) / 1000)),
+      events: systems.counters.events,
+      reactions: systems.counters.reactions,
+      voice: systems.counters.voice,
+      relations: relationLines.join(" | "),
+    });
+  }
+
+  function getBugRpStatusLines() {
+    const tone = currentRpTone();
+    return tLines("bug.rp.status", {
+      enabled: t(bugRp.enabled ? "common.on" : "common.off"),
+      tone: tone.label,
+      locale: t(`settings.contentLocale.${config.contentLocale}`),
+      library: config.contentLocale === "zh-CN" && rpLibrary?.version ? rpLibrary.version : t("bug.rp.builtin"),
+      tones: rpToneIds().join(" / "),
+    });
+  }
+
+  function handleBugRpCommand(parts) {
+    const raw = String(parts?.[0] || "status").trim();
+    const action = raw.toLowerCase();
+    if (["on", "enable", "open", "开", "开启"].includes(action)) {
+      bugRp.enabled = true;
+      saveBugRpConfig();
+      showToast(t("bug.rp.enabled", { tone: currentRpTone().label }));
+      return true;
+    }
+    if (["off", "disable", "close", "关", "关闭"].includes(action)) {
+      bugRp.enabled = false;
+      saveBugRpConfig();
+      showToast(t("bug.rp.disabled"));
+      return true;
+    }
+    if (["status", "状态"].includes(action)) {
+      sendNekoCommandNotice(getBugRpStatusLines());
+      return true;
+    }
+    const aliases = {
+      "软萌": "soft",
+      "古风": "classic",
+      "傲娇": "tsundere",
+      "礼貌": "polite",
+      "简洁": "simple",
+    };
+    const toneId = aliases[raw] || action;
+    if (!rpToneIds().includes(toneId)) {
+      sendNekoCommandNotice(tLines("bug.rp.unknown", { tone: raw, tones: rpToneIds().join(" / ") }));
+      return true;
+    }
+    bugRp.enabled = true;
+    bugRp.tonePreset = toneId;
+    saveBugRpConfig();
+    showToast(t("bug.rp.changed", { tone: currentRpTone().label }));
+    return true;
+  }
+
+  function getLegacyNekoStatusLines() {
+    const speechState = detectPlayerGagState();
+    const gagSuffix = speechState.gagged ? " (Lv." + speechState.gagLevel + ")" : "";
+    return [
+      "[\u732b\u5a18\u72b6\u6001] Bondage Club Neko Chat Enhancer v" + VERSION + " (\u6d4b\u8bd5\u7248)",
+      "\u732b\u5a18\u6a21\u5f0f\uff1a" + (config.enabled ? "\u5f00\u542f" : "\u5173\u95ed"),
+      "\u53d1\u9001\u8f6c\u6362\uff1a" + (config.convertOutgoing ? "\u5f00" : "\u5173") + " | \u663e\u793a\u8f6c\u6362\uff1a" + (config.convertDisplayed ? "\u5f00" : "\u5173"),
+      "\u5835\u5634\u8bf4\u8bdd\uff1a" + getSpeechModeLabel(speechState) + gagSuffix,
+      "\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme),
+      "\u52a8\u4f5c\u76ee\u6807\uff1a" + getActionTargetModeLabel(),
+      "\u7075\u611f\u8bb0\u5fc6\uff1a" + sceneMemory.length + "/" + NEKO_SCENE_MEMORY_LIMIT + " | \u7075\u611f\u5305\uff1a" + NEKO_SCENE_SPARK_BLUEPRINTS.length + " | \u4e92\u52a8\u529f\u80fd\uff1a" + NEKO_INTERACTION_FEATURES.length,
+      "Reply suggestions: " + (config.replySuggestionsEnabled ? "ON" : "OFF") + " | Scene spark: " + (config.sceneSparkEnabled ? "ON" : "OFF"),
+      "\u732b\u5a18\u72b6\u6001\uff1a" + currentNekoFeatureMood() + " | /neko mood \u9ad8\u5174 | /neko reactions",
+      "Neko systems\uff1aevents " + nekoSystemState.counters.events + " | relations " + Object.keys(nekoSystemState.relations).length + " | /neko systems",
+      "NekoVoice\uff1aqueue " + nekoVoiceQueue.length + "/" + NEKO_VOICE_QUEUE_LIMIT + " | /neko voice nyaa | [NekoVoice] purr",
+      "\u547d\u4ee4\u6ce8\u518c\uff1a" + (nekoCommandsRegistered ? "\u5df2\u6ce8\u518c (" + (nekoCommandRegistrationSource || "unknown") + ")" : "\u8f93\u5165\u62e6\u622a\u515c\u5e95"),
+      "\u732b\u732b\u83dc\u5355\uff1a" + (config.menuCollapsed ? "\u5df2\u6536\u8d77" : "\u5df2\u5c55\u5f00") + " | \u5feb\u6377\u52a8\u4f5c\uff1a" + (config.quickWheel ? "\u5f00" : "\u5173"),
+    ];
+  }
+
+  function getLegacyNekoHelpLines(section = "main") {
+    switch (normalizeNekoHelpSection(section)) {
+      case "rp":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / rp]",
+          "\u8fd9\u4e00\u7c7b\u7528\u4e8e\u732b\u5a18 RP \u8bed\u6c14\u548c\u8f93\u51fa\u98ce\u683c\u3002",
+          "Bug \u7248\u53ef\u7528\uff1a/neko rp \u5f00 | \u5173 | \u72b6\u6001 | \u8f6f\u840c | \u53e4\u98ce | \u50b2\u5a07 | \u793c\u8c8c | \u7b80\u6d01",
+          "\u5835\u5634\u72b6\u6001\u4f1a\u5728 RP \u8f6c\u6362\u4e4b\u540e\u518d\u505a\u538b\u5236\uff0c\u4fdd\u7559\u4eba\u8bbe\u5473\u9053\u3002",
+        ];
+      case "action":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / action]",
+          "\u53f3\u4e0b\u89d2\u52a8\u4f5c\u732b\u732b\u53ef\u5feb\u901f\u53d1\u9001\u62b1\u62b1\u3001\u6478\u5934\u3001\u5582\u98df\u3001\u8d34\u8d34\u3001\u4eb2\u4eb2\u3002",
+          "\u5f53\u524d\u76ee\u6807\u6a21\u5f0f\uff1a" + getActionTargetModeLabel(),
+          "\u5de6\u952e\u4f18\u5148\u5bf9\u5f53\u524d\u9009\u4e2d\u76ee\u6807\u751f\u6548\uff0c\u83dc\u5355\u5c55\u5f00\u540e\u53ef\u5feb\u6377\u4f7f\u7528\u3002",
+        ];
+      case "emoji":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / emoji]",
+          "\u989c\u6587\u5b57\u732b\u732b\u53ef\u70b9\u51fb\u63d2\u5165\uff0c\u957f\u6309\u6253\u5f00\u989c\u6587\u5b57\u9009\u62e9\u5668\u3002",
+          "\u989c\u6587\u5b57\u5e93\u4f1a\u8fdc\u7a0b\u52a0\u8f7d\uff0c\u5206\u7c7b\u66f4\u65b0\u540e\u5237\u65b0\u5373\u53ef\u751f\u6548\u3002",
+        ];
+      case "mode":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / mode]",
+          "\u4e3b\u732b\u732b\u957f\u6309 10 \u79d2\u53ef\u5207\u6362\u732b\u5a18\u6a21\u5f0f\u3002",
+          "\u5835\u5634\u8bf4\u8bdd\u8054\u52a8\u4f1a\u6839\u636e\u5f53\u524d\u5835\u5634\u7a0b\u5ea6\u81ea\u52a8\u538b\u7f29\u53e5\u5b50\u3002",
+          "\u53d1\u9001\u8f6c\u6362\u3001\u63a5\u6536\u663e\u793a\u8f6c\u6362\u3001\u804a\u5929\u5ba4\u7f8e\u5316\u90fd\u53ef\u5728\u732b\u5a18\u8bbe\u7f6e\u9875\u8c03\u6574\u3002",
+        ];
+      case "theme":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / theme]",
+          "\u5f53\u524d\u4e3b\u9898\uff1a" + (currentTheme().label || config.theme),
+          "\u53ef\u7528\u4e3b\u9898\uff1a\u6a31\u7c89 / \u8584\u8377 / \u5929\u7a7a / \u5976\u6cb9 / \u858b\u8863\u8349 / \u767d\u8336\u3002",
+          "\u4e3b\u9898\u53ef\u5728\u6269\u5c55\u7ec4\u4ef6\u8bbe\u7f6e\u9875\u5185\u5207\u6362\u3002",
+        ];
+      case "spark":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / spark]",
+          "Switch: /neko spark on | off | status. Default: off.",
+          "\u4f7f\u7528 /neko spark \u53ef\u6839\u636e\u6700\u8fd1\u804a\u5929\u3001\u9009\u4e2d\u76ee\u6807\u548c\u89d2\u8272\u72b6\u6001\u751f\u6210 RP \u7075\u611f\u77ed\u53e5\u3002\u5f53\u524d\u529f\u80fd\u5305\uff1a" + NEKO_SCENE_SPARK_BLUEPRINTS.length,
+          "\u4f7f\u7528 /neko spark <\u5173\u952e\u8bcd> \u53ef\u641c\u7d22\u529f\u80fd\u5305\uff0c\u4f8b\u5982 link / tail / aftercare / \u5973\u4ec6\u3002",
+          "\u7075\u611f\u4f1a\u653e\u5230\u53f3\u4e0b\u89d2\u5feb\u6377\u56de\u5e94\u91cc\uff0c\u70b9\u51fb\u5373\u53ef\u586b\u5165\u804a\u5929\u6846\u3002",
+        ];
+      case "suggest":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / suggest]",
+          "Reply suggestions are disabled by default.",
+          "Use /neko suggest on to enable automatic reply suggestions.",
+          "Use /neko suggest off to disable and hide the suggestion panel.",
+        ];
+      case "voice":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / voice]",
+          "/neko voice <text>\uff1a\u672c\u5730\u89e6\u53d1 NekoVoice\uff0c\u4e0d\u628a\u547d\u4ee4\u53d1\u5230\u804a\u5929\u3002",
+          "[NekoVoice] <text>\uff1a\u5728\u804a\u5929\u5185\u89e6\u53d1\uff0c\u540c\u4e00\u6761\u6d88\u606f\u4f1a\u505a\u77ed\u65f6\u53bb\u91cd\u3002",
+          "\u6548\u679c\uff1a*mew* / *purr* / *nyaa* \u89c6\u89c9\u58f0\u6548\u3001\u7c89\u8272\u95ea\u5149\u3001\u58f0\u6ce2\u5708\u3001\u5f39\u5e55\u53e3\u7656\u548c\u6c14\u606f\u7c92\u5b50\u3002",
+          "\u961f\u5217\uff1a\u8fde\u7eed\u89e6\u53d1\u65f6\u6392\u961f\u64ad\u653e\uff0c\u6700\u591a " + NEKO_VOICE_QUEUE_LIMIT + " \u4e2a\uff1b\u5f53\u524d " + nekoVoiceQueue.length + "\u3002",
+          "\u8868\u60c5\uff1a\u4f1a\u4e34\u65f6\u5207\u5230\u5bb3\u7f9e/\u5f00\u5fc3/\u60ca\u8bb6/\u56f0\u56f0/\u70b8\u6bdb\u7c7b\u578b\uff0c\u7ed3\u675f\u540e\u5c1d\u8bd5\u6062\u590d\u539f\u8868\u60c5\u3002",
+        ];
+      case "reactions":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / reactions]",
+          "/neko reactions\uff1a\u67e5\u770b\u5df2\u52a0\u5165\u7684\u4e92\u52a8\u529f\u80fd\u7c7b\u76ee\uff0c\u5f53\u524d " + NEKO_INTERACTION_FEATURES.length + " \u4e2a\u3002",
+          "/neko reactions <keyword>\uff1a\u641c\u7d22\u89e6\u53d1\u7c7b\u76ee\uff0c\u4f8b\u5982 ear / tail / belly / purr / shy\u3002",
+          "\u654f\u611f\u90e8\u4f4d\uff1a\u8033\u6735\u3001\u5c3e\u5df4\u3001\u540e\u9888\u3001\u4e0b\u5df4\u3001\u809a\u5b50\u4f1a\u89e6\u53d1\u4e0d\u540c\u72b6\u6001\u548c\u7c92\u5b50\u3002",
+          "\u89d2\u8272\u53cd\u5e94\uff1a\u81ea\u5df1\u6216\u5bf9\u65b9\u88ab\u6478\u5934\u3001\u62b1\u62b1\u3001\u8d34\u8d34\u3001\u79f0\u8d5e\u7b49\u4f1a\u51fa\u73b0\u7231\u5fc3\u3001\u732b\u722a\u3001\u95ea\u5149\u7b49\u6c14\u6c1b\u3002",
+        ];
+      case "mood":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / mood]",
+          "/neko mood\uff1a\u67e5\u770b\u5f53\u524d\u732b\u5a18\u72b6\u6001\u3002",
+          "/neko mood \u9ad8\u5174 | \u4f24\u5fc3 | \u9ad8\u51b7 | \u9ecf\u4eba | \u56f0\u56f0 | \u5973\u4ec6 | \u516c\u4e3b | \u62a4\u58eb\uff1a\u624b\u52a8\u5207\u6362\u72b6\u6001\u3002",
+          "\u72b6\u6001\u4f1a\u5f71\u54cd\u53d1\u51fa\u53bb\u7684\u8bed\u6c14\u5c3e\u5df4\uff0c\u4e5f\u4f1a\u88ab\u654f\u611f\u90e8\u4f4d\u548c NekoVoice \u89e6\u53d1\u4e34\u65f6\u6539\u53d8\u3002",
+          "\u4e0d\u60f3\u624b\u52a8\u9009\u65f6\uff0c\u63d2\u4ef6\u4f1a\u6839\u636e\u804a\u5929\u548c\u4e92\u52a8\u81ea\u52a8\u8fdb\u5165\u5bb3\u7f9e\u3001\u5f00\u5fc3\u3001\u56f0\u56f0\u3001\u70b8\u6bdb\u7b49\u72b6\u6001\u3002",
+        ];
+      case "systems":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / systems]",
+          "/neko systems \u6216 /neko profile\uff1a\u67e5\u770b\u732b\u5a18\u654f\u611f\u5ea6\u6863\u6848\u3001\u5173\u7cfb\u6e29\u5ea6\u8ba1\u3001\u6301\u7eed\u72b6\u6001\u548c\u4e8b\u4ef6\u8ba1\u6570\u3002",
+          "\u654f\u611f\u5ea6\uff1aear / tail / nape / chin / belly \u4f1a\u968f\u4e92\u52a8\u7d2f\u79ef\uff0c\u5f71\u54cd\u7c92\u5b50\u548c NekoVoice \u5f3a\u5ea6\u3002",
+          "\u5173\u7cfb\u6e29\u5ea6\uff1a\u5bf9\u65b9\u548c\u4f60\u4e92\u52a8\u8d8a\u591a\uff0cwarmth/trust/familiar \u8d8a\u9ad8\uff0c\u5bf9\u65b9\u53cd\u5e94\u4f1a\u66f4\u5f3a\u3002",
+          "\u4e8b\u4ef6\u603b\u7ebf\uff1aBCNekoEnhancer.events.history() \u53ef\u67e5\u770b\u6700\u8fd1\u7684 feature / voice / mood / relationship \u4e8b\u4ef6\u3002",
+        ];
+      case "status":
+        return [
+          "[\u732b\u5a18\u5e2e\u52a9 / status]",
+          "\u4f7f\u7528 /neko status \u53ef\u67e5\u770b\u5f53\u524d\u63d2\u4ef6\u72b6\u6001\u3001\u5835\u5634\u8bf4\u8bdd\u6863\u4f4d\u3001\u4e3b\u9898\u3001\u52a8\u4f5c\u76ee\u6807\u3001\u4e92\u52a8\u529f\u80fd\u6570\u548c NekoVoice \u961f\u5217\u3002",
+        ];
+      default:
+        return [
+          "[\u732b\u5a18\u547d\u4ee4\u5e2e\u52a9] /neko help <\u5206\u7c7b>",
+          "\u6838\u5fc3\uff1avoice / reactions / mood / systems / spark / suggest / status",
+          "\u57fa\u7840\uff1arp / action / emoji / mode / theme",
+          "\u5feb\u6377\u4f8b\u5b50\uff1a/neko help systems | /neko help reactions | /neko voice nyaa | /neko mood \u9ad8\u5174",
+        ];
+    }
+  }
+
+  function getNekoStatusLines() {
+    const speechState = detectPlayerGagState();
+    const gagSuffix = speechState.gagged ? ` (Lv.${speechState.gagLevel})` : "";
+    const status = getNekoLibraryStatusLines();
+    const pickLeft = isEscapePickActive()
+      ? `${Math.max(0, Math.ceil((escapePickExpiresAt - Date.now()) / 1000))}s`
+      : t("status.pick.inactive");
+    return tLines("status.lines", {
+      version: VERSION,
+      channel: t("channel.bug"),
+      enabled: t(config.enabled ? "common.enabled" : "common.disabled"),
+      outgoing: t(config.convertOutgoing ? "common.on" : "common.off"),
+      displayed: t(config.convertDisplayed ? "common.on" : "common.off"),
+      decorate: t(config.decorateChat ? "common.on" : "common.off"),
+      rain: t(config.rainOnSend ? "common.on" : "common.off"),
+      notify: t(config.notifyIncoming ? "common.on" : "common.off"),
+      speech: getSpeechModeLabel(speechState),
+      gagSuffix,
+      theme: t(`theme.${config.theme}`),
+      targetMode: getActionTargetModeLabel(),
+      selectedTarget: formatSelectedTargetStatus(status.selectedTarget),
+      actionTargetCount: status.actionTargets.length,
+      activeActions: status.activeActions.length,
+      enabledActions: status.enabledActions.length,
+      filteredActions: Math.max(0, status.enabledActions.length - status.activeActions.length),
+      actionCache: t(status.cached.actions ? "common.yes" : "common.no"),
+      actionVersion: actionLibrary.version || "unknown",
+      capability: formatActionCapabilityStatus(status.playerActionState),
+      kaomojiItems: status.activeKaomojiItems.length,
+      visibleGroups: status.visibleKaomojiGroups.length,
+      totalGroups: (kaomojiLibrary.groups || []).length,
+      kaomojiCache: t(status.cached.kaomoji ? "common.yes" : "common.no"),
+      peerCount: nekoPeers.size,
+      sdk: t(bcModApi ? "common.registered" : "common.unregistered"),
+      hooks: t(patched ? "common.registered" : "common.unregistered"),
+      commands: nekoCommandsRegistered
+        ? t("status.command.registered", { source: nekoCommandRegistrationSource || "unknown" })
+        : t("status.command.fallback"),
+      pick: pickLeft,
+      goddess: t(escapeGoddessMode ? "common.on" : "common.off"),
+      menu: t(config.menuCollapsed ? "common.collapsed" : "common.expanded"),
+      quickWheel: t(config.quickWheel ? "common.on" : "common.off"),
+    }).concat(tLines("dev.status.experimental", {
+      memory: sceneMemory.length,
+      memoryMax: NEKO_SCENE_MEMORY_LIMIT,
+      packs: NEKO_SCENE_SPARK_BLUEPRINTS.length,
+      features: NEKO_INTERACTION_FEATURES.length,
+      suggestions: t(config.replySuggestionsEnabled ? "common.on" : "common.off"),
+      spark: t(config.sceneSparkEnabled ? "common.on" : "common.off"),
+      mood: currentNekoFeatureMood(),
+      events: nekoSystemState.counters.events,
+      relations: Object.keys(nekoSystemState.relations).length,
+      voiceQueue: nekoVoiceQueue.length,
+      voiceMax: NEKO_VOICE_QUEUE_LIMIT,
+    })).concat(tLines("bug.status.rp", {
+      enabled: t(bugRp.enabled ? "common.on" : "common.off"),
+      tone: currentRpTone().label,
+      locale: t(`settings.contentLocale.${config.contentLocale}`),
+      library: config.contentLocale === "zh-CN" && rpLibrary?.version ? rpLibrary.version : t("bug.rp.builtin"),
+    }));
+  }
+
+  function getNekoHelpLines(section = "main") {
+    const group = normalizeNekoHelpSection(section);
+    if (group === "escape") return getEscapeHelpLines();
+    if (group === "action") {
+      return tLines("help.action", { targetMode: getActionTargetModeLabel() });
+    }
+    if (group === "theme") {
+      const themes = THEME_ORDER.map((id) => t(`theme.${id}`)).join(" / ");
+      return tLines("help.theme", { theme: t(`theme.${config.theme}`), themes });
+    }
+    if (group === "rp") return tLines("bug.rp.help", { tones: rpToneIds().join(" / ") });
+    const key = ["rp", "emoji", "mode", "spark", "suggest", "voice", "reactions", "mood", "systems", "status"]
+      .includes(group) ? `help.${group}` : "help.main";
+    return tLines(key);
+  }
+
+  function isNekoCommandText(text) {
+    return typeof text === "string" && /^\/(?:neko|noke|bug)(?:\s|$)/i.test(text.trim());
+  }
+
+  function clearNekoCommandInput(text) {
+    const input = getChatInput();
+    if (input && input.value && input.value.trim() === String(text || "").trim()) {
+      input.value = "";
+      input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    }
+  }
+
+  function handleNekoCommand(text) {
+    if (!isNekoCommandText(text)) return false;
+    const parts = String(text || "").trim().split(/\s+/).filter(Boolean);
+    const subcommand = String(parts[1] || "").toLowerCase();
+    if (subcommand === "escape") return handleEscapeSubcommand(parts.slice(2));
+    if (subcommand === "easy") return handleEasySubcommand(parts.slice(2));
+    if (subcommand === "pick") return handlePickSubcommand();
+    if (subcommand === "rp" || subcommand === "persona" || subcommand === "人设") {
+      return handleBugRpCommand(parts.slice(2));
+    }
+    if (subcommand === "systems" || subcommand === "system" || subcommand === "profile" || subcommand === "sensitivity" || subcommand === "relation") {
+      sendNekoCommandNotice(getNekoSystemLines());
+      return true;
+    }
+    if (subcommand === "voice" || subcommand === "sound" || subcommand === "\u58f0\u97f3") {
+      triggerNekoVoiceEffect(parts.slice(2).join(" ") || "nyaa", {
+        memberNumber: W.Player?.MemberNumber,
+        mood: currentNekoFeatureMood(),
+        sound: "nyaa",
+      });
+      showToast(t("dev.voice.queued"));
+      return true;
+    }
+    if (subcommand === "suggest" || subcommand === "suggestions" || subcommand === "reply" || subcommand === "replies") {
+      return handleNekoToggleCommand("replySuggestionsEnabled", parts.slice(2), t("dev.toggle.replySuggestions"));
+    }
+    if (subcommand === "spark" || subcommand === "灵感" || subcommand === "火花") {
+      const sparkAction = String(parts[2] || "").toLowerCase();
+      if (!sparkAction || ["on", "off", "open", "close", "enable", "disable", "status", "开启", "开", "关闭", "关"].includes(sparkAction)) {
+        return handleNekoToggleCommand("sceneSparkEnabled", parts.slice(2), t("dev.toggle.sceneSpark"));
+      }
+      return showSceneSparkSuggestions({ query: parts.slice(2).join(" ") });
+    }
+    if (subcommand === "features" || subcommand === "feature" || subcommand === "功能") {
+      sendNekoCommandNotice(getSceneFeatureLines(parts.slice(2).join(" ")));
+      return true;
+    }
+    if (subcommand === "reactions" || subcommand === "reaction" || subcommand === "互动") {
+      sendNekoCommandNotice(getNekoInteractionFeatureLines(parts.slice(2).join(" ")));
+      return true;
+    }
+    if (subcommand === "mood" || subcommand === "state" || subcommand === "状态") {
+      return handleNekoMoodCommand(parts.slice(2));
+    }
+    const group = normalizeNekoHelpSection(parts[1] || "help");
+    if (group === "main") {
+      sendNekoCommandNotice(getNekoHelpLines(parts[2] || "main"));
+      return true;
+    }
+    if (group === "status") {
+      sendNekoCommandNotice(getNekoStatusLines());
+      return true;
+    }
+    sendNekoCommandNotice(getNekoHelpLines(group));
+    return true;
+  }
+
+  function runNekoCommand(text) {
+    if (!handleNekoCommand(text)) return false;
+    clearNekoCommandInput(text);
+    return true;
+  }
+
+  function getNekoCommandDefinitions() {
+    const createAction = (prefix) => (argumentsString = "", message = "", args = []) => {
+      const argv = Array.isArray(args) ? args : String(argumentsString || "").trim().split(/\s+/).filter(Boolean);
+      runNekoCommand(`/${prefix} ${argv.join(" ")}`.trim());
+    };
+    return [
+      {
+        Tag: "neko",
+        Description: t("command.description"),
+        Action: createAction("neko"),
+      },
+      {
+        Tag: "bug",
+        Description: t("command.description"),
+        Action: createAction("bug"),
+      },
+      {
+        Tag: "noke",
+        Description: t("command.description"),
+        Action: createAction("noke"),
+      },
+    ];
+  }
+
+  function markNekoCommandsRegistered(source) {
+    nekoCommandsRegistered = true;
+    nekoCommandRegistrationSource = source;
+    console.log(`[BC 猫娘增强] /neko 命令已注册喵~ (${source})`);
+    return true;
+  }
+
+  function tryRegisterCommandsWithHost(host, hostName, commands) {
+    if (!host || typeof host !== "object") return false;
+    if (typeof host.registerCommand === "function") {
+      for (const command of commands) host.registerCommand(command);
+      return markNekoCommandsRegistered(`${hostName}.registerCommand`);
+    }
+    if (typeof host.addCommand === "function") {
+      for (const command of commands) host.addCommand(command);
+      return markNekoCommandsRegistered(`${hostName}.addCommand`);
+    }
+    if (typeof host.registerCommands === "function") {
+      host.registerCommands(commands);
+      return markNekoCommandsRegistered(`${hostName}.registerCommands`);
+    }
+    if (typeof host.addCommands === "function") {
+      host.addCommands(commands);
+      return markNekoCommandsRegistered(`${hostName}.addCommands`);
+    }
+    return false;
+  }
+
+  function tryRegisterExternalNekoCommands(commands) {
+    const hosts = [
+      ["BCX", W.BCX],
+      ["BCX.commands", W.BCX?.commands],
+      ["BCX.Command", W.BCX?.Command],
+      ["bcx", W.bcx],
+      ["bcx.commands", W.bcx?.commands],
+      ["bcx.Command", W.bcx?.Command],
+      ["EBCH", W.EBCH],
+      ["EBCH.commands", W.EBCH?.commands],
+      ["EBCH.Command", W.EBCH?.Command],
+      ["ebch", W.ebch],
+      ["ebch.commands", W.ebch?.commands],
+      ["ebch.Command", W.ebch?.Command],
+    ];
+    for (const [hostName, host] of hosts) {
+      try {
+        if (tryRegisterCommandsWithHost(host, hostName, commands)) return true;
+      } catch (error) {
+        console.warn(`[BC 猫娘增强] ${hostName} 命令注册失败，继续尝试其它入口:`, error);
+      }
+    }
+    return false;
+  }
+
+  function registerNekoCommands() {
+    if (nekoCommandsRegistered) return true;
+    const commands = getNekoCommandDefinitions();
+    try {
+      if (tryRegisterExternalNekoCommands(commands)) return true;
+      if (typeof W.CommandCombine !== "function") return false;
+      W.CommandCombine(commands);
+      return markNekoCommandsRegistered("CommandCombine");
+    } catch (error) {
+      console.warn("[BC 猫娘增强] /neko 命令注册失败，保留输入拦截兜底:", error);
+      return false;
+    }
+  }
+
   function insertKaomoji(face) {
     const input = getChatInput();
     if (!input) {
-      showToast("还没找到聊天框，进入聊天室后再点喵~");
+      showToast(t("toast.chatMissing"));
       return;
     }
 
@@ -3872,7 +4244,8 @@
       const pos = start + insert.length;
       input.setSelectionRange(pos, pos);
     }
-    showToast("猫猫颜文字已插入喵~");
+    recordKaomojiUsage(face);
+    showToast(t("toast.kaomojiInserted"));
   }
 
   function insertFace() {
@@ -3886,13 +4259,13 @@
     const toggleButton = button || document.getElementById("bcn-toggle");
     if (toggleButton) {
       toggleButton.textContent = config.enabled ? "😺" : "😿";
-      toggleButton.title = config.enabled ? "关闭猫娘模式" : "开启猫娘模式";
+      toggleButton.title = t(config.enabled ? "ui.mode.disable" : "ui.mode.enable");
     }
-    showToast(config.enabled ? "猫娘模式开启喵~" : "猫娘模式已关闭");
+    showToast(t(config.enabled ? "toast.modeEnabled" : "toast.modeDisabled"));
   }
 
   function getCharacterName(character) {
-    return W.CharacterNickname?.(character) || character?.Nickname || character?.Name || "对方";
+    return W.CharacterNickname?.(character) || character?.Nickname || character?.Name || contentFallback().unknownCharacter;
   }
 
   function getSelectedTarget() {
@@ -4059,15 +4432,17 @@
       return {
         line: pickRandomLine(
           variant.lines,
-          hasTarget ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~")) : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~")),
+          hasTarget
+            ? pickRandomLine(action.target, pickRandomLine(action.self, contentFallback().actionTargetFallback))
+            : pickRandomLine(action.self, pickRandomLine(action.target, contentFallback().actionSelfFallback)),
         ),
         variantKey: variant.key,
       };
     }
     return {
       line: hasTarget
-        ? pickRandomLine(action.target, pickRandomLine(action.self, "{target}靠近了一点喵~"))
-        : pickRandomLine(action.self, pickRandomLine(action.target, "轻轻晃了晃尾巴喵~")),
+        ? pickRandomLine(action.target, pickRandomLine(action.self, contentFallback().actionTargetFallback))
+        : pickRandomLine(action.self, pickRandomLine(action.target, contentFallback().actionSelfFallback)),
       variantKey: "",
     };
   }
@@ -4092,166 +4467,454 @@
     return cleanLines[0];
   }
 
-  function actionActor() {
-    const preset = bugRp.tonePreset;
-    if (preset === "classic") return "咱喵";
-    if (preset === "tsundere") return "本猫";
-    if (preset === "polite") return "我";
-    if (preset === "simple") return "咱喵";
-    return "人家";
-  }
-
-  function actionKind(action) {
-    const value = `${action?.id || ""} ${action?.label || ""}`.toLowerCase();
-    if (/hug|抱/.test(value)) return "hug";
-    if (/pat|摸|头/.test(value)) return "pat";
-    if (/feed|喂|食/.test(value)) return "feed";
-    if (/cuddle|贴|蹭/.test(value)) return "cuddle";
-    if (/kiss|亲|吻/.test(value)) return "kiss";
-    return "default";
-  }
-
-  function actionVerb(action) {
-    const kind = actionKind(action);
-    if (kind === "hug") {
-      if (bugRp.tonePreset === "classic") return "轻拥";
-      if (bugRp.tonePreset === "tsundere") return "勉强抱住";
-      if (bugRp.tonePreset === "polite") return "轻轻抱住";
-      return "抱抱";
-    }
-    if (kind === "pat") {
-      if (bugRp.tonePreset === "classic") return "轻抚";
-      if (bugRp.tonePreset === "tsundere") return "装作随手摸摸";
-      if (bugRp.tonePreset === "polite") return "温柔摸摸";
-      return "摸摸头";
-    }
-    if (kind === "feed") {
-      if (bugRp.tonePreset === "classic") return "奉上一口点心予";
-      if (bugRp.tonePreset === "tsundere") return "勉强投喂";
-      if (bugRp.tonePreset === "polite") return "递上一口点心给";
-      return "投喂";
-    }
-    if (kind === "cuddle") {
-      if (bugRp.tonePreset === "classic") return "依偎";
-      if (bugRp.tonePreset === "tsundere") return "假装路过蹭蹭";
-      if (bugRp.tonePreset === "polite") return "轻轻贴近";
-      return "贴贴";
-    }
-    if (kind === "kiss") {
-      if (bugRp.tonePreset === "classic") return "轻吻";
-      if (bugRp.tonePreset === "tsundere") return "别扭地亲亲";
-      if (bugRp.tonePreset === "polite") return "轻轻亲亲";
-      return "亲亲";
-    }
-    return String(action?.label || "靠近");
-  }
-
-  function rpActionTemplate(action, target) {
-    const preset = bugRp.tonePreset;
-    const kind = actionKind(action);
-    const targeted = !!target;
-    const remoteAction = currentTone().actions?.[kind] || currentTone().actions?.default;
-    if (remoteAction) {
-      const remoteLine = targeted
-        ? pickRandomLine(remoteAction.target, pickRandomLine(remoteAction.self, ""))
-        : pickRandomLine(remoteAction.self, pickRandomLine(remoteAction.target, ""));
-      if (remoteLine) return /\{actor\}/.test(remoteLine) ? remoteLine : `{actor}${remoteLine}`;
-    }
-    const templates = {
-      soft: {
-        hug: ["{actor}软乎乎地抱住{target}蹭了蹭，尾巴开心地晃呀晃喵~", "{actor}抱住自己缩成暖暖一团，小声呼噜呼噜喵~"],
-        pat: ["{actor}踮起脚摸摸{target}的头，声音甜甜地夸了一句好乖喵~", "{actor}摸摸自己的头，把小烦恼一点点揉散喵~"],
-        feed: ["{actor}把小点心递到{target}嘴边，眼睛亮晶晶地等回应喵~", "{actor}啊呜吃下一口点心，幸福得耳朵都抖了抖喵~"],
-        cuddle: ["{actor}软软贴到{target}身边，像找到最暖的小窝喵~", "{actor}抱住自己的尾巴贴贴，偷偷给自己一点温暖喵~"],
-        kiss: ["{actor}轻轻亲了亲{target}，害羞得耳朵都热起来喵~", "{actor}把一个小亲亲藏进掌心，悄悄送给自己喵~"],
-        default: ["{actor}软乎乎地{verb}了{target}喵~", "{actor}软软地{verb}了自己一下喵~"],
-      },
-      classic: {
-        hug: ["{actor}轻移莲步，将{target}轻拥入怀，尾尖微晃，似是甚欢喵。", "{actor}垂眸轻笑，敛袖轻拥自己，心下甚安喵乎。"],
-        pat: ["{actor}抬手轻抚{target}发顶，眉眼含笑，温声道甚乖喵。", "{actor}悄然顺了顺自己的发顶，神色安然喵乎。"],
-        feed: ["{actor}奉上一口点心予{target}，眸光微亮，盼君尝之喵。", "{actor}慢慢尝下一口点心，尾尖轻卷，甚是满足喵乎。"],
-        cuddle: ["{actor}悄然依偎在{target}身侧，衣袖轻触，心意已明喵。", "{actor}倚着自己静坐片刻，像把暖意藏进怀中喵乎。"],
-        kiss: ["{actor}俯身轻吻{target}，旋即别过眼去，耳尖微红喵。", "{actor}轻吻指尖，将好运悄悄留给自己喵乎。"],
-        default: ["{actor}{verb}{target}，尾尖微晃，甚好喵。", "{actor}悄悄{verb}了自己一下，甚是安然喵。"],
-      },
-      tsundere: {
-        hug: ["{actor}别过脸勉强抱住{target}，才、才不是特意想靠近喵！", "{actor}哼了一声抱住自己，才不是需要安慰呢喵。"],
-        pat: ["{actor}装作随手摸摸{target}的头，哼，这只是普通奖励喵。", "{actor}给自己摸摸头，才不是在偷偷求夸喵。"],
-        feed: ["{actor}把点心递给{target}，哼，吃完可要记得夸本猫喵。", "{actor}咬了一口点心，才不是因为嘴馋才开心喵。"],
-        cuddle: ["{actor}假装路过蹭了蹭{target}，别误会，只是这里比较舒服喵。", "{actor}抱着自己贴贴，哼，自己也能照顾自己喵。"],
-        kiss: ["{actor}别扭地亲亲{target}，立刻转头说不许笑喵！", "{actor}给自己一个小亲亲奖励，才不是害羞喵。"],
-        default: ["{actor}装作漫不经心地{verb}了{target}，才不是特意的喵！", "{actor}勉强{verb}了自己一下，哼喵。"],
-      },
-      polite: {
-        hug: ["{actor}轻轻抱住{target}，希望这份温度能让对方安心一些喵。", "{actor}轻轻抱住自己，认真把心情整理好喵。"],
-        pat: ["{actor}温柔摸摸{target}的头，轻声说今天也辛苦了喵。", "{actor}给自己顺了顺毛，安静地放松下来喵。"],
-        feed: ["{actor}递上一口点心给{target}，语气温和地请对方尝尝喵。", "{actor}小口吃下点心，认真补充一点猫娘能量喵。"],
-        cuddle: ["{actor}轻轻贴近{target}，保持着温柔又舒服的距离喵。", "{actor}安静地靠着自己，给心情一点休息时间喵。"],
-        kiss: ["{actor}轻轻亲亲{target}，把祝福温柔地送过去喵。", "{actor}亲亲自己的指尖，愿今天也顺利喵。"],
-        default: ["{actor}温柔而克制地{verb}了{target}喵。", "{actor}安静地{verb}了自己一下喵。"],
-      },
-      simple: {
-        hug: ["{actor}抱了抱{target}喵。", "{actor}抱了抱自己喵。"],
-        pat: ["{actor}摸了摸{target}的头喵。", "{actor}摸了摸自己的头喵。"],
-        feed: ["{actor}给{target}递了点心喵。", "{actor}吃了一口点心喵。"],
-        cuddle: ["{actor}和{target}贴贴喵。", "{actor}和自己贴贴喵。"],
-        kiss: ["{actor}亲亲{target}喵。", "{actor}给自己一个亲亲喵。"],
-        default: ["{actor}{verb}了{target}喵。", "{actor}{verb}了自己喵。"],
-      },
-    };
-    const pack = templates[preset] || templates.soft;
-    const pair = pack[kind] || pack.default;
-    return targeted ? pair[0] : pair[1];
-  }
-
-  function formatRpActionText(action, target, fallbackLine) {
-    if (!bugRp.enabled) return fallbackLine;
-    const template = rpActionTemplate(action, target) || (target ? currentTone().actionTarget : currentTone().actionSelf);
-    if (!template) return rpActionLine(fallbackLine);
-    return template
-      .replace(/\{actor\}/g, actionActor())
-      .replace(/\{verb\}/g, actionVerb(action))
-      .replace(/\{target\}/g, target ? getCharacterName(target) : "自己");
-  }
-
   function formatActionText(action, target) {
-    const { line } = selectActionLine(action, target);
     const hasTarget = !!target;
-    const fallbackLine = line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : "身边的猫猫");
+    const state = target ? detectCharacterState(target) : detectPlayerActionCapability();
+    const variant = chooseActionVariant(action, state, !!target);
+    const pool = variant?.lines
+      || (target ? action?.target : action?.self)
+      || (target ? action?.self : action?.target)
+      || [];
+    const fallback = hasTarget ? contentFallback().actionTargetFallback : contentFallback().actionSelfFallback;
+    const line = pickHabitActionLine(pool, fallback);
+    const fallbackLine = line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : contentFallback().nearbyTarget);
     return formatRpActionText(action, target, fallbackLine);
   }
 
-  formatActionText = function(action, target) {
-    const hasTarget = !!target;
-    const state = hasTarget ? detectCharacterState(target) : detectPlayerActionCapability();
-    const variant = chooseActionVariant(action, state, hasTarget);
-    const pool = variant?.lines
-      || (hasTarget ? action?.target : action?.self)
-      || (hasTarget ? action?.self : action?.target)
-      || [];
-    const fallback = hasTarget ? "{target}闈犺繎浜嗕竴鐐瑰柕~" : "杞昏交鏅冧簡鏅冨熬宸村柕~";
-    const line = pickHabitActionLine(pool, fallback);
-    const fallbackLine = line.replace(/\{target\}/g, hasTarget ? getCharacterName(target) : "韬竟鐨勭尗鐚?");
-    return formatRpActionText(action, target, fallbackLine);
-  };
+  function loadComposerState() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(COMPOSER_STATE_KEY) || "{}");
+      return {
+        last: parsed?.last && typeof parsed.last === "object" ? parsed.last : null,
+        favorites: (Array.isArray(parsed?.favorites) ? parsed.favorites : []).slice(0, ACTION_COMPOSER_FAVORITE_LIMIT),
+        recentHashes: (Array.isArray(parsed?.recentHashes) ? parsed.recentHashes : [])
+          .map(String)
+          .slice(0, ACTION_COMPOSER_RECENT_LIMIT),
+      };
+    } catch {
+      return { last: null, favorites: [], recentHashes: [] };
+    }
+  }
+
+  function saveComposerState() {
+    try {
+      localStorage.setItem(COMPOSER_STATE_KEY, JSON.stringify(composerState));
+    } catch {
+      // Composer choices still work for this page when persistent storage is unavailable.
+    }
+  }
+
+  function composerComboKey(combo) {
+    return [combo?.action, combo?.mood, combo?.style, combo?.target, combo?.extra].map((value) => String(value || "")).join("|");
+  }
+
+  function simpleHash(value) {
+    let hash = 5381;
+    for (const char of String(value)) hash = ((hash << 5) + hash) ^ char.codePointAt(0);
+    return (hash >>> 0).toString(36);
+  }
+
+  function weightedPick(items) {
+    const candidates = (Array.isArray(items) ? items : []).filter((item) => item && Number(item.weight || 1) > 0);
+    if (!candidates.length) return null;
+    const total = candidates.reduce((sum, item) => sum + Number(item.weight || 1), 0);
+    let cursor = Math.random() * total;
+    for (const item of candidates) {
+      cursor -= Number(item.weight || 1);
+      if (cursor <= 0) return item;
+    }
+    return candidates.at(-1);
+  }
+
+  function getComposerDefinition(action) {
+    if (!action?.composer || !composerLibrary) return null;
+    if (action.composer === true) return composerLibrary.actions?.[action.id] || null;
+    if (typeof action.composer !== "object") return null;
+    const styles = {};
+    for (const [styleId, lines] of Object.entries(action.composer.styles || {})) {
+      styles[styleId] = normalizeComposerModeLines(lines);
+    }
+    return {
+      styles,
+      incompatiblePairs: Array.isArray(action.composer.incompatiblePairs) ? action.composer.incompatiblePairs : [],
+    };
+  }
+
+  function getComposerActions() {
+    return (actionLibrary.actions || []).filter((action) => action.enabled !== false && getComposerDefinition(action));
+  }
+
+  function isComposerPairCompatible(definition, moodId, styleId) {
+    return !(definition?.incompatiblePairs || []).some((pair) => pair.mood === moodId && pair.style === styleId);
+  }
+
+  function getCompatibleComposerMoods(action) {
+    return (composerLibrary?.moods || []).filter((mood) => (
+      !mood.compatibleActions.length || mood.compatibleActions.includes(action.id)
+    ));
+  }
+
+  function getCompatibleComposerStyles(action, moodId) {
+    const definition = getComposerDefinition(action);
+    return (composerLibrary?.styles || []).filter((style) => (
+      definition?.styles?.[style.id] && isComposerPairCompatible(definition, moodId, style.id)
+    ));
+  }
+
+  function getCompatibleComposerExtras(action) {
+    const state = detectPlayerActionCapability();
+    return (composerLibrary?.extras || []).filter((extra) => (
+      (!extra.compatibleActions.length || extra.compatibleActions.includes(action.id))
+      && actionMeetsRequirements({ requirements: extra.requirements }, state)
+    ));
+  }
+
+  function normalizeComposerSelection(action, selection = {}) {
+    const moods = getCompatibleComposerMoods(action);
+    const mood = moods.some((item) => item.id === selection.mood) ? selection.mood : moods[0]?.id;
+    const styles = getCompatibleComposerStyles(action, mood);
+    const style = styles.some((item) => item.id === selection.style) ? selection.style : styles[0]?.id;
+    const extras = getCompatibleComposerExtras(action);
+    const extra = extras.some((item) => item.id === selection.extra) ? selection.extra : extras.at(-1)?.id;
+    const knownTarget = ["auto", "self", "none"].includes(selection.target)
+      || /^member:\d+$/.test(String(selection.target || ""));
+    return {
+      action: action.id,
+      mood,
+      style,
+      target: knownTarget ? selection.target : config.actionTargetMode === ACTION_TARGET_MODE.SELF ? "self" : "auto",
+      extra,
+    };
+  }
+
+  function resolveComposerTarget(targetId) {
+    if (targetId === "self") return { mode: "self", target: null };
+    if (targetId === "none") return { mode: "none", target: null };
+    if (String(targetId).startsWith("member:")) {
+      const memberNumber = Number(String(targetId).slice(7));
+      const target = (W.ChatRoomCharacter || []).find((character) => Number(character?.MemberNumber) === memberNumber) || null;
+      if (target) return { mode: "target", target };
+    }
+    const selected = getSelectedTarget();
+    return selected ? { mode: "target", target: selected } : { mode: "none", target: null };
+  }
+
+  function normalizeComposedActionText(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .replace(/\s+([,.;!?，。！？])/g, "$1")
+      .replace(/([,，]){2,}/g, "$1")
+      .replace(/([。！？.!?])\1+/g, "$1")
+      .trim();
+  }
+
+  function generateComposerPreview(action, selection, rememberHash = true) {
+    const definition = getComposerDefinition(action);
+    if (!definition || !composerLibrary) return null;
+    const normalized = normalizeComposerSelection(action, selection);
+    const mood = getCompatibleComposerMoods(action).find((item) => item.id === normalized.mood);
+    const styleLines = definition.styles?.[normalized.style];
+    const extra = getCompatibleComposerExtras(action).find((item) => item.id === normalized.extra);
+    const resolvedTarget = resolveComposerTarget(normalized.target);
+    const mode = resolvedTarget.mode;
+    if (!mood || !styleLines || !extra) return null;
+
+    let generated = null;
+    for (let attempt = 0; attempt < 24; attempt += 1) {
+      const moodLead = weightedPick(mood.leads);
+      const actionCore = weightedPick(styleLines[mode]);
+      const extraTrail = extra.kind === "kaomoji"
+        ? { id: `kaomoji-${attempt}`, text: ` ${pickRandomKaomoji()}`, weight: 1 }
+        : weightedPick(extra.trails);
+      const ending = weightedPick(composerLibrary.endings?.[mode]);
+      const template = weightedPick(composerLibrary.templates?.[mode]);
+      if (!moodLead || !actionCore || !extraTrail || !ending || !template) continue;
+      const targetName = resolvedTarget.target ? getCharacterName(resolvedTarget.target) : "";
+      const coreText = formatTemplate(actionCore.text, { target: targetName });
+      const text = normalizeComposedActionText(formatTemplate(template.text, {
+        moodLead: moodLead.text,
+        actionCore: coreText,
+        extraTrail: extraTrail.text,
+        ending: ending.text,
+      }));
+      const hash = simpleHash([
+        composerComboKey(normalized), mode, moodLead.id, actionCore.id, extraTrail.id, ending.id, template.id, text,
+      ].join("|"));
+      generated = { text, hash, selection: normalized, target: resolvedTarget.target, mode };
+      if (!composerState.recentHashes.includes(hash)) break;
+    }
+    if (!generated) return null;
+    if (generated.text.length > ACTION_MESSAGE_MAX_LENGTH) {
+      generated.text = `${generated.text.slice(0, ACTION_MESSAGE_MAX_LENGTH - 1).trimEnd()}…`;
+      generated.hash = simpleHash(generated.text);
+    }
+    if (rememberHash) {
+      composerState.recentHashes = [generated.hash, ...composerState.recentHashes.filter((hash) => hash !== generated.hash)]
+        .slice(0, ACTION_COMPOSER_RECENT_LIMIT);
+      saveComposerState();
+    }
+    return generated;
+  }
 
   function sendEmote(text) {
     const input = getChatInput();
     if (input && typeof W.ChatRoomSendChat === "function") {
       input.value = `*${text}*`;
       input.dispatchEvent(new InputEvent("input", { bubbles: true }));
-      suppressNextEmoteConvertAt = Date.now();
       W.ChatRoomSendChat();
       input.focus();
       return true;
     }
     navigator.clipboard?.writeText(`*${text}*`);
-    showToast("动作已复制，进聊天室后可直接发送喵~");
+    showToast(t("toast.actionCopied"));
     return false;
+  }
+
+  function getComposerFavoriteLabel(combo) {
+    const action = (actionLibrary.actions || []).find((item) => item.id === combo.action);
+    const mood = composerLibrary?.moods?.find((item) => item.id === combo.mood);
+    const style = composerLibrary?.styles?.find((item) => item.id === combo.style);
+    return [action?.label || combo.action, mood?.label || combo.mood, style?.label || combo.style].filter(Boolean).join(" · ");
+  }
+
+  function getComposerAlternativeLabels(action) {
+    const state = detectPlayerActionCapability();
+    const actions = getComposerActions()
+      .filter((candidate) => candidate.id !== action.id && actionMeetsRequirements(candidate, state))
+      .slice(0, 3)
+      .map((candidate) => candidate.label);
+    if (actions.length) return actions;
+    return (composerLibrary?.extras || [])
+      .filter((extra) => ["tail", "ears", "purr", "eyes"].includes(extra.id))
+      .slice(0, 3)
+      .map((extra) => extra.label);
+  }
+
+  function renderComposerOptionGroup(dimension, label, options, selectedId) {
+    return `
+      <div class="bcn-composer-field">
+        <div class="bcn-composer-label">${escapeHtml(label)}</div>
+        <div class="bcn-composer-options">
+          ${options.map((option) => `
+            <button type="button" data-composer-option="${escapeHtml(dimension)}" data-value="${escapeHtml(option.id)}"
+              class="${option.id === selectedId ? "is-selected" : ""}">${escapeHtml(option.label)}</button>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function composerTargetOptions(selectedId) {
+    const fixed = [
+      { id: "auto", label: t("composer.target.auto") },
+      { id: "self", label: t("composer.target.self") },
+      { id: "none", label: t("composer.target.none") },
+    ];
+    const people = getActionTargets().map((item) => ({ id: `member:${item.memberNumber}`, label: item.name }));
+    return [...fixed, ...people].map((option) => (
+      `<option value="${escapeHtml(option.id)}"${option.id === selectedId ? " selected" : ""}>${escapeHtml(option.label)}</option>`
+    )).join("");
+  }
+
+  function renderActionComposer() {
+    const overlay = document.getElementById("bcn-action-composer-overlay");
+    if (!overlay || !activeComposerSession) return;
+    const action = activeComposerSession.action;
+    activeComposerSession.selection = normalizeComposerSelection(action, activeComposerSession.selection);
+    activeComposerSession.preview = generateComposerPreview(action, activeComposerSession.selection);
+    const selection = activeComposerSession.selection;
+    const actions = getComposerActions();
+    const moods = getCompatibleComposerMoods(action);
+    const styles = getCompatibleComposerStyles(action, selection.mood);
+    const extras = getCompatibleComposerExtras(action);
+    const reasons = getActionUnavailableReasons(action);
+    const alternatives = reasons.length ? getComposerAlternativeLabels(action) : [];
+    const favoriteKey = composerComboKey(selection);
+    const isFavorite = composerState.favorites.some((item) => composerComboKey(item) === favoriteKey);
+    const favorites = composerState.favorites
+      .map((combo, index) => `<option value="${index}">${escapeHtml(getComposerFavoriteLabel(combo))}</option>`)
+      .join("");
+
+    overlay.innerHTML = `
+      <section id="bcn-action-composer" role="dialog" aria-modal="true" aria-label="${escapeHtml(t("composer.title"))}">
+        <header class="bcn-composer-header">
+          <div>
+            <div class="bcn-composer-title">${escapeHtml(t("composer.title"))}</div>
+            <div class="bcn-composer-subtitle">${escapeHtml(t("composer.subtitle"))}</div>
+          </div>
+          <button type="button" class="bcn-composer-close" data-composer-command="close" aria-label="${escapeHtml(t("composer.close"))}">×</button>
+        </header>
+        <div class="bcn-composer-shortcuts">
+          <button type="button" data-composer-command="recent"${composerState.last ? "" : " disabled"}>${escapeHtml(t("composer.recent"))}</button>
+          <button type="button" data-composer-command="dice">🎲 ${escapeHtml(t("composer.dice"))}</button>
+          <select id="bcn-composer-favorites"${favorites ? "" : " disabled"} aria-label="${escapeHtml(t("composer.favorites"))}">
+            ${favorites || `<option>${escapeHtml(t("composer.noFavorites"))}</option>`}
+          </select>
+          <button type="button" data-composer-command="load-favorite"${favorites ? "" : " disabled"}>${escapeHtml(t("composer.loadFavorite"))}</button>
+        </div>
+        <div class="bcn-composer-scroll">
+          ${renderComposerOptionGroup("action", t("composer.field.action"), actions, action.id)}
+          ${renderComposerOptionGroup("mood", t("composer.field.mood"), moods, selection.mood)}
+          ${renderComposerOptionGroup("style", t("composer.field.style"), styles, selection.style)}
+          <label class="bcn-composer-field">
+            <span class="bcn-composer-label">${escapeHtml(t("composer.field.target"))}</span>
+            <select id="bcn-composer-target">${composerTargetOptions(selection.target)}</select>
+          </label>
+          ${renderComposerOptionGroup("extra", t("composer.field.extra"), extras, selection.extra)}
+          ${reasons.length ? `
+            <div class="bcn-composer-warning">
+              <strong>${escapeHtml(t("composer.unavailableTitle", { action: action.label }))}</strong>
+              <span>${escapeHtml(reasons.join(t("composer.requirement.separator")))}</span>
+              ${alternatives.length ? `<span>${escapeHtml(t("composer.alternatives", { actions: alternatives.join(t("composer.requirement.separator")) }))}</span>` : ""}
+            </div>
+          ` : ""}
+          <div class="bcn-composer-preview-label">${escapeHtml(t("composer.preview"))}</div>
+          <div id="bcn-composer-preview">${escapeHtml(activeComposerSession.preview?.text || t("composer.previewUnavailable"))}</div>
+        </div>
+        <footer class="bcn-composer-footer">
+          <button type="button" data-composer-command="reroll">${escapeHtml(t("composer.reroll"))}</button>
+          <button type="button" data-composer-command="favorite">${escapeHtml(t(isFavorite ? "composer.unfavorite" : "composer.favorite"))}</button>
+          <button type="button" class="bcn-composer-send" data-composer-command="send"${reasons.length || !activeComposerSession.preview ? " disabled" : ""}>${escapeHtml(t("composer.send"))}</button>
+        </footer>
+      </section>
+    `;
+
+    overlay.onclick = (event) => {
+      const option = event.target.closest?.("[data-composer-option]");
+      const commandButton = event.target.closest?.("[data-composer-command]");
+      if (event.target === overlay) {
+        if (Date.now() - activeComposerSession.openedAt < 500) return;
+        hideActionComposer();
+        return;
+      }
+      if (option) {
+        const dimension = option.dataset.composerOption;
+        const value = option.dataset.value;
+        if (dimension === "action") {
+          const nextAction = actions.find((item) => item.id === value);
+          if (nextAction) {
+            activeComposerSession.action = nextAction;
+            activeComposerSession.selection = normalizeComposerSelection(nextAction, activeComposerSession.selection);
+          }
+        } else {
+          activeComposerSession.selection[dimension] = value;
+        }
+        renderActionComposer();
+        return;
+      }
+      if (!commandButton) return;
+      const command = commandButton.dataset.composerCommand;
+      if (command === "close") hideActionComposer();
+      else if (command === "reroll") renderActionComposer();
+      else if (command === "recent" && composerState.last) {
+        const recentAction = actions.find((item) => item.id === composerState.last.action) || action;
+        activeComposerSession.action = recentAction;
+        activeComposerSession.selection = normalizeComposerSelection(recentAction, composerState.last);
+        renderActionComposer();
+      } else if (command === "dice") {
+        const randomAction = actions[Math.floor(Math.random() * actions.length)] || action;
+        const randomMoods = getCompatibleComposerMoods(randomAction);
+        const mood = randomMoods[Math.floor(Math.random() * randomMoods.length)]?.id;
+        const randomStyles = getCompatibleComposerStyles(randomAction, mood);
+        const randomExtras = getCompatibleComposerExtras(randomAction);
+        const targetIds = ["auto", "self", "none", ...getActionTargets().map((item) => `member:${item.memberNumber}`)];
+        activeComposerSession.action = randomAction;
+        activeComposerSession.selection = normalizeComposerSelection(randomAction, {
+          mood,
+          style: randomStyles[Math.floor(Math.random() * randomStyles.length)]?.id,
+          extra: randomExtras[Math.floor(Math.random() * randomExtras.length)]?.id,
+          target: targetIds[Math.floor(Math.random() * targetIds.length)],
+        });
+        renderActionComposer();
+      } else if (command === "load-favorite") {
+        const index = Number(document.getElementById("bcn-composer-favorites")?.value);
+        const favorite = composerState.favorites[index];
+        if (!favorite) return;
+        const favoriteAction = actions.find((item) => item.id === favorite.action) || action;
+        activeComposerSession.action = favoriteAction;
+        activeComposerSession.selection = normalizeComposerSelection(favoriteAction, favorite);
+        renderActionComposer();
+      } else if (command === "favorite") {
+        const key = composerComboKey(activeComposerSession.selection);
+        const existing = composerState.favorites.findIndex((item) => composerComboKey(item) === key);
+        if (existing >= 0) {
+          composerState.favorites.splice(existing, 1);
+          showToast(t("toast.composerUnfavorited"));
+        } else {
+          composerState.favorites = [{ ...activeComposerSession.selection }, ...composerState.favorites]
+            .slice(0, ACTION_COMPOSER_FAVORITE_LIMIT);
+          showToast(t("toast.composerFavorited"));
+        }
+        saveComposerState();
+        renderActionComposer();
+      } else if (command === "send" && activeComposerSession.preview) {
+        const currentReasons = getActionUnavailableReasons(activeComposerSession.action);
+        if (currentReasons.length) {
+          showToast(formatActionUnavailableReason(activeComposerSession.action));
+          renderActionComposer();
+          return;
+        }
+        const preview = activeComposerSession.preview;
+        composerState.last = { ...preview.selection };
+        saveComposerState();
+        if (sendEmote(preview.text) && config.rainOnSend) pawRain("Action");
+        hideActionComposer();
+      }
+    };
+
+    const targetSelect = document.getElementById("bcn-composer-target");
+    if (targetSelect) {
+      targetSelect.onchange = () => {
+        activeComposerSession.selection.target = targetSelect.value;
+        renderActionComposer();
+      };
+    }
+  }
+
+  function onComposerEscape(event) {
+    if (event.key === "Escape") hideActionComposer();
+  }
+
+  function openActionComposer(action) {
+    if (!getComposerDefinition(action)) {
+      showToast(t("toast.composerUnavailable"));
+      return false;
+    }
+    hideTargetPicker();
+    hideKaomojiPicker();
+    let overlay = document.getElementById("bcn-action-composer-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "bcn-action-composer-overlay";
+      document.body.appendChild(overlay);
+    }
+    const seed = activeComposerSession?.action?.id === action.id
+      ? activeComposerSession.selection
+      : composerState.last?.action === action.id ? composerState.last : {};
+    activeComposerSession = {
+      action,
+      selection: normalizeComposerSelection(action, seed),
+      preview: null,
+      openedAt: Date.now(),
+    };
+    document.addEventListener("keydown", onComposerEscape);
+    renderActionComposer();
+    return true;
+  }
+
+  function hideActionComposer() {
+    document.removeEventListener("keydown", onComposerEscape);
+    document.getElementById("bcn-action-composer-overlay")?.remove();
+    activeComposerSession = null;
   }
 
   function sendQuickAction(action, target = undefined) {
     if (!action) return;
+    if (!actionMeetsRequirements(action, detectPlayerActionCapability())) {
+      showToast(formatActionUnavailableReason(action));
+      renderWheel();
+      return;
+    }
     const selected = target === undefined ? getSelectedTarget() : target;
     if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER && target === undefined) {
       showTargetPicker(action);
@@ -4272,8 +4935,8 @@
     const picker = document.createElement("div");
     picker.id = "bcn-target-picker";
     picker.innerHTML = `
-      <div class="bcn-target-title">选择互动对象</div>
-      <button type="button" data-self="1">自己</button>
+      <div class="bcn-target-title">${t("targetPicker.title")}</div>
+      <button type="button" data-self="1">${t("targetPicker.self")}</button>
       ${targets.map((target) => `<button type="button" data-member="${target.memberNumber}">${escapeHtml(target.name)}</button>`).join("")}
     `;
     document.body.appendChild(picker);
@@ -4318,8 +4981,63 @@
   }
 
   function editActions() {
-    window.open?.("https://github.com/QAQMOON/meow-/blob/main/actions/catgirl-actions.json", "_blank", "noopener");
-    showToast("动作库现在从 GitHub JSON 管理喵~");
+    const locale = config.contentLocale === "en" ? "en" : "zh-CN";
+    window.open?.(`https://github.com/QAQMOON/meow-/blob/main/content/${locale}/actions.json`, "_blank", "noopener");
+    showToast(t("toast.actionLibraryManaged"));
+  }
+
+  function bindWheelActionButton(button, action) {
+    let holdTimer = 0;
+    let holdTriggered = false;
+    let startX = 0;
+    let startY = 0;
+
+    const cancelHold = () => {
+      clearTimeout(holdTimer);
+      holdTimer = 0;
+      button.classList.remove("is-holding");
+    };
+
+    button.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      holdTriggered = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      cancelHold();
+      if (!action.composer) return;
+      button.classList.add("is-holding");
+      holdTimer = setTimeout(() => {
+        holdTriggered = true;
+        cancelHold();
+        openActionComposer(action);
+      }, ACTION_COMPOSER_HOLD_MS);
+    });
+
+    button.addEventListener("pointermove", (event) => {
+      if (!holdTimer) return;
+      if (Math.hypot(event.clientX - startX, event.clientY - startY) > ACTION_COMPOSER_MOVE_TOLERANCE) cancelHold();
+    });
+
+    ["pointerup", "pointercancel", "pointerleave"].forEach((type) => {
+      button.addEventListener(type, cancelHold);
+    });
+
+    button.addEventListener("click", (event) => {
+      if (holdTriggered) {
+        event.preventDefault();
+        event.stopPropagation();
+        holdTriggered = false;
+        return;
+      }
+      sendQuickAction(action);
+    });
+
+    button.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      if (event.button !== 2) return;
+      cancelHold();
+      showTargetPicker(action, button);
+    });
   }
 
   function renderWheel() {
@@ -4327,19 +5045,19 @@
     const wheel = document.getElementById("bcn-wheel");
     if (!wheel) return;
     wheel.innerHTML = "";
-    const actions = getActiveActions().slice(0, 5);
+    const state = detectPlayerActionCapability();
+    const actions = (actionLibrary.actions || []).filter((action) => action.enabled !== false).slice(0, 5);
     actions.forEach((action, index) => {
       const btn = document.createElement("button");
       btn.className = "bcn-wheel-btn";
       btn.type = "button";
       btn.textContent = action.label;
-      btn.title = `${action.label}\n左键随机动作，右键选择目标`;
+      const available = actionMeetsRequirements(action, state);
+      btn.title = t(action.composer ? "wheel.actionComposerTooltip" : "wheel.actionTooltip", { label: action.label });
       btn.style.setProperty("--i", String(index));
-      btn.addEventListener("click", () => sendQuickAction(action));
-      btn.addEventListener("contextmenu", (ev) => {
-        ev.preventDefault();
-        showTargetPicker(action, btn);
-      });
+      btn.classList.toggle("is-unavailable", !available);
+      btn.setAttribute("aria-disabled", available ? "false" : "true");
+      bindWheelActionButton(btn, action);
       wheel.appendChild(btn);
     });
     for (let index = actions.length; index < 6; index++) {
@@ -4360,7 +5078,7 @@
     }
     const items = getKaomojiItemsForGroup(activeKaomojiGroup);
     const tabs = [
-      { id: "all", label: "全部" },
+      { id: "all", label: t("kaomoji.all") },
       ...groups.map((group) => ({ id: group.id, label: group.label })),
     ];
 
@@ -4375,7 +5093,7 @@
       button.className = `bcn-kaomoji-tab${tab.id === activeKaomojiGroup ? " is-active" : ""}`;
       button.type = "button";
       button.textContent = tab.label;
-      button.title = `显示${tab.label}颜文字`;
+      button.title = t("ui.kaomojiGroup.show", { group: tab.label });
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         activeKaomojiGroup = tab.id;
@@ -4391,7 +5109,7 @@
       button.className = "bcn-kaomoji-item";
       button.type = "button";
       button.textContent = face;
-      button.title = face;
+      button.title = usageCount ? t("ui.kaomojiUsage.count", { face, count: usageCount }) : face;
       button.style.setProperty("--i", String(index % 18));
       button.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -4643,7 +5361,7 @@
 
     button.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      showToast("按住主猫猫 10 秒可切换猫娘模式喵~");
+      showToast(t("toast.mainHoldHint"));
     });
   }
 
@@ -4656,7 +5374,7 @@
 
     button.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      showToast("点击动作猫猫可展开动作轮盘喵~");
+      showToast(t("toast.actionWheelHint"));
     });
   }
 
@@ -4678,16 +5396,16 @@
     panel.id = "bcn-panel";
     panel.innerHTML = `
       <span id="bcn-tail-meter" aria-hidden="true">0/${TAIL_MOOD_MAX}</span>
-      <button class="bcn-btn" id="bcn-main-cat" type="button" title="展开猫猫菜单，按住可拖动，长按 10 秒切换猫娘模式">🐱</button>
+      <button class="bcn-btn" id="bcn-main-cat" type="button" title="${t("ui.mainButton.title")}">🐱</button>
       <div id="bcn-submenu">
-        <button class="bcn-btn" id="bcn-wheel-handle" type="button" title="展开动作轮盘">🐱</button>
-        <button class="bcn-btn" id="bcn-face" type="button" title="打开猫猫颜文字，长按 2 秒也可打开">🐱</button>
+        <button class="bcn-btn" id="bcn-wheel-handle" type="button" title="${t("ui.wheel.open")}">🐱</button>
+        <button class="bcn-btn" id="bcn-face" type="button" title="${t("ui.kaomojiButton.open")}">🐱</button>
       </div>
-      <div id="bcn-reply-suggestions" aria-label="reply suggestions"></div>
+      <div id="bcn-reply-suggestions" aria-label="快捷回应建议"></div>
       <div class="bcn-wheel-wrap">
         <div id="bcn-wheel"></div>
       </div>
-      <div id="bcn-kaomoji-picker" aria-label="猫猫颜文字选择器"></div>
+      <div id="bcn-kaomoji-picker" aria-label="${t("ui.kaomojiPicker.label")}"></div>
     `;
     document.body.appendChild(panel);
 
@@ -4758,6 +5476,26 @@
     return true;
   }
 
+  function getActionUnavailableReasons(action, state = detectPlayerActionCapability()) {
+    const requirements = getActionRequirements(action);
+    const reasons = [];
+    if (requirements.needHands && !state.handsFree) reasons.push(t("composer.requirement.hands"));
+    if (requirements.needMouth && !state.mouthFree) reasons.push(t("composer.requirement.mouth"));
+    if (requirements.needReach && !state.canReach) reasons.push(t("composer.requirement.reach"));
+    if (requirements.needMobility && !state.canMove) reasons.push(t("composer.requirement.mobility"));
+    if (Number.isFinite(requirements.maxGagLevel) && state.gagLevel > requirements.maxGagLevel) {
+      reasons.push(t("composer.requirement.gag"));
+    }
+    return [...new Set(reasons)];
+  }
+
+  function formatActionUnavailableReason(action) {
+    const reasons = getActionUnavailableReasons(action);
+    return reasons.length
+      ? t("toast.actionUnavailableReason", { reason: reasons.join(t("composer.requirement.separator")) })
+      : t("toast.actionUnavailable");
+  }
+
   function runMaintenance() {
     if (document.hidden) return;
     installObserver();
@@ -4765,6 +5503,7 @@
     patchRoomEffects();
     registerSettingsUI();
     syncScreenClass();
+    if (shouldRenderWheel()) renderWheel();
     scheduleDecorateChat();
   }
 
@@ -4802,6 +5541,8 @@
 
   const NekoSettingsUI = (() => {
     const exitButton = { x: 1830, y: 62, w: 72, h: 72 };
+    const localeButton = { x: 1610, y: 62, w: 190, h: 72 };
+    const contentLocaleButton = { x: 1390, y: 62, w: 200, h: 72 };
     const slider = { x: 800, y: 356, w: 386, h: 14 };
     const cards = {
       left: { x: 62, y: 150, w: 610, h: 740 },
@@ -4809,12 +5550,12 @@
       right: { x: 1360, y: 150, w: 580, h: 740 },
     };
     const featureRows = [
-      { key: "convertOutgoing", y: 250, title: "转换发送语气（convertOutgoing）", desc: "发送的消息自动转换为猫娘语气～" },
-      { key: "convertDisplayed", y: 348, title: "转换显示语气（convertDisplayed）", desc: "接收的消息也会变成猫娘语气哦～" },
-      { key: "decorateChat", y: 524, title: "聊天室美化（decorateChat）", desc: "美化聊天界面，添加猫娘风格装饰～" },
-      { key: "rainOnSend", y: 622, title: "猫爪表情雨（rainOnSend）", desc: "发送消息时，下起猫爪表情雨～" },
-      { key: "quickWheel", y: 720, title: "动作快捷轮盘（quickWheel）", desc: "右下角显示抱抱、摸头、喂食动作～" },
-      { key: "notifyIncoming", y: 842, title: "新消息通知（notifyIncoming）", desc: "有新消息时显示通知提醒～" },
+      { key: "convertOutgoing", y: 250, titleKey: "settings.convertOutgoing.title", descKey: "settings.convertOutgoing.description" },
+      { key: "convertDisplayed", y: 348, titleKey: "settings.convertDisplayed.title", descKey: "settings.convertDisplayed.description" },
+      { key: "decorateChat", y: 524, titleKey: "settings.decorateChat.title", descKey: "settings.decorateChat.description" },
+      { key: "rainOnSend", y: 622, titleKey: "settings.rainOnSend.title", descKey: "settings.rainOnSend.description" },
+      { key: "quickWheel", y: 720, titleKey: "settings.quickWheel.title", descKey: "settings.quickWheel.description" },
+      { key: "notifyIncoming", y: 842, titleKey: "settings.notifyIncoming.title", descKey: "settings.notifyIncoming.description" },
     ];
     const enabledRow = { key: "enabled", x: 750, y: 250 };
     const targetButton = { x: 725, y: 660, w: 230, h: 78 };
@@ -4857,6 +5598,16 @@
         return;
       }
 
+      if (W.MouseIn?.(localeButton.x, localeButton.y, localeButton.w, localeButton.h)) {
+        cycleUiLocale();
+        return;
+      }
+
+      if (W.MouseIn?.(contentLocaleButton.x, contentLocaleButton.y, contentLocaleButton.w, contentLocaleButton.h)) {
+        void cycleContentLocale();
+        return;
+      }
+
       for (const row of featureRows) {
         if (W.MouseIn?.(104, row.y - 18, 42, 42)) {
           toggleConfig(row.key);
@@ -4891,7 +5642,7 @@
           config.theme = row.id;
           saveConfig();
           syncBodyState();
-          showToast(`已切换到${THEME_PRESETS[row.id].label}主题喵~`);
+          showToast(t("toast.themeChanged", { theme: t(`theme.${row.id}`) }));
           return;
         }
       }
@@ -4917,9 +5668,29 @@
 
     function drawHeader() {
       const theme = currentTheme();
-      W.DrawButton?.(exitButton.x, exitButton.y, exitButton.w, exitButton.h, "", "White", "Icons/Exit.png", "返回");
+      W.DrawButton?.(exitButton.x, exitButton.y, exitButton.w, exitButton.h, "", "White", "Icons/Exit.png", t("settings.back"));
+      W.DrawButton?.(
+        contentLocaleButton.x,
+        contentLocaleButton.y,
+        contentLocaleButton.w,
+        contentLocaleButton.h,
+        contentLocaleButtonLabel(),
+        "White",
+        "",
+        t("settings.contentLocale.tooltip"),
+      );
+      W.DrawButton?.(
+        localeButton.x,
+        localeButton.y,
+        localeButton.w,
+        localeButton.h,
+        uiLocaleButtonLabel(),
+        "White",
+        "",
+        t("settings.uiLocale.tooltip"),
+      );
       write("🐾", 690, 92, 42, theme.icon, 700, "center");
-      write("猫 娘 聊 天 室 增 强", 1000, 91, 48, theme.text, 800, "center");
+      writeFit(t("settings.header"), 1000, 91, 660, 48, 30, theme.text, 800, "center");
       write("🐾", 1310, 92, 42, theme.icon, 700, "center");
       write(`v${VERSION}`, 1210, 134, 22, theme.muted, 700, "left");
     }
@@ -4927,16 +5698,16 @@
     function drawFeatureCard() {
       const theme = currentTheme();
       drawCard(cards.left);
-      drawCardTitle(cards.left.x + 62, cards.left.y + 60, "💬", "猫娘语气转换");
+      drawCardTitle(cards.left.x + 62, cards.left.y + 60, "💬", t("settings.title.tone"));
       drawFeatureRow(featureRows[0], theme);
       drawFeatureRow(featureRows[1], theme);
       drawDivider(cards.left.x + 32, 444, cards.left.w - 64);
-      drawCardTitle(cards.left.x + 62, 493, "🐾", "聊天相关");
+      drawCardTitle(cards.left.x + 62, 493, "🐾", t("settings.title.chat"));
       drawFeatureRow(featureRows[2], theme);
       drawFeatureRow(featureRows[3], theme);
       drawFeatureRow(featureRows[4], theme);
       drawDivider(cards.left.x + 32, 788, cards.left.w - 64);
-      drawCardTitle(cards.left.x + 62, 835, "🔔", "通知与提醒");
+      drawCardTitle(cards.left.x + 62, 835, "🔔", t("settings.title.notifications"));
       drawFeatureRow(featureRows[5], theme);
     }
 
@@ -4944,55 +5715,55 @@
       const theme = currentTheme();
       const percent = Math.round(config.nyanChance * 100);
       drawCard(cards.middle);
-      drawCardTitle(cards.middle.x + 62, cards.middle.y + 60, "⚙", "行为设置");
+      drawCardTitle(cards.middle.x + 62, cards.middle.y + 60, "⚙", t("settings.title.behavior"));
 
       drawCheckBox(enabledRow.x, enabledRow.y, !!config.enabled);
-      write("猫娘模式（enabled）", enabledRow.x + 70, enabledRow.y + 2, 24, theme.text, 700);
-      write(config.enabled ? "当前会转换语气并启用装饰～" : "当前暂停转换，只保留设置入口～", enabledRow.x + 70, enabledRow.y + 38, 18, theme.muted, 500);
+      writeFit(t("settings.enabled.title"), enabledRow.x + 70, enabledRow.y + 2, 500, 24, 18, theme.text, 700);
+      writeFit(t(config.enabled ? "settings.enabled.on" : "settings.enabled.off"), enabledRow.x + 70, enabledRow.y + 38, 500, 18, 14, theme.muted, 500);
 
       drawSlider();
       write(`${percent}%`, slider.x + slider.w + 48, slider.y + 5, 25, theme.accent, 700, "left");
-      write("语气词插入概率（nyanChance）", cards.middle.x + 40, 447, 23, theme.text, 700);
-      write("控制句尾语气词出现的概率（0~100%）", cards.middle.x + 40, 485, 18, theme.muted, 500);
+      writeFit(t("settings.nyanChance.title"), cards.middle.x + 40, 447, cards.middle.w - 80, 23, 17, theme.text, 700);
+      writeFit(t("settings.nyanChance.description"), cards.middle.x + 40, 485, cards.middle.w - 80, 18, 14, theme.muted, 500);
 
       roundedRect(getDrawCanvas(), cards.middle.x + 30, 540, cards.middle.w - 60, 108, 16, withAlpha(theme.soft, 0.9), theme.border, 2);
-      write("喵～", cards.middle.x + 60, 581, 28, theme.accent, 800);
-      write("语气词让聊天更可爱哦～", cards.middle.x + 60, 622, 18, theme.muted, 500);
+      write(t("settings.nyanChance.sample"), cards.middle.x + 60, 581, 28, theme.accent, 800);
+      writeFit(t("settings.nyanChance.preview"), cards.middle.x + 60, 622, cards.middle.w - 190, 18, 14, theme.muted, 500);
       write("ฅ^•ω•^ฅ", cards.middle.x + cards.middle.w - 52, 590, 44, theme.accent, 800, "right");
 
       drawLargeButton(targetButton, "◎", targetModeLabel());
-      write("互动目标模式", targetButton.x + 265, targetButton.y + 24, 22, theme.accent, 800);
-      write("自动：优先当前选中角色，其次聊天目标。", targetButton.x + 265, targetButton.y + 59, 17, theme.muted, 500);
+      writeFit(t("settings.target.title"), targetButton.x + 265, targetButton.y + 24, 320, 22, 16, theme.accent, 800);
+      writeFit(t("settings.target.description"), targetButton.x + 265, targetButton.y + 59, 320, 17, 13, theme.muted, 500);
 
-      drawLargeButton(actionButton, "⚡", "动作库");
-      write("从 GitHub 动作库加载；", actionButton.x + 265, actionButton.y + 24, 18, theme.muted, 500);
-      write("失败时将使用缓存或内置动作。", actionButton.x + 265, actionButton.y + 56, 18, theme.muted, 500);
+      drawLargeButton(actionButton, "⚡", t("settings.actions.button"));
+      writeFit(t("settings.actions.source"), actionButton.x + 265, actionButton.y + 24, 320, 18, 13, theme.muted, 500);
+      writeFit(t("settings.actions.fallback"), actionButton.x + 265, actionButton.y + 56, 320, 18, 13, theme.muted, 500);
     }
 
     function drawThemeCard() {
       const theme = currentTheme();
       drawCard(cards.right);
-      drawCardTitle(cards.right.x + 62, cards.right.y + 60, "🎨", "主题设置");
-      write("选择你喜欢的主题颜色", cards.right.x + 105, cards.right.y + 103, 17, theme.muted, 500);
+      drawCardTitle(cards.right.x + 62, cards.right.y + 60, "🎨", t("settings.title.theme"));
+      writeFit(t("settings.theme.choose"), cards.right.x + 105, cards.right.y + 103, 420, 17, 13, theme.muted, 500);
 
       themeRows.forEach((row) => {
         const option = THEME_PRESETS[row.id];
         const selected = config.theme === row.id;
         roundedRect(getDrawCanvas(), row.x, row.y, row.w, row.h, 16, selected ? withAlpha(option.soft, 0.86) : "rgba(255,255,255,0.82)", selected ? option.accent : "#e8e8e8", selected ? 3 : 1);
         write("🐾", row.x + 48, row.y + row.h / 2 + 1, 31, option.icon, 700, "center");
-        write(option.label, row.x + 90, row.y + row.h / 2 + 1, 24, selected ? option.text : "#2f2f2f", selected ? 800 : 600);
+        writeFit(t(`theme.${row.id}`), row.x + 90, row.y + row.h / 2 + 1, 330, 24, 17, selected ? option.text : "#2f2f2f", selected ? 800 : 600);
         if (selected) {
           circle(getDrawCanvas(), row.x + row.w - 16, row.y + 2, 20, option.accent, option.accent, 0);
           write("✓", row.x + row.w - 16, row.y + 3, 24, "#fff", 900, "center");
         }
       });
-      write("主题设置将立即生效并保存", cards.right.x + 48, cards.right.y + cards.right.h - 62, 18, theme.muted, 500);
+      writeFit(t("settings.theme.saved"), cards.right.x + 48, cards.right.y + cards.right.h - 62, cards.right.w - 96, 18, 13, theme.muted, 500);
     }
 
     function drawFeatureRow(row, theme) {
       drawCheckBox(104, row.y, !!config[row.key]);
-      write(row.title, 172, row.y + 2, 23, theme.text, 700);
-      write(row.desc, 172, row.y + 39, 18, theme.muted, 500);
+      writeFit(t(row.titleKey), 172, row.y + 2, 450, 23, 16, theme.text, 700);
+      writeWrapped(t(row.descKey), 172, row.y + 36, 450, 18, 23, theme.muted, 500, 2);
     }
 
     function drawSlider() {
@@ -5113,6 +5884,52 @@
       canvas.restore();
     }
 
+    function writeFit(text, x, y, maxWidth, size, minSize, color, weight = 500, align = "left") {
+      const canvas = getDrawCanvas();
+      if (!canvas) return;
+      const value = String(text || "");
+      let fittedSize = size;
+      canvas.save();
+      while (fittedSize > minSize) {
+        canvas.font = `${weight} ${fittedSize}px Arial, "Microsoft YaHei", sans-serif`;
+        if (canvas.measureText(value).width <= maxWidth) break;
+        fittedSize -= 1;
+      }
+      canvas.restore();
+      write(value, x, y, fittedSize, color, weight, align);
+    }
+
+    function writeWrapped(text, x, y, maxWidth, size, lineHeight, color, weight = 500, maxLines = 2) {
+      const canvas = getDrawCanvas();
+      if (!canvas) return;
+      const value = String(text || "");
+      const tokens = /\s/.test(value) ? value.split(/(\s+)/).filter(Boolean) : Array.from(value);
+      const lines = [];
+      let line = "";
+      canvas.save();
+      canvas.font = `${weight} ${size}px Arial, "Microsoft YaHei", sans-serif`;
+      for (const token of tokens) {
+        const candidate = `${line}${token}`;
+        if (line && canvas.measureText(candidate).width > maxWidth) {
+          lines.push(line.trimEnd());
+          line = token.trimStart();
+          if (lines.length === maxLines) break;
+        } else {
+          line = candidate;
+        }
+      }
+      if (lines.length < maxLines && line) lines.push(line.trim());
+      if (lines.length === maxLines) {
+        let last = lines[maxLines - 1];
+        while (last && canvas.measureText(`${last}…`).width > maxWidth) last = last.slice(0, -1);
+        if (last !== value) lines[maxLines - 1] = `${last.trimEnd()}…`;
+      }
+      canvas.restore();
+      lines.slice(0, maxLines).forEach((item, index) => {
+        write(item, x, y + index * lineHeight, size, color, weight);
+      });
+    }
+
     return { load, run, click, unload, exit };
   })();
 
@@ -5120,7 +5937,7 @@
     if (settingsRegistered || typeof W.PreferenceRegisterExtensionSetting !== "function") return false;
     W.PreferenceRegisterExtensionSetting({
       Identifier: MOD_ID,
-      ButtonText: "猫娘设置",
+      ButtonText: t("settings.button"),
       Image: "Icons/Chat.png",
       load: () => NekoSettingsUI.load(),
       run: () => NekoSettingsUI.run(),
@@ -5141,9 +5958,37 @@
   }
 
   function targetModeLabel() {
-    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return "手动选择";
-    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return "只对自己";
-    return "自动目标";
+    if (config.actionTargetMode === ACTION_TARGET_MODE.PICKER) return t("settings.target.picker");
+    if (config.actionTargetMode === ACTION_TARGET_MODE.SELF) return t("settings.target.self");
+    return t("settings.target.auto");
+  }
+
+  function uiLocaleButtonLabel() {
+    if (config.uiLocale === "auto") {
+      return t("settings.uiLocale.button", { locale: t("settings.uiLocale.auto") });
+    }
+    const name = UI_MESSAGES[config.uiLocale]?.["locale.name"] || config.uiLocale;
+    return t("settings.uiLocale.button", { locale: name });
+  }
+
+  function cycleUiLocale() {
+    const locales = ["auto", "zh-CN", "en"];
+    const current = locales.indexOf(config.uiLocale);
+    setUiLocale(locales[(current + 1) % locales.length]);
+  }
+
+  function contentLocaleButtonLabel() {
+    return t("settings.contentLocale.button", {
+      locale: t(`settings.contentLocale.${config.contentLocale}`),
+    });
+  }
+
+  async function cycleContentLocale() {
+    const next = config.contentLocale === "zh-CN" ? "en" : "zh-CN";
+    await setContentLocale(next);
+    showToast(t("toast.contentLocaleChanged", {
+      locale: t(`settings.contentLocale.${config.contentLocale}`),
+    }));
   }
 
     function drawText(text, x, y, color, backColor = "", size = 28) {
@@ -5284,6 +6129,69 @@
         animation: bcn-voice-steam 2400ms ease-out forwards;
       }
 
+      #bcn-panel {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 100000;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+        height: fit-content;
+        padding: 6px 8px;
+        border: 2px solid var(--bcn-border);
+        border-radius: 16px;
+        background: var(--bcn-panel);
+        box-shadow: 0 10px 28px var(--bcn-glow);
+        backdrop-filter: blur(8px);
+        cursor: grab;
+        transition: gap 0.22s ease;
+      }
+
+      body.bcn-menu-collapsed #bcn-panel {
+        gap: 0;
+      }
+
+      #bcn-panel.is-dragging {
+        user-select: none;
+        cursor: grabbing;
+      }
+
+      .bcn-btn,
+      .bcn-wheel-btn {
+        min-width: 42px;
+        min-height: 42px;
+        border: 2px solid var(--bcn-border);
+        border-radius: 14px;
+        background: linear-gradient(180deg, var(--bcn-panel) 0%, var(--bcn-soft) 100%);
+        color: var(--bcn-text);
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 3px 0 var(--bcn-glow);
+      }
+
+      #bcn-submenu {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        max-width: 130px;
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        overflow: hidden;
+        transition: max-width 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
+        pointer-events: auto;
+      }
+
+      body.bcn-menu-collapsed #bcn-submenu {
+        max-width: 0;
+        opacity: 0;
+        transform: translateX(-8px) scale(0.96);
+        pointer-events: none;
+      }
+
       #bcn-tail-meter {
         display: inline-flex;
         align-items: center;
@@ -5354,69 +6262,6 @@
       .bcn-reply-chip:hover {
         transform: translateY(-1px);
         background: var(--bcn-soft);
-      }
-
-      #bcn-panel {
-        position: fixed;
-        right: 18px;
-        bottom: 18px;
-        z-index: 100000;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        width: fit-content;
-        height: fit-content;
-        padding: 6px 8px;
-        border: 2px solid var(--bcn-border);
-        border-radius: 16px;
-        background: var(--bcn-panel);
-        box-shadow: 0 10px 28px var(--bcn-glow);
-        backdrop-filter: blur(8px);
-        cursor: grab;
-        transition: gap 0.22s ease;
-      }
-
-      body.bcn-menu-collapsed #bcn-panel {
-        gap: 0;
-      }
-
-      #bcn-panel.is-dragging {
-        user-select: none;
-        cursor: grabbing;
-      }
-
-      .bcn-btn,
-      .bcn-wheel-btn {
-        min-width: 42px;
-        min-height: 42px;
-        border: 2px solid var(--bcn-border);
-        border-radius: 14px;
-        background: linear-gradient(180deg, var(--bcn-panel) 0%, var(--bcn-soft) 100%);
-        color: var(--bcn-text);
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 3px 0 var(--bcn-glow);
-      }
-
-      #bcn-submenu {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        max-width: 130px;
-        opacity: 1;
-        transform: translateX(0) scale(1);
-        overflow: hidden;
-        transition: max-width 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
-        pointer-events: auto;
-      }
-
-      body.bcn-menu-collapsed #bcn-submenu {
-        max-width: 0;
-        opacity: 0;
-        transform: translateX(-8px) scale(0.96);
-        pointer-events: none;
       }
 
       #bcn-main-cat,
@@ -5883,6 +6728,230 @@
         border-radius: 10px !important;
       }
 
+      .bcn-wheel-btn {
+        position: relative;
+        overflow: hidden;
+        touch-action: manipulation;
+        -webkit-touch-callout: none;
+        user-select: none;
+      }
+
+      .bcn-wheel-btn.is-unavailable {
+        opacity: 0.56;
+        filter: saturate(0.55);
+      }
+
+      .bcn-wheel-btn.is-holding::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 4px;
+        transform-origin: left center;
+        background: var(--bcn-accent);
+        animation: bcn-composer-hold ${ACTION_COMPOSER_HOLD_MS}ms linear forwards;
+      }
+
+      @keyframes bcn-composer-hold {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+      }
+
+      #bcn-action-composer-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100020;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background: rgba(30, 24, 29, 0.38);
+        backdrop-filter: blur(5px);
+      }
+
+      #bcn-action-composer {
+        width: min(760px, 96vw);
+        max-height: min(86vh, 820px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 2px solid var(--bcn-border);
+        border-radius: 22px;
+        background: var(--bcn-panel);
+        color: var(--bcn-text);
+        box-shadow: 0 24px 70px rgba(35, 23, 31, 0.28), 0 8px 28px var(--bcn-glow);
+      }
+
+      .bcn-composer-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px 12px;
+        border-bottom: 1px solid var(--bcn-border);
+        background: linear-gradient(180deg, var(--bcn-soft), var(--bcn-panel));
+      }
+
+      .bcn-composer-title {
+        color: var(--bcn-accent);
+        font-size: clamp(22px, 3vw, 30px);
+        font-weight: 900;
+      }
+
+      .bcn-composer-subtitle {
+        max-width: 620px;
+        margin-top: 4px;
+        color: var(--bcn-muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .bcn-composer-close {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 auto;
+        border: 1px solid var(--bcn-border);
+        border-radius: 12px;
+        background: var(--bcn-panel);
+        color: var(--bcn-muted);
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      .bcn-composer-shortcuts,
+      .bcn-composer-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: var(--bcn-soft);
+      }
+
+      .bcn-composer-shortcuts {
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--bcn-border);
+      }
+
+      .bcn-composer-shortcuts select {
+        min-width: 170px;
+        flex: 1 1 190px;
+        min-height: 36px;
+        padding: 5px 9px;
+      }
+
+      .bcn-composer-shortcuts button,
+      .bcn-composer-footer button,
+      .bcn-composer-options button {
+        min-height: 36px;
+        padding: 7px 12px;
+        border: 1px solid var(--bcn-border);
+        border-radius: 11px;
+        background: var(--bcn-panel);
+        color: var(--bcn-text);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .bcn-composer-shortcuts button:disabled,
+      .bcn-composer-footer button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .bcn-composer-scroll {
+        overflow-y: auto;
+        padding: 16px 20px 20px;
+      }
+
+      .bcn-composer-field {
+        display: grid;
+        grid-template-columns: minmax(72px, 100px) 1fr;
+        align-items: start;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .bcn-composer-label,
+      .bcn-composer-preview-label {
+        padding-top: 8px;
+        color: var(--bcn-muted);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .bcn-composer-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .bcn-composer-options button.is-selected {
+        border-color: var(--bcn-accent);
+        background: var(--bcn-accent);
+        color: #fff;
+        box-shadow: 0 4px 12px var(--bcn-glow);
+      }
+
+      #bcn-composer-target {
+        width: 100%;
+        min-height: 40px;
+        padding: 6px 10px;
+      }
+
+      .bcn-composer-warning {
+        display: grid;
+        gap: 4px;
+        margin: 4px 0 14px;
+        padding: 11px 13px;
+        border: 1px solid #efb4aa;
+        border-radius: 12px;
+        background: #fff3f0;
+        color: #8b493e;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .bcn-composer-preview-label {
+        padding: 0 0 7px;
+      }
+
+      #bcn-composer-preview {
+        min-height: 78px;
+        padding: 14px 16px;
+        border: 2px dashed var(--bcn-border);
+        border-radius: 14px;
+        background: var(--bcn-soft);
+        color: var(--bcn-text);
+        font-size: clamp(15px, 2.2vw, 18px);
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .bcn-composer-footer {
+        justify-content: flex-end;
+        border-top: 1px solid var(--bcn-border);
+      }
+
+      .bcn-composer-footer .bcn-composer-send {
+        border-color: var(--bcn-accent);
+        background: var(--bcn-accent);
+        color: #fff;
+      }
+
+      @media (max-width: 620px) {
+        #bcn-action-composer-overlay { padding: 8px; }
+        #bcn-action-composer { max-height: 94vh; border-radius: 16px; }
+        .bcn-composer-header { padding: 14px 14px 10px; }
+        .bcn-composer-shortcuts,
+        .bcn-composer-footer { padding: 9px 14px; }
+        .bcn-composer-scroll { padding: 13px 14px 16px; }
+        .bcn-composer-field { grid-template-columns: 1fr; gap: 5px; }
+        .bcn-composer-label { padding-top: 0; }
+        .bcn-composer-footer { flex-wrap: wrap; }
+        .bcn-composer-footer button { flex: 1 1 110px; }
+      }
+
       #bcn-target-picker {
         position: fixed;
         right: 18px;
@@ -5980,6 +7049,7 @@
     createPanel();
     registerModSdk();
     loadRemoteActionLibrary();
+    loadRemoteComposerLibrary();
     loadRemoteKaomojiLibrary();
     loadRemoteRpLibrary();
     bindVisibilityLifecycle();
@@ -5998,7 +7068,7 @@
       runMaintenance();
     }, 800);
 
-    console.log("[BC ??????] ?????");
+    console.log(`[BC Neko Enhancer] ${t("bug.init.complete")}`);
   }
 
   if (document.readyState === "loading") {

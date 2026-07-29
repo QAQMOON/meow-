@@ -49,9 +49,6 @@ https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-dev.user.js
 Bug version:
 https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko-bug.user.js
 
-English version (UI localized):
-https://github.com/QAQMOON/meow-/raw/main/bondage-club-neko.en.user.js
-
 The Bug version is recommended for userscript installation only, for testing experimental features like RP speech packs; it's not included in FUSAM. The English version has all UI text and settings translated to English.
 
 ## Updates

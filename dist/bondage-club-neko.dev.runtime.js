@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer
 // @namespace    https://penyo.ru/
-// @version      2.13.0-dev.2
+// @version      2.13.0-dev.3
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -172,7 +172,7 @@
   const SUPPORTED_CONTENT_LOCALES = ["zh-CN", "en"];
   const INITIAL_CONTENT_LOCALE = normalizeLocale(BOOTSTRAP.defaultContentLocale) || "zh-CN";
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.13.0-dev.2";
+  const VERSION = "2.13.0-dev.3";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const CONTENT_BASE_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/content";
@@ -228,7 +228,6 @@
   const NEKO_ACTIVITY_MESSAGE_TAG = "BCNekoActivityL10N";
   const NEKO_ACTIVITY_CUSTOM_ACTION = "CUSTOM_SYSTEM_ACTION";
   const NEKO_ACTIVITY_PREREQUISITES = {
-    enabled: "BCNekoActivityEnabled",
     actorTail: "BCNekoActorHasTail",
     targetTail: "BCNekoTargetHasTail",
   };
@@ -567,7 +566,6 @@
     imagePasteEnabled: true,
     imageUploadHost: "litterbox",
     imageUploadPrivacyAcknowledged: false,
-    nekoGameActivitiesEnabled: true,
     nyanChance: 0.55,
     menuCollapsed: true,
     wheelCollapsed: true,
@@ -603,6 +601,7 @@
   let imageUploadEventsBound = false;
   let imageUploadBusy = false;
   let imageDragTimer = 0;
+  let nekoActivityInitializationAttempted = false;
   let nekoActivityHooksPatched = false;
   let nekoActivityButtonHookAttempted = false;
   let nekoActivityDictionaryInstalled = false;
@@ -814,7 +813,6 @@
     next.imagePasteEnabled = next.imagePasteEnabled !== false;
     if (!IMAGE_UPLOAD_HOST_IDS.includes(next.imageUploadHost)) next.imageUploadHost = defaults.imageUploadHost;
     next.imageUploadPrivacyAcknowledged = next.imageUploadPrivacyAcknowledged === true;
-    next.nekoGameActivitiesEnabled = next.nekoGameActivitiesEnabled !== false;
     next.wheelX = Number.isFinite(Number(next.wheelX)) ? Number(next.wheelX) : null;
     next.wheelY = Number.isFinite(Number(next.wheelY)) ? Number(next.wheelY) : null;
     const fallbackPack = contentFallback(next.contentLocale);
@@ -2766,45 +2764,27 @@
       button: "用尾巴缠住对方",
       action: "用尾巴缠住对方的尾巴",
       message: "{actor}轻轻探出尾巴，用尾巴紧紧缠住了{target}的尾巴，尾巴尖还满足地蹭了蹭喵~",
-      enabled: "猫娘游戏互动动作已开启喵~",
-      disabled: "猫娘游戏互动动作已关闭。",
       unavailable: "当前无法执行尾巴互缠动作，请确认双方都装备了尾巴。",
-      status: [
-        "[猫娘游戏互动动作]",
-        "开关：{enabled}",
-        "动作：用尾巴缠住对方（BCNeko_TailEntwine）",
-        "条件：双方都检测到尾巴；不能对自己使用；不会修改任何物品。",
-      ],
       help: [
         "[猫娘帮助 / activity]",
-        "/neko activity on|off|status",
+        "动作会在插件启动完成后尝试注册一次，不提供运行时开关或自动重试。",
         "在目标的臀部/尾巴区域打开互动动作，可看到“用尾巴缠住对方”。",
         "双方都需要装备可识别的尾巴；动作只发送叙述，不改变角色物品。",
       ],
       mainHint: "游戏互动动作：/neko activity help",
-      settingsLabel: "游戏互动动作",
     },
     en: {
       button: "Entwine tails",
       action: "Entwine their tail with yours",
       message: "{actor} gently reaches out with their tail and winds it tightly around {target}'s tail, the tip giving a satisfied little nuzzle, meow~",
-      enabled: "Neko game activities enabled, meow~",
-      disabled: "Neko game activities disabled.",
       unavailable: "Tail entwining is unavailable. Make sure both characters have a recognized tail.",
-      status: [
-        "[Neko game activities]",
-        "Enabled: {enabled}",
-        "Activity: Entwine tails (BCNeko_TailEntwine)",
-        "Requirements: both characters need a detected tail; not self-targetable; no items are changed.",
-      ],
       help: [
         "[Neko help / activity]",
-        "/neko activity on|off|status",
+        "The activity is registered once after startup, with no runtime toggle or automatic retry.",
         "Open activities on the target's butt/tail area to find “Entwine tails”.",
         "Both characters need a recognized tail. The activity sends narration only and changes no items.",
       ],
       mainHint: "Game activities: /neko activity help",
-      settingsLabel: "Game activities",
     },
   };
 
@@ -2942,10 +2922,6 @@
     const activities = getNekoActivityList();
     if (!activities) return false;
     const existingIndex = activities.findIndex((activity) => activity?.Name === NEKO_TAIL_ENTWINE_ACTIVITY_ID);
-    if (!config.nekoGameActivitiesEnabled) {
-      if (existingIndex >= 0) activities.splice(existingIndex, 1);
-      return true;
-    }
     installNekoActivityDictionary();
     if (existingIndex >= 0) return true;
     activities.push({
@@ -2966,7 +2942,6 @@
       try {
         bcModApi.hookFunction("ActivityCheckPrerequisite", 4, (args, next) => {
           const prerequisite = args[0];
-          if (prerequisite === NEKO_ACTIVITY_PREREQUISITES.enabled) return !!config.nekoGameActivitiesEnabled;
           if (prerequisite === NEKO_ACTIVITY_PREREQUISITES.actorTail) return characterHasRecognizedTail(args[1]);
           if (prerequisite === NEKO_ACTIVITY_PREREQUISITES.targetTail) return characterHasRecognizedTail(args[2]);
           return next(args);
@@ -2995,28 +2970,21 @@
     return true;
   }
 
-  function setNekoGameActivitiesEnabled(enabled) {
-    config.nekoGameActivitiesEnabled = !!enabled;
-    saveConfig();
-    registerNekoGameActivities();
-    showToast(nekoActivityText(enabled ? "enabled" : "disabled"));
+  function initializeNekoGameActivityOnce() {
+    if (nekoActivityInitializationAttempted) return false;
+    nekoActivityInitializationAttempted = true;
+    if (!patchNekoActivityHooks()) {
+      console.warn("[BC 猫娘增强] 尾巴互缠动作 Hook 一次性安装失败，本次页面不再重试");
+      return false;
+    }
+    if (!registerNekoGameActivities()) {
+      console.warn("[BC 猫娘增强] 尾巴互缠动作一次性注册失败，本次页面不再重试");
+      return false;
+    }
     return true;
   }
 
-  function getNekoGameActivityStatusLines() {
-    return nekoActivityText("status", {
-      enabled: imageUploadText(config.nekoGameActivitiesEnabled ? "settingsOn" : "settingsOff"),
-    });
-  }
-
-  function handleNekoGameActivityCommand(args = []) {
-    const action = String(args[0] || "help").trim().toLowerCase();
-    if (["on", "open", "enable", "开启", "开"].includes(action)) return setNekoGameActivitiesEnabled(true);
-    if (["off", "close", "disable", "关闭", "关"].includes(action)) return setNekoGameActivitiesEnabled(false);
-    if (action === "status" || action === "状态") {
-      sendNekoCommandNotice(getNekoGameActivityStatusLines());
-      return true;
-    }
+  function handleNekoGameActivityCommand() {
     sendNekoCommandNotice(nekoActivityText("help"));
     return true;
   }
@@ -6077,8 +6045,6 @@
     installObserver();
     patchStatusBadge();
     patchRoomEffects();
-    patchNekoActivityHooks();
-    registerNekoGameActivities();
     registerSettingsUI();
     registerImageUploadSettingsUI();
     syncScreenClass();
@@ -6517,8 +6483,7 @@
     const enabledButton = { x: 280, y: 255, w: 620, h: 105 };
     const pasteButton = { x: 1100, y: 255, w: 620, h: 105 };
     const hostButton = { x: 280, y: 470, w: 1440, h: 115 };
-    const activityButton = { x: 280, y: 660, w: 620, h: 105 };
-    const pickButton = { x: 1100, y: 660, w: 620, h: 105 };
+    const pickButton = { x: 280, y: 660, w: 1440, h: 105 };
 
     function load() {}
     function unload() {}
@@ -6553,14 +6518,6 @@
         imageUploadText("settingsHost", { host: currentImageUploadHost().label }),
         "#eef8ff",
       );
-      drawButton(
-        activityButton.x,
-        activityButton.y,
-        activityButton.w,
-        activityButton.h,
-        `${nekoActivityText("settingsLabel")}：${imageUploadText(config.nekoGameActivitiesEnabled ? "settingsOn" : "settingsOff")}`,
-        config.nekoGameActivitiesEnabled ? "#e8ddff" : "#ffe3ec",
-      );
       drawButton(pickButton.x, pickButton.y, pickButton.w, pickButton.h, imageUploadText("settingsPick"), "#fff1c9");
       drawLabel(imageUploadText("settingsHint"), 300, 840, 1400, "#8a3f5b", 25);
       drawLabel(imageUploadText("settingsPrivacy"), 300, 890, 1400, "#b34d6d", 22);
@@ -6582,10 +6539,6 @@
       if (W.MouseIn?.(hostButton.x, hostButton.y, hostButton.w, hostButton.h)) {
         const current = IMAGE_UPLOAD_HOST_IDS.indexOf(config.imageUploadHost);
         setImageUploadHost(IMAGE_UPLOAD_HOST_IDS[(current + 1) % IMAGE_UPLOAD_HOST_IDS.length]);
-        return;
-      }
-      if (W.MouseIn?.(activityButton.x, activityButton.y, activityButton.w, activityButton.h)) {
-        setNekoGameActivitiesEnabled(!config.nekoGameActivitiesEnabled);
         return;
       }
       if (W.MouseIn?.(pickButton.x, pickButton.y, pickButton.w, pickButton.h)) openImageUploadFilePicker();
@@ -7745,12 +7698,12 @@
       const chatReady = patchBC();
       const badgeReady = patchStatusBadge();
       const roomReady = patchRoomEffects();
-      const activityHooksReady = patchNekoActivityHooks();
-      const activitiesReady = registerNekoGameActivities();
       const commandReady = registerNekoCommands();
-      if (chatReady && badgeReady && roomReady && activityHooksReady && activitiesReady && commandReady) {
+      if (chatReady && badgeReady && roomReady && commandReady) {
         clearInterval(patchTimer);
+        initializeNekoGameActivityOnce();
         startMaintenance();
+        return;
       }
       runMaintenance();
     }, 800);

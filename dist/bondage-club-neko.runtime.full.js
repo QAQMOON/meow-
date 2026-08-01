@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer
 // @namespace    https://penyo.ru/
-// @version      2.12.0
+// @version      2.13.0
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -171,7 +171,7 @@
   const SUPPORTED_CONTENT_LOCALES = ["zh-CN", "en"];
   const INITIAL_CONTENT_LOCALE = normalizeLocale(BOOTSTRAP.defaultContentLocale) || "zh-CN";
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.12.0";
+  const VERSION = "2.13.0";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const CONTENT_BASE_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/content";
@@ -209,6 +209,28 @@
   const ESCAPE_SKILL_NAMES = ["Bondage", "Dressage", "Evasion", "Infiltration", "LockPicking", "SelfBondage", "Willpower"];
   const ESCAPE_PICK_WINDOW_MS = 5000;
   const ESCAPE_DEFAULT_EASY_VALUE = 99;
+  const IMAGE_UPLOAD_HOST_IDS = ["litterbox", "uguu", "imgbb", "tmpfiles", "cloudflare"];
+  const IMAGE_UPLOAD_MAX_FILES = 4;
+  const IMAGE_UPLOAD_DEFAULT_MAX_BYTES = 20 * 1024 * 1024;
+  const IMAGE_UPLOAD_HOSTS = {
+    litterbox: { label: "Litterbox", maxBytes: IMAGE_UPLOAD_DEFAULT_MAX_BYTES, retention: "12h" },
+    uguu: { label: "Uguu", maxBytes: IMAGE_UPLOAD_DEFAULT_MAX_BYTES, retention: "3h" },
+    imgbb: { label: "ImgBB", maxBytes: IMAGE_UPLOAD_DEFAULT_MAX_BYTES, retention: "12h" },
+    tmpfiles: { label: "TmpFiles", maxBytes: IMAGE_UPLOAD_DEFAULT_MAX_BYTES, retention: "60m" },
+    cloudflare: { label: "Cloudflare R2", maxBytes: 10 * 1024 * 1024, retention: "30m" },
+  };
+  const IMAGE_UPLOAD_VALID_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/gif", "image/bmp", "image/webp"]);
+  const IMAGE_UPLOAD_VALID_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "bmp", "webp"]);
+  const NEKO_TAIL_ENTWINE_ACTIVITY_ID = "BCNeko_TailEntwine";
+  const NEKO_TAIL_ENTWINE_ACTIVITY_NUMERIC_ID = 910013;
+  const NEKO_ACTIVITY_ICON_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/assets/neko-icon-64.png";
+  const NEKO_ACTIVITY_MESSAGE_TAG = "BCNekoActivityL10N";
+  const NEKO_ACTIVITY_CUSTOM_ACTION = "CUSTOM_SYSTEM_ACTION";
+  const NEKO_ACTIVITY_PREREQUISITES = {
+    enabled: "BCNekoActivityEnabled",
+    actorTail: "BCNekoActorHasTail",
+    targetTail: "BCNekoTargetHasTail",
+  };
   const THEME_PRESETS = {
     sakura: {
       label: "樱粉",
@@ -289,6 +311,11 @@
     rainOnSend: true,
     quickWheel: true,
     notifyIncoming: true,
+    imageUploadEnabled: false,
+    imagePasteEnabled: true,
+    imageUploadHost: "litterbox",
+    imageUploadPrivacyAcknowledged: false,
+    nekoGameActivitiesEnabled: true,
     nyanChance: 0.55,
     menuCollapsed: true,
     wheelCollapsed: true,
@@ -320,6 +347,14 @@
   let bcModApi = null;
   let sdkLoadingPromise = null;
   let settingsRegistered = false;
+  let imageUploadSettingsRegistered = false;
+  let imageUploadEventsBound = false;
+  let imageUploadBusy = false;
+  let imageDragTimer = 0;
+  let nekoActivityHooksPatched = false;
+  let nekoActivityButtonHookAttempted = false;
+  let nekoActivityDictionaryInstalled = false;
+  let nekoActivityTextCache = null;
   let nekoCommandsRegistered = false;
   let nekoCommandRegistrationSource = "";
   let toastTimer = 0;
@@ -491,6 +526,11 @@
     }
     next.menuCollapsed = next.menuCollapsed !== false;
     next.wheelCollapsed = next.wheelCollapsed !== false;
+    next.imageUploadEnabled = next.imageUploadEnabled === true;
+    next.imagePasteEnabled = next.imagePasteEnabled !== false;
+    if (!IMAGE_UPLOAD_HOST_IDS.includes(next.imageUploadHost)) next.imageUploadHost = defaults.imageUploadHost;
+    next.imageUploadPrivacyAcknowledged = next.imageUploadPrivacyAcknowledged === true;
+    next.nekoGameActivitiesEnabled = next.nekoGameActivitiesEnabled !== false;
     next.wheelX = Number.isFinite(Number(next.wheelX)) ? Number(next.wheelX) : null;
     next.wheelY = Number.isFinite(Number(next.wheelY)) ? Number(next.wheelY) : null;
     const fallbackPack = contentFallback(next.contentLocale);
@@ -1508,6 +1548,7 @@
 
     bcModApi.hookFunction("ChatRoomMessageDisplay", 0, (args, next) => {
       const [data, msg, senderCharacter, metadata] = args;
+      rewriteNekoActivityMessage(data);
       handleNekoPeerSignal(data);
       maybeSpawnAtmosphere(data, msg);
       const nextMsg = shouldConvertDisplay(data, msg)
@@ -1522,7 +1563,18 @@
     });
 
     bcModApi.hookFunction("ServerSend", 0, (args, next) => {
-      const [message, payload] = args;
+      const message = args[0];
+      let payload = args[1];
+      const nekoActivityName = outgoingNekoActivityName(message, payload);
+      const rewrittenActivity = rewriteOutgoingNekoActivity(message, payload);
+      if (nekoActivityName === NEKO_TAIL_ENTWINE_ACTIVITY_ID && !rewrittenActivity) {
+        showToast(nekoActivityText("unavailable"));
+        return undefined;
+      }
+      if (rewrittenActivity) {
+        args[1] = rewrittenActivity;
+        payload = rewrittenActivity;
+      }
       if (message === "ChatRoomChat" && handleNekoCommand(payload?.Content)) {
         return undefined;
       }
@@ -1536,6 +1588,7 @@
     if (typeof W.ChatRoomMessage === "function") {
       bcModApi.hookFunction("ChatRoomMessage", 0, (args, next) => {
         const [data] = args;
+        rewriteNekoActivityMessage(data);
         handleNekoPeerSignal(data);
         maybeSpawnAtmosphere(data, data?.Content);
         return next(args);
@@ -1876,6 +1929,749 @@
   }
 
 
+  const IMAGE_UPLOAD_I18N = {
+    "zh-CN": {
+      enabled: "图片拖放上传已开启喵~",
+      disabled: "图片拖放上传已关闭。",
+      enableFirst: "请先使用 /neko image on 开启图片上传。",
+      pasteEnabled: "剪贴板图片上传已开启喵~",
+      pasteDisabled: "剪贴板图片上传已关闭。",
+      busy: "上一批图片还在上传，请稍等喵。",
+      chatOnly: "请进入聊天室后再上传图片喵。",
+      noInput: "没有找到聊天输入框喵。",
+      invalidType: "{name} 不是支持的图片格式。",
+      tooLarge: "{name} 超过 {limit} 的大小限制。",
+      tooMany: "一次最多上传 {count} 张图片，已忽略其余文件。",
+      uploading: "正在通过 {host} 上传第 {index}/{total} 张：{name}",
+      failed: "{name} 上传失败：{error}",
+      allFailed: "这批图片都没有上传成功。",
+      inserted: "已把 {count} 个图片链接追加到聊天输入框，请确认后手动发送喵~",
+      hostChanged: "图片图床已切换为 {host}（预计保存 {retention}）。",
+      unknownHost: "未知图床：{host}。可用：{hosts}",
+      pickerOpened: "请选择要上传的图片喵~",
+      privacy: "图片会原样上传到第三方图床，可能包含 EXIF 等元数据；获得链接的人均可访问。",
+      status: [
+        "[猫娘图片上传]",
+        "拖放上传：{enabled}",
+        "剪贴板上传：{paste}",
+        "当前图床：{host} | 预计保存：{retention}",
+        "限制：每次最多 {maxFiles} 张；单张最大 {maxSize}",
+        "图片上传成功后只会写入聊天框，不会自动发送。",
+      ],
+      help: [
+        "[猫娘帮助 / image]",
+        "/neko image on|off|status",
+        "/neko image host litterbox|uguu|imgbb|tmpfiles|cloudflare",
+        "/neko image paste on|off",
+        "/neko image pick  - 打开文件选择器",
+        "启用后可把桌面图片拖到聊天输入框，也可在输入框聚焦时粘贴图片。",
+      ],
+      mainHint: "图片上传：/neko image help",
+      settingsButton: "猫娘图片与互动",
+      settingsTitle: "猫 娘 图 片 与 互 动",
+      settingsEnabled: "拖放上传",
+      settingsPaste: "剪贴板上传",
+      settingsHost: "当前图床：{host}",
+      settingsPick: "选择图片",
+      settingsOn: "开启",
+      settingsOff: "关闭",
+      settingsBack: "返回",
+      settingsHint: "拖放到聊天输入框，上传完成后由你确认并手动发送。",
+      settingsPrivacy: "隐私提醒：原图会发送给第三方图床，可能包含图片元数据。",
+    },
+    en: {
+      enabled: "Image drag-and-drop upload enabled, meow~",
+      disabled: "Image drag-and-drop upload disabled.",
+      enableFirst: "Enable image upload first with /neko image on.",
+      pasteEnabled: "Clipboard image upload enabled, meow~",
+      pasteDisabled: "Clipboard image upload disabled.",
+      busy: "The previous image batch is still uploading. Please wait, meow.",
+      chatOnly: "Enter a chat room before uploading images, meow.",
+      noInput: "The chat input is not available, meow.",
+      invalidType: "{name} is not a supported image format.",
+      tooLarge: "{name} exceeds the {limit} size limit.",
+      tooMany: "At most {count} images can be uploaded at once; the rest were ignored.",
+      uploading: "Uploading image {index}/{total} through {host}: {name}",
+      failed: "Upload failed for {name}: {error}",
+      allFailed: "None of the images in this batch uploaded successfully.",
+      inserted: "Added {count} image link(s) to the chat input. Review them before sending, meow~",
+      hostChanged: "Image host changed to {host} (expected retention: {retention}).",
+      unknownHost: "Unknown image host: {host}. Available: {hosts}",
+      pickerOpened: "Choose images to upload, meow~",
+      privacy: "Images are uploaded unchanged to a third-party host and may contain EXIF metadata. Anyone with the link can access them.",
+      status: [
+        "[Neko image upload]",
+        "Drag-and-drop upload: {enabled}",
+        "Clipboard upload: {paste}",
+        "Current host: {host} | Expected retention: {retention}",
+        "Limits: {maxFiles} images per batch; {maxSize} per image",
+        "Successful uploads are inserted into chat and are never sent automatically.",
+      ],
+      help: [
+        "[Neko help / image]",
+        "/neko image on|off|status",
+        "/neko image host litterbox|uguu|imgbb|tmpfiles|cloudflare",
+        "/neko image paste on|off",
+        "/neko image pick  - open the file picker",
+        "When enabled, drop desktop images onto the chat input or paste while the chat input is focused.",
+      ],
+      mainHint: "Image upload: /neko image help",
+      settingsButton: "Neko image & activities",
+      settingsTitle: "N E K O   I M A G E   &   A C T I V I T I E S",
+      settingsEnabled: "Drag-and-drop upload",
+      settingsPaste: "Clipboard upload",
+      settingsHost: "Current host: {host}",
+      settingsPick: "Choose images",
+      settingsOn: "On",
+      settingsOff: "Off",
+      settingsBack: "Back",
+      settingsHint: "Drop onto the chat input. You review and send the uploaded links yourself.",
+      settingsPrivacy: "Privacy: original files go to a third-party host and may contain image metadata.",
+    },
+  };
+
+  function imageUploadText(key, params = {}) {
+    const locale = resolveUiLocale() === "zh-CN" ? "zh-CN" : "en";
+    const value = IMAGE_UPLOAD_I18N[locale]?.[key] ?? IMAGE_UPLOAD_I18N.en[key] ?? key;
+    return Array.isArray(value)
+      ? value.map((line) => formatTemplate(line, params))
+      : formatTemplate(value, params);
+  }
+
+  const NEKO_ACTIVITY_I18N = {
+    "zh-CN": {
+      button: "用尾巴缠住对方",
+      action: "用尾巴缠住对方的尾巴",
+      message: "{actor}轻轻探出尾巴，用尾巴紧紧缠住了{target}的尾巴，尾巴尖还满足地蹭了蹭喵~",
+      enabled: "猫娘游戏互动动作已开启喵~",
+      disabled: "猫娘游戏互动动作已关闭。",
+      unavailable: "当前无法执行尾巴互缠动作，请确认双方都装备了尾巴。",
+      status: [
+        "[猫娘游戏互动动作]",
+        "开关：{enabled}",
+        "动作：用尾巴缠住对方（BCNeko_TailEntwine）",
+        "条件：双方都检测到尾巴；不能对自己使用；不会修改任何物品。",
+      ],
+      help: [
+        "[猫娘帮助 / activity]",
+        "/neko activity on|off|status",
+        "在目标的臀部/尾巴区域打开互动动作，可看到“用尾巴缠住对方”。",
+        "双方都需要装备可识别的尾巴；动作只发送叙述，不改变角色物品。",
+      ],
+      mainHint: "游戏互动动作：/neko activity help",
+      settingsLabel: "游戏互动动作",
+    },
+    en: {
+      button: "Entwine tails",
+      action: "Entwine their tail with yours",
+      message: "{actor} gently reaches out with their tail and winds it tightly around {target}'s tail, the tip giving a satisfied little nuzzle, meow~",
+      enabled: "Neko game activities enabled, meow~",
+      disabled: "Neko game activities disabled.",
+      unavailable: "Tail entwining is unavailable. Make sure both characters have a recognized tail.",
+      status: [
+        "[Neko game activities]",
+        "Enabled: {enabled}",
+        "Activity: Entwine tails (BCNeko_TailEntwine)",
+        "Requirements: both characters need a detected tail; not self-targetable; no items are changed.",
+      ],
+      help: [
+        "[Neko help / activity]",
+        "/neko activity on|off|status",
+        "Open activities on the target's butt/tail area to find “Entwine tails”.",
+        "Both characters need a recognized tail. The activity sends narration only and changes no items.",
+      ],
+      mainHint: "Game activities: /neko activity help",
+      settingsLabel: "Game activities",
+    },
+  };
+
+  function nekoActivityText(key, params = {}) {
+    const locale = resolveUiLocale() === "zh-CN" ? "zh-CN" : "en";
+    const value = NEKO_ACTIVITY_I18N[locale]?.[key] ?? NEKO_ACTIVITY_I18N.en[key] ?? key;
+    return Array.isArray(value)
+      ? value.map((line) => formatTemplate(line, params))
+      : formatTemplate(value, params);
+  }
+
+  function characterHasRecognizedTail(character) {
+    return Array.isArray(character?.Appearance) && character.Appearance.some((item) => {
+      const group = String(item?.Asset?.Group?.Name || "");
+      const asset = String(item?.Asset?.Name || "");
+      if (/hair|ponytail/i.test(group)) return false;
+      if (/tail|尾巴|尾飾|尾饰/i.test(group)) return true;
+      return /^(ItemButt|ItemPelvis)$/i.test(group) && /tail|尾巴|尾飾|尾饰/i.test(asset);
+    });
+  }
+
+  function findChatRoomCharacter(memberNumber) {
+    const numeric = Number(memberNumber);
+    return Array.isArray(W.ChatRoomCharacter)
+      ? W.ChatRoomCharacter.find((character) => Number(character?.MemberNumber) === numeric) || null
+      : null;
+  }
+
+  function makeTailEntwineActionPayload(target) {
+    const actorName = getCharacterName(W.Player);
+    const targetName = getCharacterName(target);
+    const fallback = nekoActivityText("message", { actor: actorName, target: targetName });
+    return {
+      Type: "Action",
+      Content: NEKO_ACTIVITY_CUSTOM_ACTION,
+      Dictionary: [
+        { Tag: `MISSING TEXT IN "Interface.csv": ${NEKO_ACTIVITY_CUSTOM_ACTION}`, Text: fallback },
+        {
+          Tag: NEKO_ACTIVITY_MESSAGE_TAG,
+          data: JSON.stringify({
+            id: NEKO_TAIL_ENTWINE_ACTIVITY_ID,
+            actor: actorName,
+            target: targetName,
+          }),
+        },
+      ],
+    };
+  }
+
+  function rewriteNekoActivityMessage(data) {
+    const dictionary = Array.isArray(data?.Dictionary) ? data.Dictionary : null;
+    if (!dictionary) return false;
+    const marker = dictionary.find((entry) => entry?.Tag === NEKO_ACTIVITY_MESSAGE_TAG && typeof entry.data === "string");
+    if (!marker || marker.data.length > 1200) return false;
+    try {
+      const payload = JSON.parse(marker.data);
+      if (payload?.id !== NEKO_TAIL_ENTWINE_ACTIVITY_ID) return false;
+      const actor = String(payload.actor || "").slice(0, 80);
+      const target = String(payload.target || "").slice(0, 80);
+      if (!actor || !target) return false;
+      const localized = nekoActivityText("message", { actor, target });
+      const custom = dictionary.find((entry) => String(entry?.Tag || "").includes(NEKO_ACTIVITY_CUSTOM_ACTION));
+      if (custom) custom.Text = localized;
+      else data.Content = localized;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function outgoingNekoActivityName(message, payload) {
+    if (message !== "ChatRoomChat" || payload?.Type !== "Activity") return "";
+    return String(payload.Dictionary?.find((entry) => entry?.ActivityName)?.ActivityName || "");
+  }
+
+  function rewriteOutgoingNekoActivity(message, payload) {
+    const activityName = outgoingNekoActivityName(message, payload);
+    if (activityName !== NEKO_TAIL_ENTWINE_ACTIVITY_ID) return null;
+    const targetMemberNumber = payload.Dictionary?.find((entry) => entry?.TargetCharacter)?.TargetCharacter;
+    const target = findChatRoomCharacter(targetMemberNumber);
+    if (!target || Number(target.MemberNumber) === Number(W.Player?.MemberNumber)) return null;
+    if (!characterHasRecognizedTail(W.Player) || !characterHasRecognizedTail(target)) return null;
+    return makeTailEntwineActionPayload(target);
+  }
+
+  function nekoActivityDictionaryEntries() {
+    return new Map([
+      [`Activity${NEKO_TAIL_ENTWINE_ACTIVITY_ID}`, nekoActivityText("button")],
+      [`Label-ChatOther-ItemButt-${NEKO_TAIL_ENTWINE_ACTIVITY_ID}`, nekoActivityText("button")],
+      [`ChatOther-ItemButt-${NEKO_TAIL_ENTWINE_ACTIVITY_ID}`, nekoActivityText("action")],
+    ]);
+  }
+
+  function injectNekoActivityDictionary() {
+    const entries = nekoActivityDictionaryEntries();
+    try {
+      if (typeof ActivityDictionary !== "undefined" && Array.isArray(ActivityDictionary)) {
+        for (const [key, value] of entries) {
+          const existing = ActivityDictionary.find((entry) => Array.isArray(entry) && entry[0] === key);
+          if (existing) existing[1] = value;
+          else ActivityDictionary.push([key, value]);
+        }
+      }
+    } catch {}
+    if (nekoActivityTextCache?.cache) {
+      for (const [key, value] of entries) nekoActivityTextCache.cache[key] = value;
+    }
+  }
+
+  function installNekoActivityDictionary() {
+    injectNekoActivityDictionary();
+    if (nekoActivityDictionaryInstalled) return true;
+    try {
+      if (typeof TextPrefetchFile !== "function" || typeof ScreenFileGetPath !== "function") return true;
+      nekoActivityTextCache = TextPrefetchFile(ScreenFileGetPath("ActivityDictionary.csv", "Character", "Preference"));
+      if (!nekoActivityTextCache) return true;
+      const inject = () => injectNekoActivityDictionary();
+      if (typeof nekoActivityTextCache.onRebuild === "function") nekoActivityTextCache.onRebuild(inject, true);
+      else inject();
+      nekoActivityDictionaryInstalled = true;
+      return true;
+    } catch {
+      return true;
+    }
+  }
+
+  function getNekoActivityList() {
+    try {
+      if (typeof ActivityFemale3DCG !== "undefined" && Array.isArray(ActivityFemale3DCG)) return ActivityFemale3DCG;
+    } catch {}
+    return Array.isArray(W.ActivityFemale3DCG) ? W.ActivityFemale3DCG : null;
+  }
+
+  function registerNekoGameActivities() {
+    const activities = getNekoActivityList();
+    if (!activities) return false;
+    const existingIndex = activities.findIndex((activity) => activity?.Name === NEKO_TAIL_ENTWINE_ACTIVITY_ID);
+    if (!config.nekoGameActivitiesEnabled) {
+      if (existingIndex >= 0) activities.splice(existingIndex, 1);
+      return true;
+    }
+    installNekoActivityDictionary();
+    if (existingIndex >= 0) return true;
+    activities.push({
+      Name: NEKO_TAIL_ENTWINE_ACTIVITY_ID,
+      ActivityID: NEKO_TAIL_ENTWINE_ACTIVITY_NUMERIC_ID,
+      MaxProgress: 30,
+      MaxProgressSelf: 0,
+      Prerequisite: Object.values(NEKO_ACTIVITY_PREREQUISITES),
+      Target: ["ItemButt"],
+    });
+    console.log("[BC 猫娘增强] 尾巴互缠动作已注册");
+    return true;
+  }
+
+  function patchNekoActivityHooks() {
+    if (!bcModApi) return false;
+    if (!nekoActivityHooksPatched) {
+      try {
+        bcModApi.hookFunction("ActivityCheckPrerequisite", 4, (args, next) => {
+          const prerequisite = args[0];
+          if (prerequisite === NEKO_ACTIVITY_PREREQUISITES.enabled) return !!config.nekoGameActivitiesEnabled;
+          if (prerequisite === NEKO_ACTIVITY_PREREQUISITES.actorTail) return characterHasRecognizedTail(args[1]);
+          if (prerequisite === NEKO_ACTIVITY_PREREQUISITES.targetTail) return characterHasRecognizedTail(args[2]);
+          return next(args);
+        });
+        nekoActivityHooksPatched = true;
+      } catch (error) {
+        console.warn("[BC 猫娘增强] 互动动作前置条件 hook 尚未就绪:", error);
+        return false;
+      }
+    }
+
+    if (!nekoActivityButtonHookAttempted) {
+      nekoActivityButtonHookAttempted = true;
+      try {
+        bcModApi.hookFunction("ElementButton.CreateForActivity", 4, (args, next) => {
+          if (args[1]?.Activity?.Name === NEKO_TAIL_ENTWINE_ACTIVITY_ID) {
+            args[4] = args[4] || {};
+            args[4].image = NEKO_ACTIVITY_ICON_URL;
+          }
+          return next(args);
+        });
+      } catch (error) {
+        console.warn("[BC 猫娘增强] 互动动作图标 hook 不可用，继续使用游戏默认按钮:", error);
+      }
+    }
+    return true;
+  }
+
+  function setNekoGameActivitiesEnabled(enabled) {
+    config.nekoGameActivitiesEnabled = !!enabled;
+    saveConfig();
+    registerNekoGameActivities();
+    showToast(nekoActivityText(enabled ? "enabled" : "disabled"));
+    return true;
+  }
+
+  function getNekoGameActivityStatusLines() {
+    return nekoActivityText("status", {
+      enabled: imageUploadText(config.nekoGameActivitiesEnabled ? "settingsOn" : "settingsOff"),
+    });
+  }
+
+  function handleNekoGameActivityCommand(args = []) {
+    const action = String(args[0] || "help").trim().toLowerCase();
+    if (["on", "open", "enable", "开启", "开"].includes(action)) return setNekoGameActivitiesEnabled(true);
+    if (["off", "close", "disable", "关闭", "关"].includes(action)) return setNekoGameActivitiesEnabled(false);
+    if (action === "status" || action === "状态") {
+      sendNekoCommandNotice(getNekoGameActivityStatusLines());
+      return true;
+    }
+    sendNekoCommandNotice(nekoActivityText("help"));
+    return true;
+  }
+
+  function currentImageUploadHost() {
+    return IMAGE_UPLOAD_HOSTS[config.imageUploadHost] || IMAGE_UPLOAD_HOSTS.litterbox;
+  }
+
+  function formatImageUploadBytes(bytes) {
+    const megabytes = Number(bytes || 0) / (1024 * 1024);
+    return `${Number.isInteger(megabytes) ? megabytes : megabytes.toFixed(1)}MB`;
+  }
+
+  function isSupportedImageFile(file) {
+    if (!file) return false;
+    const type = String(file.type || "").toLowerCase();
+    if (type && IMAGE_UPLOAD_VALID_TYPES.has(type)) return true;
+    const extension = String(file.name || "").split(".").pop()?.toLowerCase() || "";
+    return IMAGE_UPLOAD_VALID_EXTENSIONS.has(extension);
+  }
+
+  function normalizeImageUploadUrl(value) {
+    const url = String(value || "").trim();
+    if (!/^https:\/\//i.test(url)) throw new Error("upload service returned an invalid URL");
+    return url;
+  }
+
+  function insertImageUploadUrls(urls) {
+    const input = getChatInput();
+    if (!input) {
+      sendNekoCommandNotice(imageUploadText("noInput"));
+      return false;
+    }
+    const payload = urls.map((url) => `(${url})`).join(" ");
+    const oldValue = input.value || "";
+    const start = Number.isFinite(input.selectionStart) ? input.selectionStart : oldValue.length;
+    const end = Number.isFinite(input.selectionEnd) ? input.selectionEnd : oldValue.length;
+    const before = oldValue.slice(0, start);
+    const after = oldValue.slice(end);
+    const prefix = before && !/\s$/.test(before) ? " " : "";
+    const suffix = after && !/^\s/.test(after) ? " " : "";
+    input.value = `${before}${prefix}${payload}${suffix}${after}`;
+    input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    input.focus();
+    const cursor = before.length + prefix.length + payload.length;
+    input.setSelectionRange?.(cursor, cursor);
+    return true;
+  }
+
+  async function imageUploadFetch(url, options = {}) {
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timeout = controller ? setTimeout(() => controller.abort(), 120000) : 0;
+    try {
+      return await fetch(url, { ...options, signal: controller?.signal });
+    } catch (error) {
+      if (error?.name === "AbortError") throw new Error("upload timed out");
+      throw error;
+    } finally {
+      if (timeout) clearTimeout(timeout);
+    }
+  }
+
+  async function uploadImageToLitterbox(file) {
+    const form = new FormData();
+    form.append("reqtype", "fileupload");
+    form.append("time", "12h");
+    form.append("fileToUpload", file);
+    const response = await imageUploadFetch("https://litterbox.catbox.moe/resources/internals/api.php", {
+      method: "POST",
+      body: form,
+    });
+    const text = (await response.text()).trim();
+    if (!response.ok) throw new Error(`HTTP ${response.status}${text ? `: ${text.slice(0, 120)}` : ""}`);
+    return normalizeImageUploadUrl(text);
+  }
+
+  async function uploadImageToUguu(file) {
+    const form = new FormData();
+    form.append("files[]", file);
+    const response = await imageUploadFetch("https://bc-img-upload-uguu.awdrrawd1.workers.dev/", {
+      method: "POST",
+      body: form,
+    });
+    const json = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(json?.description || `HTTP ${response.status}`);
+    if (!json?.success || !json.files?.[0]?.url) throw new Error(json?.description || "Uguu returned no URL");
+    return normalizeImageUploadUrl(json.files[0].url);
+  }
+
+  async function uploadImageToImgBB(file) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("expiration", "43200");
+    const response = await imageUploadFetch("https://bc-img-upload-imgbb.awdrrawd1.workers.dev/", {
+      method: "POST",
+      body: form,
+    });
+    const text = await response.text();
+    const json = JSON.parse(text);
+    if (!response.ok) throw new Error(json?.error || `HTTP ${response.status}`);
+    if (!json?.success || !json.link) throw new Error(json?.error || "ImgBB returned no URL");
+    return normalizeImageUploadUrl(json.link);
+  }
+
+  async function uploadImageToTmpFiles(file) {
+    const form = new FormData();
+    form.append("file", file);
+    const response = await imageUploadFetch("https://tmpfiles.org/api/v1/upload", {
+      method: "POST",
+      body: form,
+    });
+    const json = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(json?.message || `HTTP ${response.status}`);
+    const url = json?.data?.url;
+    if (!url) throw new Error("TmpFiles returned no URL");
+    return normalizeImageUploadUrl(String(url).replace("tmpfiles.org/", "tmpfiles.org/dl/"));
+  }
+
+  async function uploadImageToCloudflare(file) {
+    const form = new FormData();
+    form.append("file", file);
+    const response = await imageUploadFetch("https://liko-image-upload-cloudflare.awdrrawd1.workers.dev", {
+      method: "POST",
+      body: form,
+    });
+    const json = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(json?.error || `HTTP ${response.status}`);
+    if (!json?.success || !json.url) throw new Error(json?.error || "Cloudflare R2 returned no URL");
+    return normalizeImageUploadUrl(json.url);
+  }
+
+  async function uploadImageFile(file, hostId = config.imageUploadHost) {
+    if (hostId === "uguu") return uploadImageToUguu(file);
+    if (hostId === "imgbb") return uploadImageToImgBB(file);
+    if (hostId === "tmpfiles") return uploadImageToTmpFiles(file);
+    if (hostId === "cloudflare") return uploadImageToCloudflare(file);
+    return uploadImageToLitterbox(file);
+  }
+
+  function ensureImageUploadPrivacyNotice() {
+    if (config.imageUploadPrivacyAcknowledged) return;
+    config.imageUploadPrivacyAcknowledged = true;
+    saveConfig();
+    sendNekoCommandNotice(imageUploadText("privacy"), 30000);
+  }
+
+  async function uploadImageFiles(files) {
+    if (W.CurrentScreen !== "ChatRoom" || !W.ChatRoomData) {
+      sendNekoCommandNotice(imageUploadText("chatOnly"));
+      return false;
+    }
+    if (imageUploadBusy) {
+      showToast(imageUploadText("busy"));
+      return false;
+    }
+
+    const sourceFiles = Array.from(files || []);
+    if (sourceFiles.length > IMAGE_UPLOAD_MAX_FILES) {
+      sendNekoCommandNotice(imageUploadText("tooMany", { count: IMAGE_UPLOAD_MAX_FILES }));
+    }
+    const hostId = config.imageUploadHost;
+    const host = IMAGE_UPLOAD_HOSTS[hostId] || IMAGE_UPLOAD_HOSTS.litterbox;
+    const accepted = [];
+    for (const file of sourceFiles.slice(0, IMAGE_UPLOAD_MAX_FILES)) {
+      if (!isSupportedImageFile(file)) {
+        sendNekoCommandNotice(imageUploadText("invalidType", { name: file?.name || "image" }));
+        continue;
+      }
+      if (Number(file.size || 0) > host.maxBytes) {
+        sendNekoCommandNotice(imageUploadText("tooLarge", {
+          name: file.name || "image",
+          limit: formatImageUploadBytes(host.maxBytes),
+        }));
+        continue;
+      }
+      accepted.push(file);
+    }
+    if (!accepted.length) return false;
+
+    ensureImageUploadPrivacyNotice();
+    imageUploadBusy = true;
+    const urls = [];
+    try {
+      for (let index = 0; index < accepted.length; index++) {
+        const file = accepted[index];
+        showToast(imageUploadText("uploading", {
+          host: host.label,
+          index: index + 1,
+          total: accepted.length,
+          name: file.name || "image",
+        }));
+        try {
+          urls.push(await uploadImageFile(file, hostId));
+        } catch (error) {
+          sendNekoCommandNotice(imageUploadText("failed", {
+            name: file.name || "image",
+            error: String(error?.message || error || "unknown error").slice(0, 180),
+          }));
+        }
+      }
+    } finally {
+      imageUploadBusy = false;
+    }
+
+    if (!urls.length) {
+      sendNekoCommandNotice(imageUploadText("allFailed"));
+      return false;
+    }
+    if (!insertImageUploadUrls(urls)) return false;
+    sendNekoCommandNotice(imageUploadText("inserted", { count: urls.length }));
+    return true;
+  }
+
+  function imageUploadHasFiles(event) {
+    return Array.from(event?.dataTransfer?.types || []).includes("Files");
+  }
+
+  function isImageUploadDropTarget(target) {
+    const input = getChatInput();
+    if (input && (target === input || input.contains?.(target))) return true;
+    const chatLog = document.getElementById("TextAreaChatLog");
+    return !!(chatLog && target instanceof Node && chatLog.contains(target));
+  }
+
+  function markImageUploadDragActive() {
+    document.body?.classList.add("bcn-image-drag-active");
+    clearTimeout(imageDragTimer);
+    imageDragTimer = setTimeout(() => document.body?.classList.remove("bcn-image-drag-active"), 180);
+  }
+
+  function clearImageUploadDragActive() {
+    clearTimeout(imageDragTimer);
+    imageDragTimer = 0;
+    document.body?.classList.remove("bcn-image-drag-active");
+  }
+
+  function createImageUploadFileInput() {
+    let input = document.getElementById("bcn-image-upload-input");
+    if (input) return input;
+    input = document.createElement("input");
+    input.id = "bcn-image-upload-input";
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/gif,image/bmp,image/webp";
+    input.multiple = true;
+    input.hidden = true;
+    input.addEventListener("change", () => {
+      const files = Array.from(input.files || []);
+      input.value = "";
+      if (files.length) void uploadImageFiles(files);
+    });
+    document.body.appendChild(input);
+    return input;
+  }
+
+  function openImageUploadFilePicker() {
+    if (!config.imageUploadEnabled) {
+      showToast(imageUploadText("enableFirst"));
+      return false;
+    }
+    if (W.CurrentScreen !== "ChatRoom") {
+      showToast(imageUploadText("chatOnly"));
+      return false;
+    }
+    showToast(imageUploadText("pickerOpened"));
+    createImageUploadFileInput().click();
+    return true;
+  }
+
+  function bindImageUploadEvents() {
+    if (imageUploadEventsBound) return;
+    imageUploadEventsBound = true;
+
+    document.addEventListener("dragover", (event) => {
+      if (!config.imageUploadEnabled || W.CurrentScreen !== "ChatRoom") return;
+      if (!imageUploadHasFiles(event) || !isImageUploadDropTarget(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+      markImageUploadDragActive();
+    });
+
+    document.addEventListener("drop", (event) => {
+      if (!config.imageUploadEnabled || W.CurrentScreen !== "ChatRoom") return;
+      if (!event.dataTransfer?.files?.length || !isImageUploadDropTarget(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      clearImageUploadDragActive();
+      void uploadImageFiles(event.dataTransfer.files);
+    });
+
+    document.addEventListener("paste", (event) => {
+      if (!config.imageUploadEnabled || !config.imagePasteEnabled || W.CurrentScreen !== "ChatRoom") return;
+      const input = getChatInput();
+      if (!input || document.activeElement !== input || !event.clipboardData) return;
+      const files = Array.from(event.clipboardData.items || [])
+        .filter((item) => String(item.type || "").startsWith("image/"))
+        .map((item) => item.getAsFile())
+        .filter(Boolean);
+      if (!files.length) return;
+      event.preventDefault();
+      event.stopPropagation();
+      void uploadImageFiles(files);
+    });
+  }
+
+  function setImageUploadEnabled(enabled) {
+    config.imageUploadEnabled = !!enabled;
+    saveConfig();
+    if (enabled) ensureImageUploadPrivacyNotice();
+    else clearImageUploadDragActive();
+    showToast(imageUploadText(enabled ? "enabled" : "disabled"));
+    return true;
+  }
+
+  function setImagePasteEnabled(enabled) {
+    config.imagePasteEnabled = !!enabled;
+    saveConfig();
+    showToast(imageUploadText(enabled ? "pasteEnabled" : "pasteDisabled"));
+    return true;
+  }
+
+  function setImageUploadHost(hostId) {
+    const normalized = String(hostId || "").trim().toLowerCase();
+    if (!IMAGE_UPLOAD_HOST_IDS.includes(normalized)) {
+      sendNekoCommandNotice(imageUploadText("unknownHost", {
+        host: normalized || "-",
+        hosts: IMAGE_UPLOAD_HOST_IDS.join(" / "),
+      }));
+      return false;
+    }
+    config.imageUploadHost = normalized;
+    saveConfig();
+    const host = currentImageUploadHost();
+    showToast(imageUploadText("hostChanged", { host: host.label, retention: host.retention }));
+    return true;
+  }
+
+  function getImageUploadStatusLines() {
+    const host = currentImageUploadHost();
+    return imageUploadText("status", {
+      enabled: imageUploadText(config.imageUploadEnabled ? "settingsOn" : "settingsOff"),
+      paste: imageUploadText(config.imagePasteEnabled ? "settingsOn" : "settingsOff"),
+      host: host.label,
+      retention: host.retention,
+      maxFiles: IMAGE_UPLOAD_MAX_FILES,
+      maxSize: formatImageUploadBytes(host.maxBytes),
+    });
+  }
+
+  function handleImageUploadCommand(args = []) {
+    const action = String(args[0] || "help").trim().toLowerCase();
+    if (["on", "open", "enable", "开启", "开"].includes(action)) return setImageUploadEnabled(true);
+    if (["off", "close", "disable", "关闭", "关"].includes(action)) return setImageUploadEnabled(false);
+    if (action === "status" || action === "状态") {
+      sendNekoCommandNotice(getImageUploadStatusLines());
+      return true;
+    }
+    if (action === "host" || action === "web" || action === "图床") {
+      if (!args[1]) {
+        sendNekoCommandNotice(getImageUploadStatusLines());
+        return true;
+      }
+      return setImageUploadHost(args[1]);
+    }
+    if (action === "paste" || action === "粘贴" || action === "貼上") {
+      const value = String(args[1] || "status").toLowerCase();
+      if (["on", "open", "enable", "开启", "开"].includes(value)) return setImagePasteEnabled(true);
+      if (["off", "close", "disable", "关闭", "关"].includes(value)) return setImagePasteEnabled(false);
+      sendNekoCommandNotice(getImageUploadStatusLines());
+      return true;
+    }
+    if (action === "pick" || action === "upload" || action === "选择" || action === "上传") {
+      return openImageUploadFilePicker();
+    }
+    sendNekoCommandNotice(imageUploadText("help"));
+    return true;
+  }
+
   function sendNekoCommandNotice(lines, duration = 20000) {
     const text = Array.isArray(lines) ? lines.join("\n") : String(lines || "");
     if (!text) return false;
@@ -1900,6 +2696,15 @@
       "\u732b\u5a18rp": "rp",
       action: "action",
       "\u52a8\u4f5c": "action",
+      image: "image",
+      img: "image",
+      upload: "image",
+      "\u56fe\u7247": "image",
+      "\u4e0a\u4f20": "image",
+      activity: "gameactivity",
+      activities: "gameactivity",
+      gameactivity: "gameactivity",
+      "\u4e92\u52a8\u52a8\u4f5c": "gameactivity",
       escape: "escape",
       easy: "escape",
       pick: "escape",
@@ -2356,6 +3161,8 @@
   function getNekoHelpLines(section = "main") {
     const group = normalizeNekoHelpSection(section);
     if (group === "escape") return getEscapeHelpLines();
+    if (group === "image") return imageUploadText("help");
+    if (group === "gameactivity") return nekoActivityText("help");
     if (group === "action") {
       return tLines("help.action", { targetMode: getActionTargetModeLabel() });
     }
@@ -2365,7 +3172,10 @@
     }
     const key = ["rp", "emoji", "mode", "spark", "voice", "reactions", "mood", "systems", "status"]
       .includes(group) ? `help.${group}` : "help.main";
-    return tLines(key);
+    const lines = tLines(key);
+    return group === "main"
+      ? lines.concat(imageUploadText("mainHint"), nekoActivityText("mainHint"))
+      : lines;
   }
 
   function isNekoCommandText(text) {
@@ -2384,6 +3194,12 @@
     if (!isNekoCommandText(text)) return false;
     const parts = String(text || "").trim().split(/\s+/).filter(Boolean);
     const subcommand = String(parts[1] || "").toLowerCase();
+    if (subcommand === "image" || subcommand === "img" || subcommand === "upload" || subcommand === "\u56fe\u7247" || subcommand === "\u4e0a\u4f20") {
+      return handleImageUploadCommand(parts.slice(2));
+    }
+    if (subcommand === "activity" || subcommand === "activities" || subcommand === "gameactivity" || subcommand === "\u4e92\u52a8\u52a8\u4f5c") {
+      return handleNekoGameActivityCommand(parts.slice(2));
+    }
     if (subcommand === "escape") return handleEscapeSubcommand(parts.slice(2));
     if (subcommand === "easy") return handleEasySubcommand(parts.slice(2));
     if (subcommand === "pick") return handlePickSubcommand();
@@ -3649,7 +4465,10 @@
     installObserver();
     patchStatusBadge();
     patchRoomEffects();
+    patchNekoActivityHooks();
+    registerNekoGameActivities();
     registerSettingsUI();
+    registerImageUploadSettingsUI();
     syncScreenClass();
     if (shouldRenderWheel()) renderWheel();
     scheduleDecorateChat();
@@ -4081,6 +4900,88 @@
     return { load, run, click, unload, exit };
   })();
 
+  const ImageUploadSettingsUI = (() => {
+    const exitButton = { x: 1830, y: 60, w: 72, h: 72 };
+    const enabledButton = { x: 280, y: 255, w: 620, h: 105 };
+    const pasteButton = { x: 1100, y: 255, w: 620, h: 105 };
+    const hostButton = { x: 280, y: 470, w: 1440, h: 115 };
+    const activityButton = { x: 280, y: 660, w: 620, h: 105 };
+    const pickButton = { x: 1100, y: 660, w: 620, h: 105 };
+
+    function load() {}
+    function unload() {}
+    function exit() {}
+
+    function run() {
+      W.DrawRect?.(0, 0, 2000, 1000, "#fff5f9");
+      W.DrawRect?.(35, 35, 1930, 900, "#ffffff");
+      W.DrawTextFit?.(imageUploadText("settingsTitle"), 1000, 105, 1180, "#8a3f5b");
+      W.DrawButton?.(exitButton.x, exitButton.y, exitButton.w, exitButton.h, "", "White", "Icons/Exit.png", imageUploadText("settingsBack"));
+      drawButton(
+        enabledButton.x,
+        enabledButton.y,
+        enabledButton.w,
+        enabledButton.h,
+        `${imageUploadText("settingsEnabled")}：${imageUploadText(config.imageUploadEnabled ? "settingsOn" : "settingsOff")}`,
+        config.imageUploadEnabled ? "#d9f7e8" : "#ffe3ec",
+      );
+      drawButton(
+        pasteButton.x,
+        pasteButton.y,
+        pasteButton.w,
+        pasteButton.h,
+        `${imageUploadText("settingsPaste")}：${imageUploadText(config.imagePasteEnabled ? "settingsOn" : "settingsOff")}`,
+        config.imagePasteEnabled ? "#d9f7e8" : "#ffe3ec",
+      );
+      drawButton(
+        hostButton.x,
+        hostButton.y,
+        hostButton.w,
+        hostButton.h,
+        imageUploadText("settingsHost", { host: currentImageUploadHost().label }),
+        "#eef8ff",
+      );
+      drawButton(
+        activityButton.x,
+        activityButton.y,
+        activityButton.w,
+        activityButton.h,
+        `${nekoActivityText("settingsLabel")}：${imageUploadText(config.nekoGameActivitiesEnabled ? "settingsOn" : "settingsOff")}`,
+        config.nekoGameActivitiesEnabled ? "#e8ddff" : "#ffe3ec",
+      );
+      drawButton(pickButton.x, pickButton.y, pickButton.w, pickButton.h, imageUploadText("settingsPick"), "#fff1c9");
+      drawLabel(imageUploadText("settingsHint"), 300, 840, 1400, "#8a3f5b", 25);
+      drawLabel(imageUploadText("settingsPrivacy"), 300, 890, 1400, "#b34d6d", 22);
+    }
+
+    function click() {
+      if (W.MouseIn?.(exitButton.x, exitButton.y, exitButton.w, exitButton.h)) {
+        W.PreferenceExit?.();
+        return;
+      }
+      if (W.MouseIn?.(enabledButton.x, enabledButton.y, enabledButton.w, enabledButton.h)) {
+        setImageUploadEnabled(!config.imageUploadEnabled);
+        return;
+      }
+      if (W.MouseIn?.(pasteButton.x, pasteButton.y, pasteButton.w, pasteButton.h)) {
+        setImagePasteEnabled(!config.imagePasteEnabled);
+        return;
+      }
+      if (W.MouseIn?.(hostButton.x, hostButton.y, hostButton.w, hostButton.h)) {
+        const current = IMAGE_UPLOAD_HOST_IDS.indexOf(config.imageUploadHost);
+        setImageUploadHost(IMAGE_UPLOAD_HOST_IDS[(current + 1) % IMAGE_UPLOAD_HOST_IDS.length]);
+        return;
+      }
+      if (W.MouseIn?.(activityButton.x, activityButton.y, activityButton.w, activityButton.h)) {
+        setNekoGameActivitiesEnabled(!config.nekoGameActivitiesEnabled);
+        return;
+      }
+      if (W.MouseIn?.(pickButton.x, pickButton.y, pickButton.w, pickButton.h)) openImageUploadFilePicker();
+    }
+
+    return { load, run, click, unload, exit };
+  })();
+
   function registerSettingsUI() {
     if (settingsRegistered || typeof W.PreferenceRegisterExtensionSetting !== "function") return false;
     W.PreferenceRegisterExtensionSetting({
@@ -4095,6 +4996,23 @@
     });
     settingsRegistered = true;
     console.log("[BC 猫娘增强] 扩展组件设置页已注册");
+    return true;
+  }
+
+  function registerImageUploadSettingsUI() {
+    if (imageUploadSettingsRegistered || typeof W.PreferenceRegisterExtensionSetting !== "function") return false;
+    W.PreferenceRegisterExtensionSetting({
+      Identifier: `${MOD_ID}MediaActivities`,
+      ButtonText: imageUploadText("settingsButton"),
+      Image: "Icons/Chat.png",
+      load: () => ImageUploadSettingsUI.load(),
+      run: () => ImageUploadSettingsUI.run(),
+      click: () => ImageUploadSettingsUI.click(),
+      unload: () => ImageUploadSettingsUI.unload(),
+      exit: () => ImageUploadSettingsUI.exit(),
+    });
+    imageUploadSettingsRegistered = true;
+    console.log("[BC 猫娘增强] 图片与互动设置页已注册");
     return true;
   }
 
@@ -4992,6 +5910,13 @@
         transform: translateX(-50%) translateY(0);
       }
 
+      body.bcn-image-drag-active #InputChat,
+      body.bcn-image-drag-active #TextAreaChatLog {
+        outline: 3px dashed var(--bcn-accent) !important;
+        outline-offset: -5px;
+        box-shadow: 0 0 0 6px var(--bcn-glow), 0 12px 34px rgba(0, 0, 0, 0.2) !important;
+      }
+
       .bcn-rain-drop {
         position: fixed;
         top: -48px;
@@ -5024,6 +5949,7 @@
     installStyles();
     createPanel();
     registerModSdk();
+    bindImageUploadEvents();
     loadRemoteActionLibrary();
     loadRemoteComposerLibrary();
     loadRemoteKaomojiLibrary();
@@ -5035,8 +5961,10 @@
       const chatReady = patchBC();
       const badgeReady = patchStatusBadge();
       const roomReady = patchRoomEffects();
+      const activityHooksReady = patchNekoActivityHooks();
+      const activitiesReady = registerNekoGameActivities();
       const commandReady = registerNekoCommands();
-      if (chatReady && badgeReady && roomReady && commandReady) {
+      if (chatReady && badgeReady && roomReady && activityHooksReady && activitiesReady && commandReady) {
         clearInterval(patchTimer);
         startMaintenance();
       }

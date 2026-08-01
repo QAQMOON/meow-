@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer
 // @namespace    https://penyo.ru/
-// @version      2.13.0-dev.1
+// @version      2.13.0-dev.2
 // @description  Bondage Club 猫娘消息转换、聊天室美化、猫爪表情雨和动作快捷轮盘
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -172,7 +172,7 @@
   const SUPPORTED_CONTENT_LOCALES = ["zh-CN", "en"];
   const INITIAL_CONTENT_LOCALE = normalizeLocale(BOOTSTRAP.defaultContentLocale) || "zh-CN";
   const MOD_ID = "BCNekoEnhancer";
-  const VERSION = "2.13.0-dev.1";
+  const VERSION = "2.13.0-dev.2";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
   const CONTENT_BASE_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/content";
@@ -2674,7 +2674,7 @@
       pickerOpened: "请选择要上传的图片喵~",
       privacy: "图片会原样上传到第三方图床，可能包含 EXIF 等元数据；获得链接的人均可访问。",
       status: [
-        "[猫娘图片上传 / Dev]",
+        "[猫娘图片上传]",
         "拖放上传：{enabled}",
         "剪贴板上传：{paste}",
         "当前图床：{host} | 预计保存：{retention}",
@@ -2689,9 +2689,9 @@
         "/neko image pick  - 打开文件选择器",
         "启用后可把桌面图片拖到聊天输入框，也可在输入框聚焦时粘贴图片。",
       ],
-      mainHint: "Dev 图片上传：/neko image help",
-      settingsButton: "猫娘实验功能",
-      settingsTitle: "猫 娘 实 验 功 能（Dev）",
+      mainHint: "图片上传：/neko image help",
+      settingsButton: "猫娘图片与互动",
+      settingsTitle: "猫 娘 图 片 与 互 动",
       settingsEnabled: "拖放上传",
       settingsPaste: "剪贴板上传",
       settingsHost: "当前图床：{host}",
@@ -2723,7 +2723,7 @@
       pickerOpened: "Choose images to upload, meow~",
       privacy: "Images are uploaded unchanged to a third-party host and may contain EXIF metadata. Anyone with the link can access them.",
       status: [
-        "[Neko image upload / Dev]",
+        "[Neko image upload]",
         "Drag-and-drop upload: {enabled}",
         "Clipboard upload: {paste}",
         "Current host: {host} | Expected retention: {retention}",
@@ -2738,9 +2738,9 @@
         "/neko image pick  - open the file picker",
         "When enabled, drop desktop images onto the chat input or paste while the chat input is focused.",
       ],
-      mainHint: "Dev image upload: /neko image help",
-      settingsButton: "Neko experiments",
-      settingsTitle: "N E K O   E X P E R I M E N T S  (Dev)",
+      mainHint: "Image upload: /neko image help",
+      settingsButton: "Neko image & activities",
+      settingsTitle: "N E K O   I M A G E   &   A C T I V I T I E S",
       settingsEnabled: "Drag-and-drop upload",
       settingsPaste: "Clipboard upload",
       settingsHost: "Current host: {host}",
@@ -2770,7 +2770,7 @@
       disabled: "猫娘游戏互动动作已关闭。",
       unavailable: "当前无法执行尾巴互缠动作，请确认双方都装备了尾巴。",
       status: [
-        "[猫娘游戏互动动作 / Dev]",
+        "[猫娘游戏互动动作]",
         "开关：{enabled}",
         "动作：用尾巴缠住对方（BCNeko_TailEntwine）",
         "条件：双方都检测到尾巴；不能对自己使用；不会修改任何物品。",
@@ -2781,7 +2781,7 @@
         "在目标的臀部/尾巴区域打开互动动作，可看到“用尾巴缠住对方”。",
         "双方都需要装备可识别的尾巴；动作只发送叙述，不改变角色物品。",
       ],
-      mainHint: "Dev 游戏互动动作：/neko activity help",
+      mainHint: "游戏互动动作：/neko activity help",
       settingsLabel: "游戏互动动作",
     },
     en: {
@@ -2792,7 +2792,7 @@
       disabled: "Neko game activities disabled.",
       unavailable: "Tail entwining is unavailable. Make sure both characters have a recognized tail.",
       status: [
-        "[Neko game activities / Dev]",
+        "[Neko game activities]",
         "Enabled: {enabled}",
         "Activity: Entwine tails (BCNeko_TailEntwine)",
         "Requirements: both characters need a detected tail; not self-targetable; no items are changed.",
@@ -2803,7 +2803,7 @@
         "Open activities on the target's butt/tail area to find “Entwine tails”.",
         "Both characters need a recognized tail. The activity sends narration only and changes no items.",
       ],
-      mainHint: "Dev game activities: /neko activity help",
+      mainHint: "Game activities: /neko activity help",
       settingsLabel: "Game activities",
     },
   };
@@ -2956,7 +2956,7 @@
       Prerequisite: Object.values(NEKO_ACTIVITY_PREREQUISITES),
       Target: ["ItemButt"],
     });
-    console.log("[BC 猫娘增强] Dev 尾巴互缠动作已注册");
+    console.log("[BC 猫娘增强] 尾巴互缠动作已注册");
     return true;
   }
 
@@ -2973,7 +2973,7 @@
         });
         nekoActivityHooksPatched = true;
       } catch (error) {
-        console.warn("[BC 猫娘增强] Dev 互动动作前置条件 hook 尚未就绪:", error);
+        console.warn("[BC 猫娘增强] 互动动作前置条件 hook 尚未就绪:", error);
         return false;
       }
     }
@@ -2989,7 +2989,7 @@
           return next(args);
         });
       } catch (error) {
-        console.warn("[BC 猫娘增强] Dev 互动动作图标 hook 不可用，继续使用游戏默认按钮:", error);
+        console.warn("[BC 猫娘增强] 互动动作图标 hook 不可用，继续使用游戏默认按钮:", error);
       }
     }
     return true;
@@ -6614,7 +6614,7 @@
   function registerImageUploadSettingsUI() {
     if (imageUploadSettingsRegistered || typeof W.PreferenceRegisterExtensionSetting !== "function") return false;
     W.PreferenceRegisterExtensionSetting({
-      Identifier: `${MOD_ID}Experiments`,
+      Identifier: `${MOD_ID}MediaActivities`,
       ButtonText: imageUploadText("settingsButton"),
       Image: "Icons/Chat.png",
       load: () => ImageUploadSettingsUI.load(),
@@ -6624,7 +6624,7 @@
       exit: () => ImageUploadSettingsUI.exit(),
     });
     imageUploadSettingsRegistered = true;
-    console.log("[BC 猫娘增强] Dev 图片上传设置页已注册");
+    console.log("[BC 猫娘增强] 图片与互动设置页已注册");
     return true;
   }
 

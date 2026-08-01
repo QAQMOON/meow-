@@ -1,6 +1,6 @@
 {
-  "release": "3.2.0",
-  "stableRuntime": "2.12.0",
+  "release": "3.3.0",
+  "stableRuntime": "2.13.0",
   "stableSource": "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js",
   "devSource": "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.dev.runtime.js",
   "icon": "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/assets/neko-icon.png"

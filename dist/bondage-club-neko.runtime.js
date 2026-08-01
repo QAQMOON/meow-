@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer
 // @namespace    https://penyo.ru/
-// @version      2.12.0
+// @version      2.13.0
 // @description  Bondage Club 猫娘插件 FUSAM/CDN 跳板；从 CDN 加载完整正式版核心
 // @author       Penyo (Modified)
 // @match        *://www.bondageprojects.com/club_game*
@@ -31,11 +31,11 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.12.0";
+  const VERSION = "2.13.0";
   const SOURCES = [
-    `https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.12.0`,
-    `https://fastly.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.12.0`,
-    `https://gcore.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.12.0`,
+    `https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.13.0`,
+    `https://fastly.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.13.0`,
+    `https://gcore.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.13.0`,
   ];
 
   function fetchText(url) {

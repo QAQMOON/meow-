@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bondage Club Neko Chat Enhancer (Dev)
 // @namespace    https://penyo.ru/
-// @version      3.0.5
-// @description  Bondage Club 猫娘增强动态加载测试版；刷新游戏时自动拉取 GitHub 最新测试主体
+// @version      3.3.0-dev.4
+// @description  Bondage Club 猫娘增强 i18n 测试版；动态加载实验系统、双语 UI 与双语输出
 // @author       Penyo (Modified)
 // @icon         https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/assets/neko-icon.png
 // @icon64       https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/assets/neko-icon-64.png

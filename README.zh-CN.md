@@ -66,7 +66,7 @@ Bug 版只建议用油猴安装，用来测试 RP 语气包等实验功能；不
 
 动作文案放在：
 
-https://github.com/QAQMOON/meow-/blob/main/actions/catgirl-actions.json
+https://github.com/QAQMOON/meow-/blob/main/content/zh-CN/actions.json
 
 插件启动时会尝试从 GitHub 加载动作库；如果加载失败，会使用上次缓存，缓存也没有时会使用内置默认动作。
 
@@ -92,7 +92,7 @@ https://github.com/QAQMOON/meow-/blob/main/actions/catgirl-actions.json
 
 颜文字库放在：
 
-https://github.com/QAQMOON/meow-/blob/main/kaomoji/cute-kaomoji.json
+https://github.com/QAQMOON/meow-/blob/main/content/shared/kaomoji.json
 
 插件启动时会尝试从 GitHub 加载颜文字库；如果加载失败，会使用上次缓存，缓存也没有时会使用内置默认猫猫颜文字。
 

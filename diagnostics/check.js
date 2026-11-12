@@ -40,13 +40,13 @@ const resources = [
   {
     id: "actions",
     name: "远程动作库",
-    url: `${RAW_BASE}actions/catgirl-actions.json`,
+    url: `${RAW_BASE}content/zh-CN/actions.json`,
     kind: "actions",
   },
   {
     id: "kaomoji",
     name: "远程颜文字库",
-    url: `${RAW_BASE}kaomoji/cute-kaomoji.json`,
+    url: `${RAW_BASE}content/shared/kaomoji.json`,
     kind: "kaomoji",
   },
 ];

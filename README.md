@@ -65,7 +65,7 @@ If GitHub is temporarily unreachable, the plugin will try to use the last succes
 
 Action templates are stored at:
 
-https://github.com/QAQMOON/meow-/blob/main/actions/catgirl-actions.json
+https://github.com/QAQMOON/meow-/blob/main/content/zh-CN/actions.json
 
 The plugin tries to load the action library from GitHub on startup; if loading fails, it uses the last cache, or built-in default actions if there's no cache.
 
@@ -91,7 +91,7 @@ To add a new action theme, append an item to the `actions` array:
 
 Kaomoji library is stored at:
 
-https://github.com/QAQMOON/meow-/blob/main/kaomoji/cute-kaomoji.json
+https://github.com/QAQMOON/meow-/blob/main/content/shared/kaomoji.json
 
 The plugin tries to load the kaomoji library from GitHub on startup; if loading fails, it uses the last cache, or built-in default cat kaomoji if there's no cache.
 

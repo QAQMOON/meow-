@@ -37,10 +37,11 @@
   const VERSION = "2.10.8";
   const STORE_KEY = "bcNekoEnhancer.config.v2";
   const MOD_SDK_URL = "https://cdn.jsdelivr.net/npm/bondage-club-mod-sdk@1.2.0/dist/bcmodsdk.js";
-  const ACTION_LIBRARY_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/actions/catgirl-actions.en.json";
+  const ACTION_LIBRARY_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/content/en/actions.json";
   const ACTION_LIBRARY_CACHE_KEY = "bcNekoEnhancer.actionLibrary.v1";
-  const KAOMOJI_LIBRARY_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/kaomoji/cute-kaomoji.json";
+  const KAOMOJI_LIBRARY_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/content/shared/kaomoji.json";
   const KAOMOJI_LIBRARY_CACHE_KEY = "bcNekoEnhancer.kaomojiLibrary.v1";
+  const KAOMOJI_GROUP_LABELS = { cat: "Cats", cute: "Cute", heart: "Hearts", shy: "Shy", happy: "Happy", sleepy: "Sleepy", clingy: "Clingy", kiss: "Kisses", pleading: "Pleading", surprised: "Surprised", smug: "Smug", comfort: "Comfort" };
   const PEER_SIGNAL_CONTENT = "BCNekoEnhancer.Hello";
   const PEER_SIGNAL_INTERVAL = 45000;
   const PEER_TTL = 300000;
@@ -455,7 +456,7 @@
         if (!items.length) return null;
         return {
           id: String(group.id || `group-${index}`).trim() || `group-${index}`,
-          label: String(group.label || group.id || "Kaomoji").trim().slice(0, 12),
+          label: String(KAOMOJI_GROUP_LABELS[group.id] || group.label || group.id || "Kaomoji").trim().slice(0, 12),
           enabled: group.enabled !== false,
           items,
         };
@@ -1872,7 +1873,7 @@
   }
 
   function editActions() {
-    window.open?.("https://github.com/QAQMOON/meow-/blob/main/actions/catgirl-actions.en.json", "_blank", "noopener");
+    window.open?.("https://github.com/QAQMOON/meow-/blob/main/content/en/actions.json", "_blank", "noopener");
     showToast("Action library now managed via GitHub JSON meow~");
   }
 

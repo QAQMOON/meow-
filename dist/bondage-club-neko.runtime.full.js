@@ -221,58 +221,58 @@
   const THEME_PRESETS = {
     sakura: {
       label: "樱粉",
-      soft: "#fff1f6",
+      soft: "#fff5f7",
       panel: "#ffffff",
-      accent: "#f65086",
-      border: "#ffd4e2",
-      text: "#8a3f5b",
-      muted: "#9d7a86",
-      icon: "#f65086",
-      glow: "rgba(246, 80, 134, 0.22)",
+      accent: "#e98aa4",
+      border: "#f9d9e1",
+      text: "#7b4a58",
+      muted: "#92767f",
+      icon: "#f3a9bb",
+      glow: "rgba(233, 138, 164, 0.20)",
     },
     mint: {
       label: "薄荷",
-      soft: "#effff9",
+      soft: "#f1faf6",
       panel: "#ffffff",
-      accent: "#59cdb4",
-      border: "#c5eee4",
-      text: "#2f665c",
-      muted: "#668078",
-      icon: "#6fd8c4",
-      glow: "rgba(89, 205, 180, 0.20)",
+      accent: "#79bfa9",
+      border: "#cde9df",
+      text: "#3b5f55",
+      muted: "#687f78",
+      icon: "#a3d6c5",
+      glow: "rgba(121, 191, 169, 0.18)",
     },
     sky: {
       label: "天空",
-      soft: "#eef8ff",
+      soft: "#f1f7fc",
       panel: "#ffffff",
-      accent: "#64b8ee",
-      border: "#c8e5f8",
-      text: "#315f82",
-      muted: "#647b8c",
-      icon: "#8ed2f6",
-      glow: "rgba(100, 184, 238, 0.20)",
+      accent: "#82b2d6",
+      border: "#cfe2f1",
+      text: "#3e5a70",
+      muted: "#6a7d8c",
+      icon: "#a8cde6",
+      glow: "rgba(130, 178, 214, 0.18)",
     },
     cream: {
       label: "奶油",
-      soft: "#fff8df",
+      soft: "#fdf8ed",
       panel: "#ffffff",
-      accent: "#efbd75",
-      border: "#f1dfb3",
-      text: "#715b2f",
-      muted: "#85785d",
-      icon: "#efc49a",
-      glow: "rgba(239, 189, 117, 0.20)",
+      accent: "#d9a970",
+      border: "#f1e3c9",
+      text: "#6a563a",
+      muted: "#857a66",
+      icon: "#ebc79a",
+      glow: "rgba(217, 169, 112, 0.18)",
     },
     lavender: {
       label: "薰衣草",
-      soft: "#f7f0ff",
+      soft: "#f7f4fc",
       panel: "#ffffff",
-      accent: "#b58add",
-      border: "#decaf0",
-      text: "#604a7c",
-      muted: "#7e708e",
-      icon: "#cda7dc",
-      glow: "rgba(181, 138, 221, 0.20)",
+      accent: "#a898d0",
+      border: "#ddd5ee",
+      text: "#554a70",
+      muted: "#79718a",
+      icon: "#c4b7e1",
+      glow: "rgba(168, 152, 208, 0.18)",
     },
     tea: {
       label: "白茶",
@@ -4458,14 +4458,14 @@
   function installStyles() {
     addStyle(`
       body {
-        --bcn-soft: #fff1f6;
+        --bcn-soft: #fff5f7;
         --bcn-panel: #ffffff;
-        --bcn-accent: #f65086;
-        --bcn-border: #ffd4e2;
-        --bcn-text: #8a3f5b;
-        --bcn-muted: #9d7a86;
-        --bcn-icon: #f65086;
-        --bcn-glow: rgba(246, 80, 134, 0.22);
+        --bcn-accent: #e98aa4;
+        --bcn-border: #f9d9e1;
+        --bcn-text: #7b4a58;
+        --bcn-muted: #92767f;
+        --bcn-icon: #f3a9bb;
+        --bcn-glow: rgba(233, 138, 164, 0.20);
       }
 
       body.bcn-enabled #MainCanvas {

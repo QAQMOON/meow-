@@ -2141,14 +2141,30 @@
 
   function randomizeOriginalZayu(text) {
     if (typeof text !== "string" || !text.includes("杂鱼")) return text;
-    const variants = ["杂鱼～♡", "笨蛋杂鱼♡", "笨蛋"];
+    const variants = ["杂鱼～♡", "笨蛋杂鱼♡", "笨蛋", "杂鱼"];
     return text.replace(/杂鱼/g, () => variants[Math.floor(Math.random() * variants.length)]);
+  }
+
+  function replaceOriginalPhrases(text) {
+    if (typeof text !== "string") return text;
+    return text
+      .replace(/早上好/g, "早安喵")
+      .replace(/晚上好/g, "晚上好喵")
+      .replace(/晚安/g, "晚安喵")
+      .replace(/好的/g, "好哒喵")
+      .replace(/明白了/g, "明白啦喵")
+      .replace(/等一下/g, "稍等一下喵")
+      .replace(/欢迎回来/g, "欢迎回来喵")
+      .replace(/好饿/g, "肚子开始咕噜叫了喵");
   }
 
   function convertByType(type, text, options = {}) {
     if (!config.enabled || !text) return text;
     // Process original outgoing text before the normal word mappings.
-    if (options.outgoing && ["Chat", "Whisper", "Emote"].includes(type)) text = randomizeOriginalZayu(text);
+    if (options.outgoing && ["Chat", "Whisper", "Emote"].includes(type)) {
+      text = randomizeOriginalZayu(text);
+      text = replaceOriginalPhrases(text);
+    }
     let value = text;
     if (bugRp.enabled && type === "Whisper") value = rpNeko(text, "Whisper");
     else if (bugRp.enabled && type === "Chat") value = rpNeko(text, "Chat");

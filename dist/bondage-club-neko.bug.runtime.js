@@ -2155,7 +2155,8 @@
       .replace(/明白了/g, "明白啦喵")
       .replace(/等一下/g, "稍等一下喵")
       .replace(/欢迎回来/g, "欢迎回来喵")
-      .replace(/好饿/g, "肚子开始咕噜叫了喵");
+      .replace(/好饿/g, "肚子开始咕噜叫了喵")
+      .replace(/(嗯|哼|嘿嘿|嘻嘻|啦|呗|呐|欸|嗷|叭|惹)(?=[\s,.!?;:，。！？；：）】」』]|$)/g, "$1喵");
   }
 
   function convertByType(type, text, options = {}) {

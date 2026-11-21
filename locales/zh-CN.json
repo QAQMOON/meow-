@@ -95,7 +95,7 @@
   "speech.gag.medium": "中堵嘴",
   "speech.gag.heavy": "重堵嘴",
   "peer.self": "猫娘插件 v{version}",
-  "peer.other": "猫娘同好 v{version}",
+  "peer.other": "猫娘 v{version}",
   "status.capability": "手:{hands} | 嘴:{mouth} | 移动:{move} | 够到:{reach} | 姿态:{posture}",
   "status.capability.available": "可用",
   "status.capability.limited": "受限",

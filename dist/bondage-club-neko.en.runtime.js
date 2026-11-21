@@ -1285,7 +1285,7 @@
       const peer = nekoPeers.get(memberNumber);
       const isSelf = memberNumber === memberNumberOf(W.Player);
       const version = isSelf ? VERSION : peer?.version || "unknown";
-      const label = isSelf ? `Catgirl Plugin v${version}` : `Fellow Catgirl v${version}`;
+      const label = isSelf ? `Catgirl Plugin v${version}` : `Catgirl v${version}`;
       const width = Math.max(190, label.length * 18);
       const x = Math.max(10, Math.min(2000 - width - 10, hitbox.cx - width / 2));
       const y = Math.max(10, hitbox.cy + hitbox.h + 8);

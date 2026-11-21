@@ -95,7 +95,7 @@
   "speech.gag.medium": "moderately gagged",
   "speech.gag.heavy": "heavily gagged",
   "peer.self": "Neko plugin v{version}",
-  "peer.other": "Fellow neko v{version}",
+  "peer.other": "Neko v{version}",
   "status.capability": "Hands: {hands} | Mouth: {mouth} | Move: {move} | Reach: {reach} | Posture: {posture}",
   "status.capability.available": "available",
   "status.capability.limited": "limited",

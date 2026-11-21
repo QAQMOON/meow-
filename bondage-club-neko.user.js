@@ -35,7 +35,7 @@
   "use strict";
 
   const CHANNEL = "stable";
-  const RUNTIME_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.13.2";
+  const RUNTIME_URL = "https://cdn.jsdelivr.net/gh/QAQMOON/meow-@main/dist/bondage-club-neko.runtime.full.js?v=2.13.5";
   const CACHE_KEY = "bcNekoEnhancer.runtimeCache.stable";
 
   function log(message, detail) {

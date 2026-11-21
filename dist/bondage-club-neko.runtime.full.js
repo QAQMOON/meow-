@@ -1327,8 +1327,16 @@
     return applyGagSpeech(text, state, type);
   }
 
+  function randomizeOriginalZayu(text) {
+    if (typeof text !== "string" || !text.includes("杂鱼")) return text;
+    const variants = ["杂鱼～♡", "笨蛋杂鱼♡", "笨蛋"];
+    return text.replace(/杂鱼/g, () => variants[Math.floor(Math.random() * variants.length)]);
+  }
+
   function convertByType(type, text, options = {}) {
     if (!config.enabled || !text) return text;
+    // Process original outgoing text before the normal word mappings.
+    if (options.outgoing && ["Chat", "Whisper", "Emote"].includes(type)) text = randomizeOriginalZayu(text);
     let value = text;
     if (type === "Whisper") value = whisperNeko(text);
     else if (type === "Emote") value = emoteNeko(text);
@@ -1516,7 +1524,7 @@
 
     bcModApi.hookFunction("ChatRoomGenerateChatRoomChatMessage", 0, (args, next) => {
       const [type, msg, replyId] = args;
-      const nextMsg = config.convertOutgoing ? convertByType(type, msg, { applyGag: true }) : msg;
+      const nextMsg = config.convertOutgoing ? convertByType(type, msg, { outgoing: true, applyGag: true }) : msg;
       return next([type, nextMsg, replyId]);
     });
 

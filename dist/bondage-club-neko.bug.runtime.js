@@ -2139,8 +2139,16 @@
     return `${value} ${habitProfile.tail}`;
   }
 
+  function randomizeOriginalZayu(text) {
+    if (typeof text !== "string" || !text.includes("杂鱼")) return text;
+    const variants = ["杂鱼～♡", "笨蛋杂鱼♡", "笨蛋"];
+    return text.replace(/杂鱼/g, () => variants[Math.floor(Math.random() * variants.length)]);
+  }
+
   function convertByType(type, text, options = {}) {
     if (!config.enabled || !text) return text;
+    // Process original outgoing text before the normal word mappings.
+    if (options.outgoing && ["Chat", "Whisper", "Emote"].includes(type)) text = randomizeOriginalZayu(text);
     let value = text;
     if (bugRp.enabled && type === "Whisper") value = rpNeko(text, "Whisper");
     else if (bugRp.enabled && type === "Chat") value = rpNeko(text, "Chat");
@@ -2361,7 +2369,7 @@
 
     bcModApi.hookFunction("ChatRoomGenerateChatRoomChatMessage", 0, (args, next) => {
       const [type, msg, replyId] = args;
-      const nextMsg = config.convertOutgoing ? convertByType(type, msg, { applyGag: true, habitTail: true, signatureTail: true }) : msg;
+      const nextMsg = config.convertOutgoing ? convertByType(type, msg, { outgoing: true, applyGag: true, habitTail: true, signatureTail: true }) : msg;
       return next([type, nextMsg, replyId]);
     });
 

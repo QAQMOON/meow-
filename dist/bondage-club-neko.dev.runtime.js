@@ -378,6 +378,7 @@
     ...pack,
     pattern: new RegExp(pack.triggers.map(escapeScenePattern).join("|"), "i"),
   }));
+  const NEKO_SCENE_SPARK_ANY_PATTERN = new RegExp(NEKO_SCENE_SPARK_BLUEPRINTS.flatMap((pack) => pack.triggers || []).map(escapeScenePattern).join("|"), "i");
   const NEKO_INTERACTION_FEATURES = [
     nekoFeature("touch-head-hearts", "被摸头冒爱心猫爪", "Voice Effect touch reaction", ["摸头", "摸摸头", "pat head"], "self", "happy", "heart", "nya", "被摸头时会在自己附近冒出爱心和小猫爪。"),
     nekoFeature("touch-ear-meow", "耳朵敏感叫声", "Voice Effect sensitive part", ["摸耳朵", "耳朵", "ear"], "self", "shy", "sparkle", "mew", "被碰到耳朵时会触发害羞叫声和闪光。"),
@@ -480,6 +481,7 @@
     nekoFeature("tone-nurse-suffix", "护士语气尾巴", "Tone modifier", ["护士语气", "nurse tone"], "self", "nurse", "heart", "mew", "护士状态影响后续语气。"),
     nekoFeature("tone-pet-suffix", "宠物语气尾巴", "Tone modifier", ["宠物语气", "pet tone"], "self", "pet", "paw", "nya", "宠物状态影响后续语气。"),
   ];
+  const NEKO_INTERACTION_ANY_PATTERN = new RegExp(NEKO_INTERACTION_FEATURES.flatMap((feature) => feature.triggers || []).map(escapeScenePattern).join("|"), "i");
   const THEME_PRESETS = {
     sakura: {
       label: "樱粉",
@@ -586,9 +588,25 @@
   let actionLibrary = loadCachedActionLibrary() || normalizeActionLibrary(DEFAULT_ACTION_LIBRARY);
   let composerLibrary = loadCachedComposerLibrary();
   let kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
+  let activeKaomojiCache = null;
+  let visibleKaomojiGroupsCache = null;
+  let knownKaomojiPattern = null;
   let kaomojiUsage = loadKaomojiUsage();
   let composerState = loadComposerState();
   let activeComposerSession = null;
+  let lastAppliedTheme = "";
+  let lastWheelSignature = "";
+  let lastWheelElement = null;
+  let lastWheelActions = [];
+  let replySuggestionLibrarySource = null;
+  let replySuggestionLibraryCache = [];
+  let lastReplyElement = null;
+  let lastReplySignature = "";
+  let lastPeerCleanupAt = -Infinity;
+  let playerRelationsCache = { playerNumber: 0, time: 0, owners: new Set(), lovers: new Set() };
+  let habitSaveTimer = 0;
+  let kaomojiUsageSaveTimer = 0;
+  let nekoSystemSaveTimer = 0;
   const processedMessages = new WeakSet();
   const atmosphereMessages = new WeakSet();
   let patched = false;
@@ -623,6 +641,7 @@
   let chatObserver = null;
   let observerRoot = null;
   let maintenanceTimer = 0;
+  let patchTimer = 0;
   let decorateTimer = 0;
   let lastDecorateFullScanAt = 0;
   let kaomojiPickerDirty = true;
@@ -638,6 +657,7 @@
   let nekoVoiceLastTriggerKey = "";
   const intimacyCombo = { count: 0, lastAt: 0, sender: 0 };
   const relationshipHintTimes = new Map();
+  const activePawDrops = new Set();
   const nekoFeatureCooldowns = new Map();
   const nekoEventSubscribers = new Map();
   const nekoEventHistory = [];
@@ -813,8 +833,8 @@
     next.imagePasteEnabled = next.imagePasteEnabled !== false;
     if (!IMAGE_UPLOAD_HOST_IDS.includes(next.imageUploadHost)) next.imageUploadHost = defaults.imageUploadHost;
     next.imageUploadPrivacyAcknowledged = next.imageUploadPrivacyAcknowledged === true;
-    next.wheelX = Number.isFinite(Number(next.wheelX)) ? Number(next.wheelX) : null;
-    next.wheelY = Number.isFinite(Number(next.wheelY)) ? Number(next.wheelY) : null;
+    next.wheelX = next.wheelX != null && next.wheelX !== "" && Number.isFinite(Number(next.wheelX)) ? Number(next.wheelX) : null;
+    next.wheelY = next.wheelY != null && next.wheelY !== "" && Number.isFinite(Number(next.wheelY)) ? Number(next.wheelY) : null;
     const fallbackPack = contentFallback(next.contentLocale);
     const fallbackActions = fallbackPack.actions.map((action) => ({
       label: action.label,
@@ -944,10 +964,15 @@
   }
 
   function experimentalReplySuggestionLibrary() {
-    return (experimentalContent().replySuggestions || []).map((entry) => ({
-      ...entry,
-      pattern: new RegExp((entry.patterns || []).map(escapeScenePattern).join("|"), "i"),
-    }));
+    const source = experimentalContent().replySuggestions;
+    if (source !== replySuggestionLibrarySource) {
+      replySuggestionLibrarySource = source;
+      replySuggestionLibraryCache = (source || []).map((entry) => ({
+        ...entry,
+        pattern: new RegExp((entry.patterns || []).map(escapeScenePattern).join("|"), "i"),
+      }));
+    }
+    return replySuggestionLibraryCache;
   }
 
   function actionLibraryUrl(locale = config.contentLocale) {
@@ -1004,11 +1029,13 @@
     actionLibrary = loadCachedActionLibrary() || normalizeActionLibrary(DEFAULT_ACTION_LIBRARY);
     composerLibrary = loadCachedComposerLibrary();
     kaomojiLibrary = loadCachedKaomojiLibrary() || normalizeKaomojiLibrary(DEFAULT_KAOMOJI_LIBRARY);
+    invalidateKaomojiCache();
     Object.assign(habitProfile, normalizeHabitProfile(habitProfile));
     hideActionComposer();
     markKaomojiPickerDirty();
     renderReplySuggestions();
     updateTailMoodUi();
+    lastWheelSignature = "";
     if (shouldRenderWheel()) renderWheel();
     await Promise.all([loadRemoteActionLibrary(), loadRemoteComposerLibrary(), loadRemoteKaomojiLibrary()]);
     return true;
@@ -1042,7 +1069,9 @@
 
   function applyTheme() {
     if (!document.body) return;
+    if (lastAppliedTheme === config.theme && document.body.dataset.bcnTheme === config.theme) return;
     const theme = currentTheme();
+    lastAppliedTheme = config.theme;
     document.body.dataset.bcnTheme = config.theme;
     document.body.style.setProperty("--bcn-soft", theme.soft);
     document.body.style.setProperty("--bcn-panel", theme.panel);
@@ -1177,22 +1206,74 @@
     };
   }
 
+  function invalidateKaomojiCache() {
+    activeKaomojiCache = null;
+    visibleKaomojiGroupsCache = null;
+    knownKaomojiPattern = null;
+  }
+
   function getActiveKaomojiItems() {
+    if (activeKaomojiCache) return activeKaomojiCache;
     const items = kaomojiLibrary.groups
       .filter((group) => group.enabled !== false)
       .flatMap((group) => group.items)
       .filter(Boolean);
-    return items.length ? items : DEFAULT_KAOMOJI;
+    activeKaomojiCache = items.length ? items : DEFAULT_KAOMOJI;
+    return activeKaomojiCache;
   }
 
   function getVisibleKaomojiGroups() {
-    return kaomojiLibrary.groups.filter((group) => group.enabled !== false && group.items.length);
+    if (!visibleKaomojiGroupsCache) {
+      visibleKaomojiGroupsCache = kaomojiLibrary.groups.filter((group) => group.enabled !== false && group.items.length);
+    }
+    return visibleKaomojiGroupsCache;
+  }
+
+  function loadKaomojiUsage() {
+    try {
+      const raw = localStorage.getItem(KAOMOJI_USAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+      return Object.fromEntries(
+        Object.entries(parsed)
+          .map(([face, count]) => [String(face), Math.max(0, Number(count) || 0)])
+          .filter(([face, count]) => face && count > 0)
+      );
+    } catch {
+      return {};
+    }
+  }
+
+  function flushKaomojiUsage() {
+    clearTimeout(kaomojiUsageSaveTimer);
+    kaomojiUsageSaveTimer = 0;
+    try {
+      localStorage.setItem(KAOMOJI_USAGE_KEY, JSON.stringify(kaomojiUsage));
+    } catch {
+      // Ignore storage failures; kaomoji insertion still works without ranking.
+    }
+  }
+
+  function saveKaomojiUsage() {
+    if (kaomojiUsageSaveTimer) return;
+    kaomojiUsageSaveTimer = setTimeout(flushKaomojiUsage, 300);
+  }
+
+  function getKaomojiUsage(face) {
+    return Math.max(0, Number(kaomojiUsage[String(face)] || 0));
+  }
+
+  function sortKaomojiByUsage(items) {
+    return items
+      .map((face, index) => ({ face, index, count: getKaomojiUsage(face) }))
+      .sort((a, b) => b.count - a.count || a.index - b.index)
+      .map((item) => item.face);
   }
 
   function getKaomojiItemsForGroup(groupId) {
-    if (groupId === "all") return getActiveKaomojiItems();
+    if (groupId === "all") return sortKaomojiByUsage(getActiveKaomojiItems());
     const group = getVisibleKaomojiGroups().find((item) => item.id === groupId);
-    return group?.items?.length ? group.items : getActiveKaomojiItems();
+    return sortKaomojiByUsage(group?.items?.length ? group.items : getActiveKaomojiItems());
   }
 
   function createHabitProfile() {
@@ -1226,12 +1307,25 @@
     }
   }
 
-  function saveHabitProfile() {
+  function flushHabitProfile() {
+    clearTimeout(habitSaveTimer);
+    habitSaveTimer = 0;
     try {
       localStorage.setItem(HABIT_STORE_KEY, JSON.stringify(normalizeHabitProfile(habitProfile)));
     } catch {
       // Ignore storage failure; this is only local flavor state.
     }
+  }
+
+  function saveHabitProfile() {
+    if (habitSaveTimer) return;
+    habitSaveTimer = setTimeout(flushHabitProfile, 400);
+  }
+
+  function flushPendingStorageWrites() {
+    if (habitSaveTimer) flushHabitProfile();
+    if (kaomojiUsageSaveTimer) flushKaomojiUsage();
+    if (nekoSystemSaveTimer) flushNekoSystemState();
   }
 
   function createNekoSystemState() {
@@ -1403,12 +1497,19 @@
       });
   }
 
-  function saveNekoSystemState() {
+  function flushNekoSystemState() {
+    clearTimeout(nekoSystemSaveTimer);
+    nekoSystemSaveTimer = 0;
     try {
       localStorage.setItem(NEKO_SYSTEM_STORE_KEY, JSON.stringify(normalizeNekoSystemState(nekoSystemState)));
     } catch {
       // Local memory is best-effort only.
     }
+  }
+
+  function saveNekoSystemState() {
+    if (nekoSystemSaveTimer) return;
+    nekoSystemSaveTimer = setTimeout(flushNekoSystemState, 350);
   }
 
   function onNekoEvent(type, handler) {
@@ -1582,7 +1683,15 @@
   }
 
   function hasKnownKaomoji(text) {
-    return getActiveKaomojiItems().some((face) => text.includes(face));
+    if (!text) return false;
+    if (!knownKaomojiPattern) {
+      const escaped = getActiveKaomojiItems()
+        .filter(Boolean)
+        .sort((a, b) => b.length - a.length)
+        .map(escapeScenePattern);
+      knownKaomojiPattern = escaped.length ? new RegExp(escaped.join("|")) : null;
+    }
+    return knownKaomojiPattern ? knownKaomojiPattern.test(text) : false;
   }
 
   function loadCachedKaomojiLibrary() {
@@ -1610,6 +1719,7 @@
         if (requestedLocale !== config.contentLocale) return kaomojiLibrary;
         const library = normalizeKaomojiLibrary(JSON.parse(text));
         kaomojiLibrary = library;
+        invalidateKaomojiCache();
         cacheKaomojiLibrary(library);
         markKaomojiPickerDirty();
         console.log(`[BC 猫娘增强] 颜文字库已加载: ${library.version}, ${getActiveKaomojiItems().length} 个颜文字`);
@@ -1715,6 +1825,7 @@
     const picker = document.getElementById("bcn-kaomoji-picker");
     const button = document.getElementById("bcn-face");
     picker?.classList.toggle("is-open", !!open);
+    if (open && picker) positionPanelPopover(picker);
     button?.classList.toggle("is-active", !!open);
     if (button) {
       button.title = t(open ? "ui.kaomojiButton.close" : "ui.kaomojiButton.open");
@@ -1751,40 +1862,39 @@
     style.textContent = `
       #bcn-first-chatroom-help {
         position: fixed;
-        left: 28px;
-        top: 28px;
+        left: 24px;
+        top: 24px;
         z-index: 2147483646;
-        max-width: min(720px, calc(100vw - 48px));
-        padding: 20px 24px;
-        border-radius: 22px;
-        background:
-          linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 248, 252, 0.94)),
-          rgba(255, 255, 255, 0.96);
-        border: 1px solid rgba(205, 165, 225, 0.42);
-        box-shadow: 0 16px 36px rgba(156, 111, 201, 0.18);
-        color: #9c6fc9;
+        max-width: min(460px, calc(100vw - 40px));
+        padding: 14px 18px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.97), var(--bcn-soft, #fff5f7));
+        border: 1.5px solid var(--bcn-border, #f9d9e1);
+        box-shadow: 0 10px 24px var(--bcn-glow, rgba(233, 138, 164, 0.2));
+        color: var(--bcn-text, #7b4a58);
         font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
         line-height: 1.35;
         pointer-events: none;
         opacity: 0;
         transform: translateY(-6px);
-        animation: bcnFirstChatroomHelpIn 220ms ease-out forwards;
+        animation: bcnFirstChatroomHelpIn 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
       #bcn-first-chatroom-help .bcn-help-title {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 10px;
-        font-size: 24px;
-        font-weight: 700;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--bcn-accent, #e98aa4);
       }
       #bcn-first-chatroom-help .bcn-help-icon {
-        font-size: 28px;
+        font-size: 18px;
         line-height: 1;
       }
       #bcn-first-chatroom-help .bcn-help-line {
-        font-size: 22px;
-        font-weight: 500;
+        font-size: 14px;
+        font-weight: 600;
         word-break: break-word;
       }
       @keyframes bcnFirstChatroomHelpIn {
@@ -2094,17 +2204,34 @@
   }
 
   function hasOwnerRelationship(character, senderNumber) {
-    const playerOwners = collectOwnerNumbers(W.Player);
+    const playerOwners = getPlayerRelations().owners;
     if (playerOwners.has(senderNumber)) return true;
     const characterOwners = collectOwnerNumbers(character);
     return characterOwners.has(memberNumberOf(W.Player));
   }
 
   function hasLoverRelationship(character, senderNumber) {
-    const playerLovers = collectLoverNumbers(W.Player);
+    const playerLovers = getPlayerRelations().lovers;
     if (playerLovers.has(senderNumber)) return true;
     const characterLovers = collectLoverNumbers(character);
     return characterLovers.has(memberNumberOf(W.Player));
+  }
+
+  function getPlayerRelations() {
+    const player = W.Player;
+    const playerNumber = memberNumberOf(player);
+    const now = Date.now();
+    const sources = [player?.Owner, player?.OwnerNumber, player?.Ownership,
+      player?.Lovership, player?.Lover, player?.LoverMemberNumber, player?.Lovers];
+    if (playerRelationsCache.player !== player || playerRelationsCache.playerNumber !== playerNumber
+      || now - playerRelationsCache.time >= 500
+      || sources.some((source, index) => source !== playerRelationsCache.sources?.[index])) {
+      playerRelationsCache = {
+        player, playerNumber, sources, time: now,
+        owners: collectOwnerNumbers(player), lovers: collectLoverNumbers(player),
+      };
+    }
+    return playerRelationsCache;
   }
 
   function getRelationshipStatus(sender) {
@@ -2144,6 +2271,7 @@
     if (!nameEl) return;
     const existing = nameEl.querySelector(".bcn-relation-badge");
     const tail = nameEl.querySelector(".bcn-relation-tail");
+    if (relation && nameEl.dataset.bcnRelationBadge === relation && existing && tail) return;
     if (!relation) {
       existing?.remove();
       tail?.remove();
@@ -2165,15 +2293,13 @@
 
   function syncRelationshipDecoration(div, sender) {
     if (!div) return;
-    div.classList.remove("bcn-related-message", "bcn-related-owner", "bcn-related-lover", "bcn-related-dual");
-    delete div.dataset.bcnRelation;
     const relation = getRelationshipStatus(sender);
-    if (!relation) {
-      applyRelationshipBadge(div, null);
-      return;
+    const relationKey = relation || "";
+    if (div.dataset.bcnRelation !== relationKey) {
+      div.classList.remove("bcn-related-message", "bcn-related-owner", "bcn-related-lover", "bcn-related-dual");
+      div.dataset.bcnRelation = relationKey;
+      if (relation) div.classList.add("bcn-related-message", `bcn-related-${relation}`);
     }
-    div.classList.add("bcn-related-message", `bcn-related-${relation}`);
-    div.dataset.bcnRelation = relation;
     applyRelationshipBadge(div, relation);
   }
 
@@ -2400,7 +2526,8 @@
     if (!memberNumber) return false;
     if (memberNumber === memberNumberOf(W.Player)) return true;
     cleanupNekoPeers();
-    return nekoPeers.has(memberNumber);
+    const peer = nekoPeers.get(memberNumber);
+    return !!peer && Date.now() - peer.time <= PEER_TTL;
   }
 
   function rememberCharacterAnchorFromDraw(drawArgs) {
@@ -2479,6 +2606,8 @@
 
   function cleanupNekoPeers() {
     const now = Date.now();
+    if (now - lastPeerCleanupAt < 1000) return;
+    lastPeerCleanupAt = now;
     for (const [memberNumber, peer] of nekoPeers) {
       if (now - peer.time > PEER_TTL) nekoPeers.delete(memberNumber);
     }
@@ -2526,8 +2655,13 @@
   }
 
   function spawnAtmosphereForMember(sender, text = "", relation = null, comboLevel = 1) {
+    if (document.hidden) return;
     const memberNumber = memberNumberOf(sender);
-    const anchor = characterAnchors.get(memberNumber) || characterAnchors.get(memberNumberOf(W.Player));
+    const now = Date.now();
+    const currentAnchor = characterAnchors.get(memberNumber);
+    const anchor = currentAnchor && now - currentAnchor.time <= 3000
+      ? currentAnchor : characterAnchors.get(memberNumberOf(W.Player));
+    if (anchor && now - anchor.time > 3000) return;
     if (!anchor) return;
     const profile = getAtmosphereProfile(text, relation);
     const icons = profile.icons;
@@ -2576,12 +2710,15 @@
   }
 
   function drawNekoBadgeTooltip() {
-    cleanupNekoPeers();
     if (W.CurrentScreen !== "ChatRoom" || typeof W.MouseIn !== "function") return;
+    cleanupNekoPeers();
+    const now = Date.now();
     for (const [memberNumber, hitbox] of badgeHitboxes) {
-      if (!W.MouseIn(hitbox.x, hitbox.y, hitbox.w, hitbox.h)) continue;
+      if (now - hitbox.time > 1200) continue;
       const peer = nekoPeers.get(memberNumber);
       const isSelf = memberNumber === memberNumberOf(W.Player);
+      if (!isSelf && (!peer || now - peer.time > PEER_TTL)) continue;
+      if (!W.MouseIn(hitbox.x, hitbox.y, hitbox.w, hitbox.h)) continue;
       const version = isSelf ? VERSION : peer?.version || "unknown";
       const label = t(isSelf ? "peer.self" : "peer.other", { version });
       const width = Math.max(190, label.length * 18);
@@ -2611,18 +2748,26 @@
   }
 
   function collectChatMessageNodes(root = null) {
-    if (!root) return Array.from(document.querySelectorAll("#TextAreaChatLog .ChatMessage"));
+    if (!root) {
+      const log = document.getElementById("TextAreaChatLog");
+      if (!log) return [];
+      // Walk backwards so a long chat log only visits the most recent messages.
+      const recent = [];
+      const walker = document.createTreeWalker(log, NodeFilter.SHOW_ELEMENT);
+      while (walker.lastChild()) { /* Find the last descendant. */ }
+      for (let node = walker.currentNode; node && node !== log; node = walker.previousNode()) {
+        if (node.classList.contains("ChatMessage")) recent.push(node);
+        if (recent.length >= RECENT_CHAT_DECORATION_LIMIT) break;
+      }
+      return recent.reverse();
+    }
     const nodes = [];
     if (root instanceof Element && root.classList?.contains("ChatMessage")) nodes.push(root);
     if (root.querySelectorAll) nodes.push(...root.querySelectorAll(".ChatMessage"));
     return nodes;
   }
 
-  function decorateExistingChat(root = null) {
-    let nodes = collectChatMessageNodes(root);
-    if (!root && nodes.length > RECENT_CHAT_DECORATION_LIMIT) {
-      nodes = nodes.slice(-RECENT_CHAT_DECORATION_LIMIT);
-    }
+  function decorateExistingChat(root = null, nodes = collectChatMessageNodes(root)) {
     nodes.forEach((div) => {
       decorateMessage(div, {
         Type: div.className.match(/ChatMessage(Chat|Whisper|Emote|Action|Activity|ServerMessage|LocalMessage)/)?.[1],
@@ -2635,13 +2780,17 @@
     if (!(node instanceof Element)) return false;
     const nodes = collectChatMessageNodes(node);
     if (!nodes.length) return false;
-    decorateExistingChat(node);
+    decorateExistingChat(node, nodes);
     return true;
   }
 
   function pawRain(type = "Chat") {
+    if (document.hidden) return;
     const icons = type === "Whisper" ? ["💗", "🐾", "💌"] : type === "Emote" ? ["🐾", "💕", "ฅ"] : ["🐾", "💗", "💖"];
-    const count = type === "Action" ? 12 : 20;
+    const count = Math.min(type === "Action" ? 12 : 20, 60 - activePawDrops.size);
+    if (count <= 0) return;
+    const fragment = document.createDocumentFragment();
+    const drops = [];
     for (let i = 0; i < count; i++) {
       const drop = document.createElement("span");
       drop.className = "bcn-rain-drop";
@@ -2650,9 +2799,17 @@
       drop.style.animationDuration = `${2.8 + Math.random() * 2.8}s`;
       drop.style.animationDelay = `${Math.random() * 0.45}s`;
       drop.style.fontSize = `${18 + Math.random() * 24}px`;
-      document.body.appendChild(drop);
-      setTimeout(() => drop.remove(), 6500);
+      fragment.appendChild(drop);
+      activePawDrops.add(drop);
+      drops.push(drop);
     }
+    document.body.appendChild(fragment);
+    setTimeout(() => {
+      for (const drop of drops) {
+        drop.remove();
+        activePawDrops.delete(drop);
+      }
+    }, 6500);
   }
 
   function showToast(text) {
@@ -3461,6 +3618,10 @@
     const panel = document.getElementById("bcn-panel");
     const wrap = document.getElementById("bcn-reply-suggestions");
     if (!panel || !wrap) return;
+    const signature = JSON.stringify([resolveUiLocale(), activeReplySuggestions]);
+    if (lastReplyElement === wrap && lastReplySignature === signature) return;
+    lastReplyElement = wrap;
+    lastReplySignature = signature;
     wrap.innerHTML = "";
     panel.classList.toggle("has-replies", activeReplySuggestions.length > 0);
     if (!activeReplySuggestions.length) return;
@@ -3690,6 +3851,7 @@
   }
 
   function triggerNekoVoiceFlash() {
+    if (document.hidden) return;
     const overlay = getNekoVoiceOverlay();
     const flash = document.createElement("div");
     flash.className = "bcn-voice-flash";
@@ -3698,6 +3860,7 @@
   }
 
   function triggerNekoVoiceWaves(memberNumber) {
+    if (document.hidden) return;
     const overlay = getNekoVoiceOverlay();
     const pos = nekoVoiceAnchor(memberNumber, false);
     const wrap = document.createElement("div");
@@ -3714,8 +3877,11 @@
   }
 
   function triggerNekoVoiceDanmaku(text) {
+    if (document.hidden) return;
     const overlay = getNekoVoiceOverlay();
     const pool = [text].concat(experimentalContent().voicePhrases || []).filter(Boolean);
+    const fragment = document.createDocumentFragment();
+    const lines = [];
     for (let i = 0; i < 4; i++) {
       const line = document.createElement("div");
       line.className = "bcn-voice-danmaku";
@@ -3723,14 +3889,19 @@
       line.style.left = `${40 + Math.random() * Math.min(680, window.innerWidth * 0.45)}px`;
       line.style.top = `${60 + Math.random() * Math.min(620, window.innerHeight * 0.72)}px`;
       line.style.animationDelay = `${i * 170}ms`;
-      overlay.appendChild(line);
-      setTimeout(() => line.remove(), NEKO_VOICE_EFFECT_DURATION + 900);
+      fragment.appendChild(line);
+      lines.push(line);
     }
+    overlay.appendChild(fragment);
+    setTimeout(() => lines.forEach((line) => line.remove()), NEKO_VOICE_EFFECT_DURATION + 900);
   }
 
   function triggerNekoVoiceSteam(memberNumber) {
+    if (document.hidden) return;
     const overlay = getNekoVoiceOverlay();
     const pos = nekoVoiceAnchor(memberNumber, true);
+    const fragment = document.createDocumentFragment();
+    const dots = [];
     for (let i = 0; i < 14; i++) {
       const dot = document.createElement("span");
       dot.className = "bcn-voice-steam";
@@ -3741,9 +3912,11 @@
       dot.style.top = `${pos.y + (Math.random() - 0.5) * 40}px`;
       dot.style.animationDelay = `${Math.random() * 900}ms`;
       dot.style.animationDuration = `${1400 + Math.random() * 1400}ms`;
-      overlay.appendChild(dot);
-      setTimeout(() => dot.remove(), 3400);
+      fragment.appendChild(dot);
+      dots.push(dot);
     }
+    overlay.appendChild(fragment);
+    setTimeout(() => dots.forEach((dot) => dot.remove()), 3400);
   }
 
   async function runNekoVoiceEffect(entry) {
@@ -3827,6 +4000,7 @@
     if (!config.enabled) return null;
     const value = cleanSceneText(text || data?.Content);
     if (!value || value === PEER_SIGNAL_CONTENT || isNekoCommandText(value)) return null;
+    if (!NEKO_INTERACTION_ANY_PATTERN.test(value)) return null;
     for (const feature of NEKO_INTERACTION_FEATURES) {
       if (!feature.pattern.test(value)) continue;
       runNekoFeatureEffect(feature, data, value, direction);
@@ -3954,9 +4128,10 @@
       if (pack.pattern.test(searchValue)) pushSceneSpark(out, pack.lines, target);
       if (out.length >= 4) break;
     }
+    if (out.length >= 4) return out.slice(0, 4);
     const featurePacks = query
       ? NEKO_SCENE_SPARK_PACKS.filter((pack) => scenePackMatchesQuery(pack, query))
-      : NEKO_SCENE_SPARK_PACKS;
+      : NEKO_SCENE_SPARK_ANY_PATTERN.test(searchValue) ? NEKO_SCENE_SPARK_PACKS : [];
     for (const pack of featurePacks) {
       if (query || pack.pattern.test(searchValue)) pushSceneSpark(out, localizedScenePack(pack).lines, target);
       if (out.length >= 4) break;
@@ -5617,28 +5792,65 @@
     if (!shouldRenderWheel()) return;
     const wheel = document.getElementById("bcn-wheel");
     if (!wheel) return;
-    wheel.innerHTML = "";
     const state = detectPlayerActionCapability();
     const actions = (actionLibrary.actions || []).filter((action) => action.enabled !== false).slice(0, 5);
+    const availableActions = actions.map((action) => actionMeetsRequirements(action, state));
+    const signature = JSON.stringify([resolveUiLocale(), config.contentLocale,
+      actions.map((action, index) => [action.label, !!action.composer, availableActions[index]])]);
+    if (lastWheelElement === wheel && lastWheelSignature === signature && wheel.children.length === 6
+      && actions.length === lastWheelActions.length
+      && actions.every((action, index) => action === lastWheelActions[index])) {
+      positionWheelPopover(wheel);
+      return;
+    }
+    lastWheelElement = wheel;
+    lastWheelSignature = signature;
+    lastWheelActions = actions;
+    const fragment = document.createDocumentFragment();
     actions.forEach((action, index) => {
       const btn = document.createElement("button");
       btn.className = "bcn-wheel-btn";
       btn.type = "button";
       btn.textContent = action.label;
-      const available = actionMeetsRequirements(action, state);
+      const available = availableActions[index];
       btn.title = t(action.composer ? "wheel.actionComposerTooltip" : "wheel.actionTooltip", { label: action.label });
       btn.style.setProperty("--i", String(index));
       btn.classList.toggle("is-unavailable", !available);
       btn.setAttribute("aria-disabled", available ? "false" : "true");
       bindWheelActionButton(btn, action);
-      wheel.appendChild(btn);
+      fragment.appendChild(btn);
     });
     for (let index = actions.length; index < 6; index++) {
       const blank = document.createElement("span");
       blank.className = "bcn-wheel-blank";
       blank.style.setProperty("--i", String(index));
-      wheel.appendChild(blank);
+      fragment.appendChild(blank);
     }
+    wheel.replaceChildren(fragment);
+    positionWheelPopover(wheel);
+  }
+
+  function positionWheelPopover(wheel) {
+    const wrap = wheel.parentElement;
+    if (!wrap?.classList.contains("bcn-wheel-wrap")) return;
+    // Use the expanded grid size, independent of the wrapper's opening transition.
+    positionPanelPopover(wrap, wheel.offsetWidth + 28, wheel.offsetHeight + 28);
+  }
+
+  function positionPanelPopover(popover, width = popover.offsetWidth, height = popover.offsetHeight) {
+    const panel = document.getElementById("bcn-panel");
+    if (!panel || !Number.isFinite(width) || !Number.isFinite(height)) return;
+    const rect = panel.getBoundingClientRect();
+    const margin = 12;
+    const maxLeft = Math.max(margin, window.innerWidth - width - margin);
+    const maxTop = Math.max(margin, window.innerHeight - height - margin);
+    const left = clamp(rect.right - width, margin, maxLeft);
+    const above = rect.top - height - 10;
+    const top = clamp(above >= margin ? above : rect.bottom + 10, margin, maxTop);
+    popover.style.left = `${Math.round(left - rect.left - panel.clientLeft)}px`;
+    popover.style.top = `${Math.round(top - rect.top - panel.clientTop)}px`;
+    popover.style.right = "auto";
+    popover.style.bottom = "auto";
   }
 
   function renderKaomojiPicker(force = false) {
@@ -5677,22 +5889,26 @@
     });
 
     const grid = picker.querySelector(".bcn-kaomoji-grid");
-    items.forEach((face, index) => {
+    const faceFragment = document.createDocumentFragment();
+    items.forEach((face) => {
       const button = document.createElement("button");
+      const usageCount = getKaomojiUsage(face);
       button.className = "bcn-kaomoji-item";
       button.type = "button";
       button.textContent = face;
       button.title = usageCount ? t("ui.kaomojiUsage.count", { face, count: usageCount }) : face;
-      button.style.setProperty("--i", String(index % 18));
+      button.classList.toggle("is-used", usageCount > 0);
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         insertKaomoji(face);
         hideKaomojiPicker();
       });
-      grid.appendChild(button);
+      faceFragment.appendChild(button);
     });
+    grid.appendChild(faceFragment);
     picker.dataset.bcnRendered = "1";
     kaomojiPickerDirty = false;
+    if (picker.classList.contains("is-open")) positionPanelPopover(picker);
   }
 
   function showKaomojiPicker() {
@@ -5839,12 +6055,35 @@
     let startY = 0;
     let originLeft = 0;
     let originTop = 0;
+    let maxLeft = 0;
+    let maxTop = 0;
+    let activePointerId = null;
+    let pendingPosition = null;
+    let dragFrame = 0;
+
+    const applyPosition = () => {
+      dragFrame = 0;
+      if (!pendingPosition) return;
+      const pos = pendingPosition;
+      pendingPosition = null;
+      panel.style.left = `${pos.left}px`;
+      panel.style.top = `${pos.top}px`;
+      panel.style.right = "auto";
+      panel.style.bottom = "auto";
+      config.wheelX = pos.left;
+      config.wheelY = pos.top;
+    };
 
     const stopDrag = () => {
       if (!dragging) return;
+      if (dragFrame) cancelAnimationFrame(dragFrame);
+      applyPosition();
       dragging = false;
+      activePointerId = null;
       panel.classList.remove("is-dragging");
       if (moved) {
+        const wheel = document.getElementById("bcn-wheel");
+        if (wheel && shouldRenderWheel()) positionWheelPopover(wheel);
         panelJustDragged = true;
         saveConfig();
         setTimeout(() => {
@@ -5853,10 +6092,12 @@
       }
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("blur", stopDrag);
     };
 
     const onMove = (event) => {
-      if (!dragging) return;
+      if (!dragging || event.pointerId !== activePointerId) return;
       const dx = event.clientX - startX;
       const dy = event.clientY - startY;
       if (!moved && Math.hypot(dx, dy) > 5) {
@@ -5864,32 +6105,35 @@
         hideKaomojiPicker();
       }
       if (!moved) return;
-      const pos = clampPanelPosition(panel, originLeft + dx, originTop + dy);
-      panel.style.left = `${pos.left}px`;
-      panel.style.top = `${pos.top}px`;
-      panel.style.right = "auto";
-      panel.style.bottom = "auto";
-      config.wheelX = pos.left;
-      config.wheelY = pos.top;
-      syncBodyState();
+      pendingPosition = {
+        left: Math.round(clamp(originLeft + dx, 6, maxLeft)),
+        top: Math.round(clamp(originTop + dy, 6, maxTop)),
+      };
+      if (!dragFrame) dragFrame = requestAnimationFrame(applyPosition);
     };
 
-    const onUp = () => {
-      stopDrag();
+    const onUp = (event) => {
+      if (event.pointerId === activePointerId) stopDrag();
     };
 
     panel.addEventListener("pointerdown", (event) => {
-      if (event.button !== 0) return;
+      if (event.button !== 0 || dragging) return;
       if (event.target?.closest?.("#bcn-wheel, #bcn-kaomoji-picker")) return;
       dragging = true;
+      activePointerId = event.pointerId;
       moved = false;
       startX = event.clientX;
       startY = event.clientY;
-      originLeft = panel.getBoundingClientRect().left;
-      originTop = panel.getBoundingClientRect().top;
+      const rect = panel.getBoundingClientRect();
+      originLeft = rect.left;
+      originTop = rect.top;
+      maxLeft = Math.max(6, window.innerWidth - rect.width - 6);
+      maxTop = Math.max(6, window.innerHeight - rect.height - 6);
       panel.classList.add("is-dragging");
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp);
+      document.addEventListener("pointercancel", onUp);
+      window.addEventListener("blur", stopDrag);
     });
 
     return {
@@ -5998,6 +6242,21 @@
     updateTailMoodUi();
     saveHabitProfile();
     syncBodyState();
+    const positionOpenPopovers = () => {
+      if (!panel.classList.contains("is-dragging")) syncWheelPosition(panel);
+      const picker = document.getElementById("bcn-kaomoji-picker");
+      if (picker?.classList.contains("is-open")) positionPanelPopover(picker);
+      const wheel = document.getElementById("bcn-wheel");
+      if (wheel && shouldRenderWheel()) positionWheelPopover(wheel);
+    };
+    window.addEventListener("resize", () => {
+      syncWheelPosition(panel);
+      positionOpenPopovers();
+    });
+    if (typeof ResizeObserver === "function") {
+      const panelResizeObserver = new ResizeObserver(positionOpenPopovers);
+      panelResizeObserver.observe(panel);
+    }
   }
 
   function syncScreenClass() {
@@ -6088,11 +6347,38 @@
       clearInterval(maintenanceTimer);
       maintenanceTimer = 0;
     }
+    if (patchTimer) {
+      clearInterval(patchTimer);
+      patchTimer = 0;
+    }
     disconnectObserver();
   }
 
+  function retryHostHooks() {
+    if (document.hidden) return;
+    const chatReady = patchBC();
+    const badgeReady = patchStatusBadge();
+    const roomReady = patchRoomEffects();
+    const commandReady = registerNekoCommands();
+    if (chatReady && badgeReady && roomReady && commandReady) {
+      clearInterval(patchTimer);
+      patchTimer = 0;
+      initializeNekoGameActivityOnce();
+      return;
+    }
+    runMaintenance();
+  }
+
+  function startHookRetry() {
+    if (patchTimer || document.hidden) return;
+    if (patched && statusBadgePatched && roomEffectsPatched && nekoCommandsRegistered) return;
+    patchTimer = setInterval(retryHostHooks, 800);
+    retryHostHooks();
+  }
+
   function startMaintenance() {
-    if (maintenanceTimer) return;
+    if (maintenanceTimer || document.hidden) return;
+    startHookRetry();
     runMaintenance();
     maintenanceTimer = setInterval(runMaintenance, MAINTENANCE_INTERVAL);
   }
@@ -6102,7 +6388,10 @@
     visibilityBound = true;
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
+        flushPendingStorageWrites();
         stopMaintenance();
+        for (const drop of activePawDrops) drop.remove();
+        activePawDrops.clear();
         return;
       }
       startMaintenance();
@@ -6110,7 +6399,15 @@
     window.addEventListener("focus", () => {
       if (!document.hidden) startMaintenance();
     });
-    window.addEventListener("beforeunload", stopMaintenance, { once: true });
+    const suspend = () => {
+      flushPendingStorageWrites();
+      stopMaintenance();
+    };
+    window.addEventListener("pagehide", suspend);
+    window.addEventListener("beforeunload", suspend);
+    window.addEventListener("pageshow", () => {
+      if (!document.hidden) startMaintenance();
+    });
   }
 
   const NekoSettingsUI = (() => {
@@ -6712,10 +7009,6 @@
         --bcn-glow: rgba(233, 138, 164, 0.20);
       }
 
-      body.bcn-enabled #MainCanvas {
-        filter: saturate(1.06) brightness(1.03);
-      }
-
       #bcn-soft-paws {
         position: fixed;
         inset: 0;
@@ -6805,7 +7098,6 @@
         border-radius: 16px;
         background: var(--bcn-panel);
         box-shadow: 0 10px 28px var(--bcn-glow);
-        backdrop-filter: blur(8px);
         cursor: grab;
         transition: gap 0.22s ease;
       }
@@ -6951,7 +7243,6 @@
         border-radius: 16px;
         background: var(--bcn-panel);
         box-shadow: 0 10px 28px var(--bcn-glow);
-        backdrop-filter: blur(8px);
         transition: max-width 0.22s ease, opacity 0.22s ease, transform 0.22s ease, padding 0.22s ease;
         opacity: 0;
         transform: translateY(8px) scale(0.96);
@@ -6974,9 +7265,9 @@
 
       #bcn-wheel {
         display: none;
-        grid-template-columns: repeat(3, minmax(82px, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
-        width: min(58vw, 360px);
+        width: min(360px, calc(100vw - 56px));
         max-width: 360px;
         align-items: center;
       }
@@ -7025,7 +7316,6 @@
       body.bcn-wheel-collapsed .bcn-wheel-blank {
         opacity: 0;
         transform: translateX(-10px) scale(0.92);
-        filter: blur(0.5px);
         pointer-events: none;
       }
 
@@ -7087,6 +7377,7 @@
 
       #bcn-kaomoji-picker {
         position: absolute;
+        box-sizing: border-box;
         right: 0;
         bottom: calc(100% + 10px);
         width: min(420px, calc(100vw - 24px));
@@ -7099,22 +7390,25 @@
         border-radius: 16px;
         background: var(--bcn-panel);
         box-shadow: 0 14px 32px var(--bcn-glow), 0 2px 10px rgba(80, 40, 60, 0.12);
-        backdrop-filter: blur(10px);
         opacity: 0;
+        visibility: hidden;
         transform: translateY(8px) scale(0.96);
         transform-origin: right bottom;
         pointer-events: none;
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
       }
 
       #bcn-kaomoji-picker.is-open {
         opacity: 1;
+        visibility: visible;
+        transition-delay: 0s;
         transform: translateY(0) scale(1);
         pointer-events: auto;
       }
 
       .bcn-kaomoji-tabs {
         display: flex;
+        flex: 0 0 auto;
         gap: 6px;
         max-width: 100%;
         overflow-x: auto;
@@ -7149,6 +7443,7 @@
 
       .bcn-kaomoji-grid {
         display: grid;
+        min-height: 0;
         grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
         gap: 8px;
         overflow-y: auto;
@@ -7167,8 +7462,16 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        animation: bcn-pop 0.2s ease both;
-        animation-delay: calc(var(--i, 0) * 0.012s);
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      }
+
+      .bcn-kaomoji-item.is-used {
+        border-color: var(--bcn-accent);
+      }
+
+      #bcn-panel button:focus-visible {
+        outline: 3px solid var(--bcn-accent);
+        outline-offset: 3px;
       }
 
       .bcn-kaomoji-tab:hover,
@@ -7178,6 +7481,32 @@
       }
 
       @media (max-width: 520px) {
+        #bcn-panel {
+          box-sizing: border-box;
+          max-width: calc(100vw - 24px);
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+
+        #bcn-panel:not(.has-replies) #bcn-reply-suggestions {
+          display: none;
+        }
+
+        #bcn-reply-suggestions {
+          flex-basis: 100%;
+          min-width: 0;
+        }
+
+        #bcn-panel.has-replies #bcn-reply-suggestions {
+          max-width: 100%;
+          overflow-x: auto;
+          scrollbar-width: thin;
+        }
+
+        .bcn-reply-chip {
+          flex: 0 0 auto;
+        }
+
         #bcn-kaomoji-picker {
           width: min(330px, calc(100vw - 16px));
           max-height: min(360px, calc(100vh - 96px));
@@ -7723,19 +8052,7 @@
     syncScreenClass();
     registerNekoCommands();
 
-    const patchTimer = setInterval(() => {
-      const chatReady = patchBC();
-      const badgeReady = patchStatusBadge();
-      const roomReady = patchRoomEffects();
-      const commandReady = registerNekoCommands();
-      if (chatReady && badgeReady && roomReady && commandReady) {
-        clearInterval(patchTimer);
-        initializeNekoGameActivityOnce();
-        startMaintenance();
-        return;
-      }
-      runMaintenance();
-    }, 800);
+    startMaintenance();
 
     console.log(`[BC Neko Enhancer] ${t("dev.init.complete")}`);
   }
